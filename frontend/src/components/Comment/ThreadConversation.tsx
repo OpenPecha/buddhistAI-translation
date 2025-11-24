@@ -187,7 +187,8 @@ const ThreadConversation = ({
     });
   }
 
-  const handleSubmitReply = async () => {
+  const handleSubmitReply = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     if(!selection) return;
     if (replyContent.trim()) {
       // Clear previous AI errors from the thread
@@ -248,7 +249,7 @@ const ThreadConversation = ({
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      handleSubmitReply();
+      handleSubmitReply(e as unknown as React.FormEvent<HTMLFormElement>);
     }
   };
   return (

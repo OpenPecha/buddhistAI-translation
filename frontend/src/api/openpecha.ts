@@ -12,11 +12,15 @@ export const fetchTexts = async ({
   limit,
   offset,
   language,
+  author,
+  title,
 }: {
   type?: string;
   limit?: number;
   offset?: number;
   language?: string;
+  author?: string;
+  title?: string;
 }) => {
   const getUrl = () => {
     const params = new URLSearchParams();
@@ -24,6 +28,8 @@ export const fetchTexts = async ({
     if (limit) params.append("limit", limit.toString());
     if (offset) params.append("offset", offset.toString());
     if (language) params.append("language", language);
+    if (author) params.append("author", author);
+    if (title) params.append("title", title);
     return `${server_url}/openpecha/texts?${params.toString()}`;
   };
   const response = await fetch(getUrl(), {
@@ -52,8 +58,8 @@ export const fetchText = async (textId: string) => {
  * @param textId - Text ID
  * @returns List of text instances
  */
-export const fetchInstances = async (textId: string) => {
-  const response = await fetch(`${server_url}/openpecha/${textId}/instances`, {
+export const fetchInstances = async (textId: string, type?: string) => {
+  const response = await fetch(`${server_url}/openpecha/${textId}/instances?${type ? `instance_type=${type}` : ''}`, {
     headers: getHeaders(),
   });
   if (!response.ok) {

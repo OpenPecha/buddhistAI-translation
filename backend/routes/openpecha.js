@@ -24,15 +24,17 @@ const router = express.Router();
  * @param {number} limit.query - Limit number of texts returned
  * @param {number} offset.query - Offset for pagination
  * @param {string} language.query - Filter by language
+ * @param {string} author.query - Filter by author
+ * @param {string} title.query - Filter by title
  * @return {array<object>} 200 - List of texts
  * @return {object} 400 - Bad request - Invalid type parameter
  * @return {object} 500 - Server error
  */
 router.get("/texts", async (req, res) => {
-  const { type, limit, offset, language } = req.query;
+  const { type, limit, offset, language, author, title } = req.query;
 
   try {
-    const texts = await getTexts(type, limit, offset, language);
+    const texts = await getTexts(type, limit, offset, language, author, title);
     res.json(texts);
   } catch (error) {
     console.error("Error fetching texts:", error);
