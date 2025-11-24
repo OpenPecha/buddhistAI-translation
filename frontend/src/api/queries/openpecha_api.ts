@@ -7,6 +7,8 @@ interface useFetchTextsParams {
   limit?: number;
   offset?: number;
   language?: string;
+  author?: string;
+  title?: string;
 }
 
 export const useFetchTexts = (
@@ -14,12 +16,14 @@ export const useFetchTexts = (
     type,
     limit,
     offset,
-    language
+    language,
+    author,
+    title,
   }:useFetchTextsParams
 ) => {
   return useQuery({
-    queryKey: ["texts", type, limit, offset, language],
-    queryFn: () => fetchTexts({ type, limit, offset, language }),
+    queryKey: ["texts", type, limit, offset, language, author, title],
+    queryFn: () => fetchTexts({ type, limit, offset, language, author, title }),
     staleTime: 5 * 60 * 1000,
   });
 };

@@ -1,11 +1,13 @@
 const API_ENDPOINT = process.env.OPENPECHA_ENDPOINT;
 
-async function getTexts(type, limit, offset, language) {
+async function getTexts(type, limit, offset, language, author, title) {
   const url = new URL(`${API_ENDPOINT}/texts`);
   if (type) url.searchParams.append("type", type);
   if (limit) url.searchParams.append("limit", limit);
   if (offset) url.searchParams.append("offset", offset);
   if (language) url.searchParams.append("language", language);
+  if (author) url.searchParams.append("author", author);
+  if (title) url.searchParams.append("title", title);
   const response = await fetch(url.toString(), {
     headers: {
       accept: "application/json",

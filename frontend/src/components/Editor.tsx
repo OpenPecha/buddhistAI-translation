@@ -138,15 +138,19 @@ const Editor = ({
       }
 
       // Temporarily set selection to get line number, then restore
-      const lineNumber = getLineNumber(quillRef.current);
-     
+      let lineNumber = getLineNumber(quillRef.current);
       background_cleaner();
       if (lineNumber === null) return;
     
       onLineFocus(lineNumber, documentId!);
 
       // Select the 3rd <a> tag within its parent and style it
-      
+      const allParagraphs = document.querySelectorAll(".ql-editor p");
+      for(let i = 0; i < allParagraphs.length && i< lineNumber; i++) {
+        if(allParagraphs[i].textContent?.trim() === "") {
+          lineNumber = lineNumber + 1;
+        }
+      }
       const selector = `.ql-editor p:nth-child(${lineNumber})`;
       const elements = document.querySelectorAll(selector);
       elements.forEach((el) => {
