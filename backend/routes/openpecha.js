@@ -247,10 +247,7 @@ router.post(
       });
     }
     const translationData = {
-      ...req.body,
-      author: {
-        person_id: PERSON_ID,
-      },
+      ...req.body
     };
     try {
       const translation = await uploadTranslationToOpenpecha(

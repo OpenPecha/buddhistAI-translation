@@ -133,7 +133,7 @@ const DocumentSidebar: React.FC<DocumentSidebarProps> = ({ documentId, isTransla
             {activeTab === "upload" && isTranslationEditor && (
               <UploadContent 
                 documentId={documentId} 
-                onClose={() => setActiveTab(documentId, null)}
+                onClose={() => setTabs(documentId, null)}
               />
             )}
           </div>
