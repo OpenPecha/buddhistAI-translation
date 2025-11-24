@@ -13,7 +13,7 @@ import {
   fetchTextContent,
   fetchAnnotations,
 } from "@/api/openpecha";
-import { useTitleSearch } from "@/hooks/useTitleSearch";
+import { useFetchTexts } from "@/api/queries/openpecha_api";
 
 export function OpenPechaTranslationLoader({
   rootId,
@@ -58,7 +58,7 @@ export function OpenPechaTranslationLoader({
     data: titleSearchResults, 
     isLoading: isLoadingTitleSearch, 
     error: titleSearchError 
-  } = useTitleSearch(searchQuery, 1000);
+  } = useFetchTexts({title: searchQuery, limit: 100});
 
   // Apply segmentation to text content
   const applySegmentation = (
@@ -83,15 +83,15 @@ export function OpenPechaTranslationLoader({
 
   // Handle title search result selection
   const handleTitleResultSelect = React.useCallback(
-    async (result: { text_id: string; title: string; instance_id: string }) => {
+    async (result: { id: string; title: { [key: string]: string | undefined } }) => {
       setShowTitleResults(false);
       setShowBdrcResults(false);
       setBdrcTextNotFound(false);
       setIsCheckingTitleText(true);
 
       try {
-        // Fetch text details
-        const text = await fetchText(result.text_id);
+        // Fetch text details first
+        const text = await fetchText(result.id);
 
         if (!text?.id) {
           setIsCheckingTitleText(false);
@@ -101,11 +101,21 @@ export function OpenPechaTranslationLoader({
 
         // Set the text
         setSelectedText(text);
-        setSelectedTextId(result.text_id);
-        setSelectedInstanceId(result.instance_id);
+        setSelectedTextId(text.id);
+
+        // Fetch text details
+        const instance = await fetchInstances(result.id, "critical");
+
+        if (!instance[0]?.id) {
+          setIsCheckingTitleText(false);
+          setBdrcTextNotFound(true);
+          return;
+        }
+
+        setSelectedInstanceId(instance[0].id);
 
         // Fetch text content with annotations
-        const textContent = await fetchTextContent(result.instance_id);
+        const textContent = await fetchTextContent(instance[0].id);
 
         if (!textContent?.content) {
           setIsCheckingTitleText(false);
@@ -366,7 +376,7 @@ export function OpenPechaTranslationLoader({
       ? `create?w_id=${selectedBdrcResult.workId}&i_id=${selectedBdrcResult.instanceId}`
       : "";
     return `${CATALOGER_URL}/${workIdParam}`;
-  }, [CATALOGER_URL, selectedBdrcResult?.workId]);
+  }, [CATALOGER_URL, selectedBdrcResult?.workId, selectedBdrcResult?.instanceId]);
 
   // Render title search results
   const renderTitleSearchResults = () => {
@@ -422,20 +432,17 @@ export function OpenPechaTranslationLoader({
           <div className="px-4 py-2 bg-gray-50 border-b border-gray-200 sticky top-0">
             <h3 className="text-sm font-semibold text-gray-700">OpenPecha</h3>
           </div>
-          {titleSearchResults.map((result: { text_id: string; title: string; instance_id: string }) => (
+          {titleSearchResults.map((result: { id: string; title: { bo?: string; en?: string; [key: string]: string | undefined } }) => (
             <button
-              key={`title-${result.text_id}-${result.instance_id}`}
+              key={`title-${result.id}`}
               onClick={() => handleTitleResultSelect(result)}
               className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0 transition-colors"
             >
               <div className="font-medium text-sm text-gray-900">
-                {result.title || "Untitled"}
+                {(result.title?.bo || Object.values(result.title || {})[0])}
               </div>
               <div className="text-xs text-gray-500 mt-1">
-                Text ID: {result.text_id}
-              </div>
-              <div className="text-xs text-gray-500">
-                Instance ID: {result.instance_id}
+                Text ID: {result.id}
               </div>
             </button>
           ))}
@@ -658,13 +665,6 @@ export function OpenPechaTranslationLoader({
             </p>
             {selectedText && (
               <div className="text-sm text-green-700">
-                <p>
-                  <span className="font-medium">Text ID:</span> {selectedTextId}
-                </p>
-                <p>
-                  <span className="font-medium">Instance ID:</span>{" "}
-                  {selectedInstanceId}
-                </p>
                 <p>
                   <span className="font-medium">Content length:</span>{" "}
                   {processedText.length} characters

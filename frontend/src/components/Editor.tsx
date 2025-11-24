@@ -130,32 +130,32 @@ const Editor = ({
     },
     onLineFocus: () => {
       if (!quillRef.current) return;
-      function background_cleaner(){
-        const allParagraphs = document.querySelectorAll(".ql-editor p");
-        allParagraphs.forEach((p) => {
-          p.classList.remove('focused_p');
-        });
-      }
+      // function background_cleaner(){
+      //   const allParagraphs = document.querySelectorAll(".ql-editor p");
+      //   allParagraphs.forEach((p) => {
+      //     p.classList.remove('focused_p');
+      //   });
+      // }
 
       // Temporarily set selection to get line number, then restore
-      let lineNumber = getLineNumber(quillRef.current);
-      background_cleaner();
+      const lineNumber = getLineNumber(quillRef.current);
+      // background_cleaner();
       if (lineNumber === null) return;
     
       onLineFocus(lineNumber, documentId!);
 
       // Select the 3rd <a> tag within its parent and style it
-      const allParagraphs = document.querySelectorAll(".ql-editor p");
-      for(let i = 0; i < allParagraphs.length && i< lineNumber; i++) {
-        if(allParagraphs[i].textContent?.trim() === "") {
-          lineNumber = lineNumber + 1;
-        }
-      }
-      const selector = `.ql-editor p:nth-child(${lineNumber})`;
-      const elements = document.querySelectorAll(selector);
-      elements.forEach((el) => {
-      el.classList.add('focused_p');
-      });
+      // const allParagraphs = document.querySelectorAll(".ql-editor p");
+      // for(let i = 0; i < allParagraphs.length && i< lineNumber; i++) {
+      //   if(allParagraphs[i].textContent?.trim() === "") {
+      //     lineNumber = lineNumber + 1;
+      //   }
+      // }
+      // const selector = `.ql-editor p:nth-child(${lineNumber})`;
+      // const elements = document.querySelectorAll(selector);
+      // elements.forEach((el) => {
+      // el.classList.add('focused_p');
+      // });
     },
   });
 
@@ -289,7 +289,7 @@ const Editor = ({
           unit: "character",
         },
       },
-      readOnly: !isEditable,
+      readOnly: !isTranslationEditor,
       placeholder: t("editor.startTyping") as string,
       // className is not a valid Quill option, apply these styles to the container instead
     });
