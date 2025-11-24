@@ -139,7 +139,6 @@ const Editor = ({
 
       // Temporarily set selection to get line number, then restore
       let lineNumber = getLineNumber(quillRef.current);
-     console.log("lineNumber 1 :::",lineNumber);
       background_cleaner();
       if (lineNumber === null) return;
     
@@ -152,7 +151,6 @@ const Editor = ({
           lineNumber = lineNumber + 1;
         }
       }
-      console.log("lineNumber :::",lineNumber);
       const selector = `.ql-editor p:nth-child(${lineNumber})`;
       const elements = document.querySelectorAll(selector);
       elements.forEach((el) => {
