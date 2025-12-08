@@ -15,7 +15,7 @@ export const Welcome = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsButtonReady(true);
-    }, 1500);
+    }, 4000);
 
     return () => clearTimeout(timer);
   }, []);
