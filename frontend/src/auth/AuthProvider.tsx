@@ -34,11 +34,11 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (isAuthenticated) {
       setAuthTokenGetter(getAccessTokenSilently);
       async function createUserInDatabase() {
-      const userData = {
-        id: user?.sub || "",
-        email: user?.email || "",
-        username: user?.nickname || "",
-        picture: user?.picture || "",
+        const userData = {
+          id: user?.sub || "",
+          email: user?.email || "",
+          username: user?.nickname || "",
+          picture: user?.picture || "",
         };
         await createUser(userData);
       }

@@ -8,10 +8,12 @@ import {
   FileText,
   Languages,
 } from "lucide-react";
+import { useAuth0 } from "@auth0/auth0-react";
+import { Button } from "./ui/button";
 
 export const Welcome = () => {
   const [isButtonReady, setIsButtonReady] = useState(false);
-
+  const { loginWithRedirect } = useAuth0();
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsButtonReady(true);
@@ -103,8 +105,8 @@ export const Welcome = () => {
                   <span>Loading...</span>
                 </div>
               ) : (
-                <Link
-                  to="/login"
+                <Button
+                  onClick={() => loginWithRedirect()}
                   className="group relative inline-flex items-center gap-3 px-10 py-5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold text-lg rounded-2xl shadow-2xl hover:shadow-blue-500/50 transform hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
                 >
                   <span>Get Started</span>
@@ -121,7 +123,7 @@ export const Welcome = () => {
                       d="M13 7l5 5m0 0l-5 5m5-5H6"
                     />
                   </svg>
-                </Link>
+                </Button>
               )}
             </div>
           </div>

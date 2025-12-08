@@ -79,7 +79,7 @@ function AppContent() {
             <SuspenceWithLoadingFallback>
               <QuillVersionProvider>
                 <EditorProvider>
-                <DocumentsWrapper />
+                  <DocumentsWrapper />
                 </EditorProvider>
               </QuillVersionProvider>
             </SuspenceWithLoadingFallback>

@@ -7,17 +7,20 @@ import ThemeToggle from "./ThemeToggle";
 import SettingsButton from "./setting/SettingsButton";
 import { Button } from "./ui/button";
 import { useTranslation } from "react-i18next";
+import { useAuth0 } from "@auth0/auth0-react";
 
 function ProfileArea() {
   const [isOpen, setIsOpen] = useState(false);
   const { currentUser, logout: handleLogout } = useAuth();
-  const { i18n, t } = useTranslation(); 
+  const { logout } = useAuth0();
+  const { i18n, t } = useTranslation();
   const currentLanguage = i18n.language;
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const toggleDropdown = () => setIsOpen(!isOpen);
 
   const onLogout = () => {
+    logout();
     handleLogout();
     setIsOpen(false);
   };
