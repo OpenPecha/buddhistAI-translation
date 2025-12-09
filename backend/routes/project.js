@@ -4,7 +4,6 @@ const router = express.Router();
 const archiver = require("archiver");
 const path = require("path");
 const crypto = require("crypto");
-const { PrismaClient } = require("@prisma/client");
 const {
   createSideBySideDocx,
   createLineByLineDocx,
@@ -42,7 +41,7 @@ const {
   projectPermissionRemovedTemplate,
 } = require("../utils/emailTemplates");
 
-const prisma = new PrismaClient();
+const { prisma } = require("../services/db");
 
 // Configuration constants
 const TEXT_CHUNK_LENGTH = 300; // Characters per chunk
@@ -348,8 +347,8 @@ router.get("/:id/accessible-users", authenticate, async (req, res) => {
             id: true,
             username: true,
             email: true,
-            picture: true
-          }
+            picture: true,
+          },
         },
         permissions: {
           include: {
@@ -358,12 +357,12 @@ router.get("/:id/accessible-users", authenticate, async (req, res) => {
                 id: true,
                 username: true,
                 email: true,
-                picture: true
-              }
-            }
-          }
-        }
-      }
+                picture: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!project) {
@@ -386,7 +385,7 @@ router.get("/:id/accessible-users", authenticate, async (req, res) => {
     if (project.owner) {
       accessibleUsers.push({
         ...project.owner,
-        accessLevel: "owner"
+        accessLevel: "owner",
       });
     }
 
@@ -395,14 +394,14 @@ router.get("/:id/accessible-users", authenticate, async (req, res) => {
       if (permission.user) {
         accessibleUsers.push({
           ...permission.user,
-          accessLevel: permission.accessLevel
+          accessLevel: permission.accessLevel,
         });
       }
     });
 
     res.json({
       success: true,
-      data: accessibleUsers
+      data: accessibleUsers,
     });
   } catch (error) {
     console.error("Error fetching accessible users:", error);

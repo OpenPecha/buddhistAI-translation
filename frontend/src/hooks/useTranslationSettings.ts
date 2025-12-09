@@ -11,6 +11,7 @@ export interface TranslationConfig {
   batchSize: number;
   userRules: string;
   extractGlossary: boolean;
+  contextFiles: File[];
 }
 
 interface TranslationUIState {
@@ -29,6 +30,7 @@ const DEFAULT_CONFIG: TranslationConfig = {
   batchSize: 5,
   userRules: "do translation normally",
   extractGlossary: false,
+  contextFiles: [],
 };
 
 const DEFAULT_UI_STATE: TranslationUIState = {

@@ -1,6 +1,5 @@
-const { PrismaClient } = require("@prisma/client");
+const { prisma } = require("../services/db");
 const jwt = require("jsonwebtoken");
-const prisma = new PrismaClient();
 const { auth, claimCheck } = require("express-oauth2-jwt-bearer");
 const jwksClient = require("jwks-rsa");
 // Auth0 configuration

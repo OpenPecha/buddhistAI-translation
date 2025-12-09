@@ -1,11 +1,10 @@
 const express = require("express");
-const { PrismaClient } = require("@prisma/client");
+const { prisma } = require("../services/db");
 const {
   authenticate,
   optionalAuthenticate,
 } = require("../middleware/authenticate");
 
-const prisma = new PrismaClient();
 const router = express.Router();
 
 /**
@@ -56,8 +55,8 @@ router.get("/", async (req, res) => {
           select: {
             id: true,
             username: true,
-            email: true
-          }
+            email: true,
+          },
         },
         // comments: {
         //   include: {
@@ -77,7 +76,6 @@ router.get("/", async (req, res) => {
   }
 });
 
-
 /**
  * GET /threads/{id}
  * @summary Get a specific thread by ID with all comments
@@ -91,7 +89,7 @@ router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
-    if(!id) {
+    if (!id) {
       return res.status(400).json({ error: "Thread ID is required" });
     }
     const thread = await prisma.thread.findUnique({
@@ -101,21 +99,19 @@ router.get("/:id", async (req, res) => {
           select: {
             id: true,
             username: true,
-            email: true
-          }
+            email: true,
+          },
         },
         comments: {
           include: {
-            user: true
+            user: true,
           },
           orderBy: {
-            createdAt: "asc"
-          }
-        }
+            createdAt: "asc",
+          },
+        },
       },
     });
-    
-    
 
     if (!thread) {
       return res.status(404).json({ error: "Thread not found" });
@@ -183,7 +179,7 @@ router.post("/", authenticate, async (req, res) => {
             username: true,
             email: true,
           },
-        }
+        },
       },
     });
     res.status(201).json(newThread);

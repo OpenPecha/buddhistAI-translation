@@ -4,7 +4,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -57,7 +56,7 @@ model Doc {
   name                   String    @default("document")
   comments               Comment[]
   owner                  User?     @relation("UserDocs", fields: [ownerId], references: [id], onDelete: Cascade)
-
+  TranslationContextFiles   TranslationContextFile[]
   permissions      Permission[] // A document can have multiple permission entries
   versions         Version[] // A document can have multiple versions
   footnotes        Footnote[] // A document can have multiple footnotes
@@ -204,3 +203,19 @@ model Webuddhist {
   webuddhistThread  WebuddhistThread? @relation("WebuddhistResponse", fields: [webuddhistThreadId], references: [id])
   webuddhistThreadId String? 
 }
+
+
+model TranslationContextFile {
+  id String @id @default(uuid())
+  mimeType String
+  sizeBytes Int
+  storageUrl String
+  geminiFileId String?
+  extractedText String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  documentId String
+  document Doc @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  @@index([documentId])
+}
+

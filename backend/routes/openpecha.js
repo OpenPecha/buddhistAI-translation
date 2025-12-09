@@ -11,8 +11,7 @@ const {
   getSegmentsContent,
   searchTextByTitle,
 } = require("../apis/openpecha_api");
-const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
+const { prisma } = require("../services/db");
 
 const router = express.Router();
 
@@ -247,7 +246,7 @@ router.post(
       });
     }
     const translationData = {
-      ...req.body
+      ...req.body,
     };
     try {
       const translation = await uploadTranslationToOpenpecha(

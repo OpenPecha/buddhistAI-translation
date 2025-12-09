@@ -1,5 +1,4 @@
-const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
+const { prisma } = require("../services/db");
 
 async function getProject(id) {
   return await prisma.project.findUnique({

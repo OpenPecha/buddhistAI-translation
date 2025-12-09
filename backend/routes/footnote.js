@@ -1,11 +1,10 @@
 const express = require("express");
-const { PrismaClient } = require("@prisma/client");
 const {
-	authenticate,
-	optionalAuthenticate,
+  authenticate,
+  optionalAuthenticate,
 } = require("../middleware/authenticate");
 
-const prisma = new PrismaClient();
+const { prisma } = require("../services/db");
 const router = express.Router();
 
 /**
@@ -18,30 +17,30 @@ const router = express.Router();
  * @return {object} 500 - Server error
  */
 router.get("/", authenticate, async (req, res) => {
-	try {
-		const { docId } = req.query;
+  try {
+    const { docId } = req.query;
 
-		let footnotes;
-		if (docId) {
-			footnotes = await prisma.footnote.findMany({
-				where: { docId },
-				orderBy: {
-					order: "asc",
-				},
-			});
-		} else {
-			footnotes = await prisma.footnote.findMany({
-				orderBy: {
-					order: "asc",
-				},
-			});
-		}
+    let footnotes;
+    if (docId) {
+      footnotes = await prisma.footnote.findMany({
+        where: { docId },
+        orderBy: {
+          order: "asc",
+        },
+      });
+    } else {
+      footnotes = await prisma.footnote.findMany({
+        orderBy: {
+          order: "asc",
+        },
+      });
+    }
 
-		res.json(footnotes);
-	} catch (error) {
-		console.error(error);
-		res.status(500).json({ error: "Server error while fetching footnotes" });
-	}
+    res.json(footnotes);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error while fetching footnotes" });
+  }
 });
 
 /**
@@ -53,25 +52,25 @@ router.get("/", authenticate, async (req, res) => {
  * @return {object} 500 - Server error
  */
 router.get("/:docId", optionalAuthenticate, async (req, res) => {
-	try {
-		const { docId } = req.params;
+  try {
+    const { docId } = req.params;
 
-		const footnotes = await prisma.footnote.findMany({
-			where: { docId },
-			select: {
-				threadId: true,
-				content: true,
-				id: true,
-			},
-			orderBy: {
-				order: "asc",
-			},
-		});
-		res.json(footnotes);
-	} catch (error) {
-		console.error(error);
-		res.status(500).json({ error: "Error fetching document footnotes" });
-	}
+    const footnotes = await prisma.footnote.findMany({
+      where: { docId },
+      select: {
+        threadId: true,
+        content: true,
+        id: true,
+      },
+      orderBy: {
+        order: "asc",
+      },
+    });
+    res.json(footnotes);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error fetching document footnotes" });
+  }
 });
 
 /**
@@ -84,20 +83,20 @@ router.get("/:docId", optionalAuthenticate, async (req, res) => {
  * @return {object} 500 - Server error
  */
 router.get("/thread/:threadId", authenticate, async (req, res) => {
-	try {
-		const { threadId } = req.params;
-		const footnotes = await prisma.footnote.findMany({
-			where: { threadId },
-			include: { user: true },
-			orderBy: {
-				order: "asc",
-			},
-		});
-		res.json(footnotes);
-	} catch (error) {
-		console.error(error);
-		res.status(500).json({ error: "Error fetching thread footnotes" });
-	}
+  try {
+    const { threadId } = req.params;
+    const footnotes = await prisma.footnote.findMany({
+      where: { threadId },
+      include: { user: true },
+      orderBy: {
+        order: "asc",
+      },
+    });
+    res.json(footnotes);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error fetching thread footnotes" });
+  }
 });
 
 /**
@@ -128,72 +127,72 @@ router.get("/thread/:threadId", authenticate, async (req, res) => {
  * }
  */
 router.post("/", authenticate, async (req, res) => {
-	try {
-		const {
-			docId,
-			userId,
-			content,
-			initialStartOffset,
-			initialEndOffset,
-			threadId,
-			noteOn,
-		} = req.body;
+  try {
+    const {
+      docId,
+      userId,
+      content,
+      initialStartOffset,
+      initialEndOffset,
+      threadId,
+      noteOn,
+    } = req.body;
 
-		if (
-			!docId ||
-			!userId ||
-			!content ||
-			!noteOn ||
-			initialStartOffset == null ||
-			initialEndOffset == null
-		) {
-			return res.status(400).json({ error: "Missing required fields" });
-		}
+    if (
+      !docId ||
+      !userId ||
+      !content ||
+      !noteOn ||
+      initialStartOffset == null ||
+      initialEndOffset == null
+    ) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
 
-		// Create the new footnote first with a temporary order
-		const tempData = {
-			docId,
-			userId,
-			content,
-			initialStartOffset,
-			initialEndOffset,
-			threadId: threadId || null,
-			noteOn,
-			order: 999999, // Temporary high order number
-		};
+    // Create the new footnote first with a temporary order
+    const tempData = {
+      docId,
+      userId,
+      content,
+      initialStartOffset,
+      initialEndOffset,
+      threadId: threadId || null,
+      noteOn,
+      order: 999999, // Temporary high order number
+    };
 
-		const newFootnote = await prisma.footnote.create({
-			data: tempData,
-			include: { user: true },
-		});
+    const newFootnote = await prisma.footnote.create({
+      data: tempData,
+      include: { user: true },
+    });
 
-		// Get all footnotes for this document ordered by initialStartOffset
-		const allFootnotes = await prisma.footnote.findMany({
-			where: { docId },
-			orderBy: {
-				initialStartOffset: "asc",
-			},
-		});
+    // Get all footnotes for this document ordered by initialStartOffset
+    const allFootnotes = await prisma.footnote.findMany({
+      where: { docId },
+      orderBy: {
+        initialStartOffset: "asc",
+      },
+    });
 
-		// Update all footnotes with correct order based on their position
-		for (let i = 0; i < allFootnotes.length; i++) {
-			await prisma.footnote.update({
-				where: { id: allFootnotes[i].id },
-				data: { order: i + 1 },
-			});
-		}
+    // Update all footnotes with correct order based on their position
+    for (let i = 0; i < allFootnotes.length; i++) {
+      await prisma.footnote.update({
+        where: { id: allFootnotes[i].id },
+        data: { order: i + 1 },
+      });
+    }
 
-		// Fetch the updated footnote with correct order
-		const updatedFootnote = await prisma.footnote.findUnique({
-			where: { id: newFootnote.id },
-			include: { user: true },
-		});
+    // Fetch the updated footnote with correct order
+    const updatedFootnote = await prisma.footnote.findUnique({
+      where: { id: newFootnote.id },
+      include: { user: true },
+    });
 
-		res.status(201).json(updatedFootnote);
-	} catch (error) {
-		console.error(error);
-		res.status(500).json({ error: "Error creating footnote" });
-	}
+    res.status(201).json(updatedFootnote);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error creating footnote" });
+  }
 });
 
 /**
@@ -209,31 +208,31 @@ router.post("/", authenticate, async (req, res) => {
  * @return {object} 500 - Server error
  */
 router.put("/:id", authenticate, async (req, res) => {
-	try {
-		const { id } = req.params;
-		const { content } = req.body;
+  try {
+    const { id } = req.params;
+    const { content } = req.body;
 
-		const existingFootnote = await prisma.footnote.findUnique({
-			where: { id },
-		});
+    const existingFootnote = await prisma.footnote.findUnique({
+      where: { id },
+    });
 
-		if (!existingFootnote) {
-			return res.status(404).json({ error: "Footnote not found" });
-		}
+    if (!existingFootnote) {
+      return res.status(404).json({ error: "Footnote not found" });
+    }
 
-		const updatedFootnote = await prisma.footnote.update({
-			where: { id },
-			data: {
-				content,
-				updatedAt: new Date(),
-			},
-		});
+    const updatedFootnote = await prisma.footnote.update({
+      where: { id },
+      data: {
+        content,
+        updatedAt: new Date(),
+      },
+    });
 
-		res.json(updatedFootnote);
-	} catch (error) {
-		console.error(error);
-		res.status(500).json({ error: "Error updating footnote" });
-	}
+    res.json(updatedFootnote);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error updating footnote" });
+  }
 });
 
 /**
@@ -247,26 +246,26 @@ router.put("/:id", authenticate, async (req, res) => {
  * @return {object} 500 - Server error
  */
 router.delete("/:id", authenticate, async (req, res) => {
-	try {
-		const { id } = req.params;
+  try {
+    const { id } = req.params;
 
-		const footnote = await prisma.footnote.findUnique({
-			where: { id },
-		});
+    const footnote = await prisma.footnote.findUnique({
+      where: { id },
+    });
 
-		if (!footnote) {
-			return res.status(404).json({ error: "Footnote not found" });
-		}
+    if (!footnote) {
+      return res.status(404).json({ error: "Footnote not found" });
+    }
 
-		await prisma.footnote.delete({
-			where: { id },
-		});
+    await prisma.footnote.delete({
+      where: { id },
+    });
 
-		res.json({ message: "Footnote deleted successfully" });
-	} catch (error) {
-		console.error(error);
-		res.status(500).json({ error: "Error deleting footnote" });
-	}
+    res.json({ message: "Footnote deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error deleting footnote" });
+  }
 });
 
 module.exports = router;

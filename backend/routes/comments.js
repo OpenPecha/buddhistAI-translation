@@ -1,6 +1,7 @@
 const express = require("express");
-const { PrismaClient } = require("@prisma/client");
-const { v4: uuidv4 } = require('uuid');
+const { prisma } = require("../services/db");
+
+const { v4: uuidv4 } = require("uuid");
 const {
   authenticate,
   optionalAuthenticate,
@@ -8,7 +9,6 @@ const {
 const { sendEmail } = require("../services/utils");
 const { getSegmentsContent } = require("../apis/openpecha_api");
 const { getSegmentRelated } = require("../apis/openpecha_api");
-const prisma = new PrismaClient();
 const router = express.Router();
 
 //references = [{type: "commentary", content: "The content of the reference"}]
@@ -21,7 +21,6 @@ async function generateMessagesFromThread(threadId, selectedText) {
   }
 
   try {
-
     // Fetch thread with comments in a single query
     const thread = await prisma.thread.findFirst({
       where: { id: threadId },
@@ -35,7 +34,7 @@ async function generateMessagesFromThread(threadId, selectedText) {
     });
 
     let messages = [];
-    
+
     // Add selected text as initial message if it exists
     if (thread?.selectedText) {
       messages.push({
@@ -46,10 +45,12 @@ async function generateMessagesFromThread(threadId, selectedText) {
 
     // Convert comments to messages format
     if (thread?.comments) {
-      messages.push(...thread.comments.map((comment) => ({
-        role: comment.isSystemGenerated ? "assistant" : "user",
-        content: comment.content,
-      })));
+      messages.push(
+        ...thread.comments.map((comment) => ({
+          role: comment.isSystemGenerated ? "assistant" : "user",
+          content: comment.content,
+        }))
+      );
     }
 
     return messages;
@@ -60,7 +61,14 @@ async function generateMessagesFromThread(threadId, selectedText) {
 }
 
 // AI Comment function
-async function getAIComment(threadId, selectedText, res, model_name, content, references) {
+async function getAIComment(
+  threadId,
+  selectedText,
+  res,
+  model_name,
+  content,
+  references
+) {
   try {
     // Generate messages from thread history
     const messages = await generateMessagesFromThread(threadId, selectedText);
@@ -106,40 +114,46 @@ async function getAIComment(threadId, selectedText, res, model_name, content, re
 
       buffer += decoder.decode(value, { stream: true });
       const lines = buffer.split("\n");
-      buffer = lines.pop(); 
+      buffer = lines.pop();
       for (const line of lines) {
-				if (line.startsWith("data:")) {
-					const jsonStartIndex = line.indexOf("{");
-					if (jsonStartIndex !== -1) {
-						const jsonString = line.substring(jsonStartIndex);
-						try {
-							const parsed = JSON.parse(jsonString);
-							if (parsed.type === "comment_delta") {
-								finalCommentText += parsed.text || "";
-							} else if(parsed.type === "completion"){
+        if (line.startsWith("data:")) {
+          const jsonStartIndex = line.indexOf("{");
+          if (jsonStartIndex !== -1) {
+            const jsonString = line.substring(jsonStartIndex);
+            try {
+              const parsed = JSON.parse(jsonString);
+              if (parsed.type === "comment_delta") {
+                finalCommentText += parsed.text || "";
+              } else if (parsed.type === "completion") {
                 finalCommentText = parsed.comment_text || parsed.text;
                 // Trim "@Comment " prefix if present
-                if (finalCommentText && finalCommentText.startsWith("@Comment ")) {
+                if (
+                  finalCommentText &&
+                  finalCommentText.startsWith("@Comment ")
+                ) {
                   finalCommentText = finalCommentText.substring(9); // Remove "@Comment " (9 characters)
                 }
               } else if (parsed.type === "error") {
-								console.error("Error:", parsed.message || "An unknown error occurred");
-							}
-							// Properly serialize JSON to avoid escaping issues with special characters
-							const responseData = {
-								type: parsed?.type,
-								text: parsed?.text || parsed?.comment_text || parsed?.message
-							};
-							const dataString = `data: ${JSON.stringify(responseData)}\n\n`;
-							res.write(dataString);
-							// Force flush to ensure immediate delivery
-							if (res.flush) res.flush();
-						} catch (e) {
-							console.error("Failed to parse stream data:", e);	
-						}
-					}
-				}
-			}
+                console.error(
+                  "Error:",
+                  parsed.message || "An unknown error occurred"
+                );
+              }
+              // Properly serialize JSON to avoid escaping issues with special characters
+              const responseData = {
+                type: parsed?.type,
+                text: parsed?.text || parsed?.comment_text || parsed?.message,
+              };
+              const dataString = `data: ${JSON.stringify(responseData)}\n\n`;
+              res.write(dataString);
+              // Force flush to ensure immediate delivery
+              if (res.flush) res.flush();
+            } catch (e) {
+              console.error("Failed to parse stream data:", e);
+            }
+          }
+        }
+      }
     }
 
     // Return the final comment text for database storage
@@ -147,7 +161,10 @@ async function getAIComment(threadId, selectedText, res, model_name, content, re
   } catch (error) {
     console.error("Error calling AI comment API:", error);
     res.write(
-      `data: ${JSON.stringify({ type: "error", message: error.message || "Failed to get AI comment" })}\n\n`
+      `data: ${JSON.stringify({
+        type: "error",
+        message: error.message || "Failed to get AI comment",
+      })}\n\n`
     );
     throw error;
   }
@@ -171,7 +188,6 @@ async function sendMentionNotifications(
   selectedText,
   currentUser
 ) {
-
   const currentUserInfo = await prisma.user.findUnique({
     where: { id: currentUser.id },
   });
@@ -187,24 +203,26 @@ async function sendMentionNotifications(
       if (mentionedUser) {
         const emailContent = {
           subject: `You were mentioned in a comment - Pecha Translation Editor`,
-          text: `Hello ${mentionedUser.username || ""},\n\nYou were mentioned in a comment by ${currentUserInfo.username} on Pecha Translation Editor.\n\n
+          text: `Hello ${
+            mentionedUser.username || ""
+          },\n\nYou were mentioned in a comment by ${
+            currentUserInfo.username
+          } on Pecha Translation Editor.\n\n
 Comment: "${content}"
-${selectedText ? `Selected text: "${selectedText}"\n\n` : ""}You can view and respond to this comment in the document editor.
+${
+  selectedText ? `Selected text: "${selectedText}"\n\n` : ""
+}You can view and respond to this comment in the document editor.
 
 Thank you for using Pecha Translation Editor!
 
 ---
 This is an automated message. Please do not reply to this email.`,
         };
-      
+
         await sendEmail([mentionedUser.email], emailContent);
       }
-      
     } catch (error) {
-      console.error(
-        `Error sending mention notification to @${userId}:`,
-        error
-      );
+      console.error(`Error sending mention notification to @${userId}:`, error);
     }
   }
 }
@@ -350,10 +368,9 @@ router.get("/thread/:threadId", optionalAuthenticate, async (req, res) => {
  */
 router.post("/", authenticate, async (req, res) => {
   try {
-
-    const user = req.user
-    if(!user){
-      return res.status(400).json({error:"missing user"})
+    const user = req.user;
+    if (!user) {
+      return res.status(400).json({ error: "missing user" });
     }
     const {
       docId,
@@ -362,7 +379,7 @@ router.post("/", authenticate, async (req, res) => {
       isSuggestion,
       suggestedText,
       isSystemGenerated,
-      selectedText
+      selectedText,
     } = req.body;
     if (!docId || !content) {
       return res.status(400).json({ error: "Missing required fields" });
@@ -379,7 +396,7 @@ router.post("/", authenticate, async (req, res) => {
     const newComment = await prisma.comment.create({
       data: {
         docId,
-        userId:user.id,
+        userId: user.id,
         content,
         threadId: threadId,
         isSuggestion: isSuggestion || false,
@@ -392,9 +409,7 @@ router.post("/", authenticate, async (req, res) => {
     const mentionedUserIds = extractMentions(content);
     // Send mention notifications (excluding AI mentions)
     if (mentionedUserIds && mentionedUserIds.length > 0) {
-      const regularMentions = mentionedUserIds.filter(
-        (id) => id !== "ai"
-      );
+      const regularMentions = mentionedUserIds.filter((id) => id !== "ai");
       if (regularMentions.length > 0) {
         await sendMentionNotifications(
           regularMentions,
@@ -408,15 +423,15 @@ router.post("/", authenticate, async (req, res) => {
     // Check if this is an AI comment request AFTER saving the user's comment
     if (content.includes("@ai")) {
       const offset = await prisma.thread.findFirst({
-        where : {id:threadId}
-      })
+        where: { id: threadId },
+      });
       const instance = await prisma.docMetadata.findFirst({
-        where:{docId:docId},
-        select:{
-          instanceId:true
-        }
-      })
-      if(!instance) {
+        where: { docId: docId },
+        select: {
+          instanceId: true,
+        },
+      });
+      if (!instance) {
         return res.status(404).json({ error: "Instance not found" });
       }
       // STATUS UPDATE 1: Start
@@ -430,43 +445,70 @@ router.post("/", authenticate, async (req, res) => {
         "X-Accel-Buffering": "no", // Disable nginx buffering
         "Content-Encoding": "none", // Disable compression
       });
-      res.write(`data: ${JSON.stringify({ type: "status", message: "Finding related segments..." })}\n\n`);
+      res.write(
+        `data: ${JSON.stringify({
+          type: "status",
+          message: "Finding related segments...",
+        })}\n\n`
+      );
 
-      const relatedSegments = await getSegmentRelated(instance.instanceId, offset.initialStartOffset, offset.initialEndOffset);
+      const relatedSegments = await getSegmentRelated(
+        instance.instanceId,
+        offset.initialStartOffset,
+        offset.initialEndOffset
+      );
       let references = [];
       const segmentDetails = [];
       for (const item of relatedSegments) {
-        if(item.text_metadata.type === "commentary") {
+        if (item.text_metadata.type === "commentary") {
           segmentDetails.push({
             type: item.text_metadata.type,
             instance_id: item.instance_metadata.id,
-            seg_ids: item.segments.map(seg => seg.segment_id)
+            seg_ids: item.segments.map((seg) => seg.segment_id),
           });
         }
       }
 
       // STATUS UPDATE 2: After finding segments
-      res.write(`data: ${JSON.stringify({ type: "status", message: `Found ${segmentDetails.length} related commentary segments.` })}\n\n`);
+      res.write(
+        `data: ${JSON.stringify({
+          type: "status",
+          message: `Found ${segmentDetails.length} related commentary segments.`,
+        })}\n\n`
+      );
 
       let count = 1;
       for (const segmentDetail of segmentDetails) {
         let name = `ref-${segmentDetail.type}-${count}`;
 
         // STATUS UPDATE 3: Before fetching each reference content
-        res.write(`data: ${JSON.stringify({ type: "status", message: `Fetching content for reference ${count}...` })}\n\n`);
+        res.write(
+          `data: ${JSON.stringify({
+            type: "status",
+            message: `Fetching content for reference ${count}...`,
+          })}\n\n`
+        );
 
-        const segmentContent = await getSegmentsContent(segmentDetail.instance_id, segmentDetail.seg_ids);
+        const segmentContent = await getSegmentsContent(
+          segmentDetail.instance_id,
+          segmentDetail.seg_ids
+        );
         references.push({
-            id: uuidv4(),
-            name: name,
-            type: segmentDetail.type,
-            content: segmentContent.map(item => item.content).join('')
-          })  
+          id: uuidv4(),
+          name: name,
+          type: segmentDetail.type,
+          content: segmentContent.map((item) => item.content).join(""),
+        });
         count++;
       }
 
       // STATUS UPDATE 4: Before calling AI
-      res.write(`data: ${JSON.stringify({ type: "status", message: "Generating AI comment..." })}\n\n`);
+      res.write(
+        `data: ${JSON.stringify({
+          type: "status",
+          message: "Generating AI comment...",
+        })}\n\n`
+      );
 
       try {
         // Stream AI response to client
@@ -495,7 +537,10 @@ router.post("/", authenticate, async (req, res) => {
 
         // Send final completion event with the saved AI comment
         res.write(
-          `data: ${JSON.stringify({ type: "saved_comment", comment: aiComment })}\n\n`
+          `data: ${JSON.stringify({
+            type: "saved_comment",
+            comment: aiComment,
+          })}\n\n`
         );
         res.end();
       } catch (error) {
@@ -503,10 +548,18 @@ router.post("/", authenticate, async (req, res) => {
         // Still end the response stream properly on error
         if (!res.headersSent) {
           res.writeHead(500, { "Content-Type": "application/json" });
-          res.end(JSON.stringify({ type: "error", message : "Failed to process AI comment" }));
+          res.end(
+            JSON.stringify({
+              type: "error",
+              message: "Failed to process AI comment",
+            })
+          );
         } else {
           res.write(
-            `data: ${JSON.stringify({ type: "error", message: "Failed to process AI comment" })}\n\n`
+            `data: ${JSON.stringify({
+              type: "error",
+              message: "Failed to process AI comment",
+            })}\n\n`
           );
           res.end();
         }
@@ -518,10 +571,15 @@ router.post("/", authenticate, async (req, res) => {
     console.error(error);
     if (!res.headersSent) {
       res.writeHead(500, { "Content-Type": "application/json" });
-      res.end(JSON.stringify({ type: "error", message : "Failed to add comment" }));
+      res.end(
+        JSON.stringify({ type: "error", message: "Failed to add comment" })
+      );
     } else {
       res.write(
-        `data: ${JSON.stringify({ type: "error", message: "Failed to process AI comment" })}\n\n`
+        `data: ${JSON.stringify({
+          type: "error",
+          message: "Failed to process AI comment",
+        })}\n\n`
       );
       res.end();
     }

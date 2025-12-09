@@ -3,7 +3,6 @@ const {
   authenticate,
   optionalAuthenticate,
 } = require("../middleware/authenticate");
-const { PrismaClient } = require("@prisma/client");
 const multer = require("multer");
 const { WSSharedDoc } = require("../services");
 const { sendEmail } = require("../services/utils");
@@ -11,7 +10,8 @@ const {
   documentSharedTemplate,
   documentPermissionUpdatedTemplate,
 } = require("../utils/emailTemplates");
-const prisma = new PrismaClient();
+const { prisma } = require("../services/db");
+
 const router = express.Router();
 const { docxToText } = require("../utils/docxToText");
 /**
@@ -248,12 +248,17 @@ router.post("/", authenticate, upload.single("file"), async (req, res) => {
     }
     let textContent = null;
     if (req.file) {
-      if (req.file.mimetype === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
+      if (
+        req.file.mimetype ===
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      ) {
         textContent = await docxToText(req.file.buffer);
       } else if (req.file.mimetype === "text/plain") {
         textContent = req.file.buffer.toString("utf-8");
       } else {
-        return res.status(400).json({ error: "Unsupported file type: " + req.file.mimetype });
+        return res
+          .status(400)
+          .json({ error: "Unsupported file type: " + req.file.mimetype });
       }
     }
     const doc = new WSSharedDoc(identifier, req.user.id);
@@ -1382,5 +1387,97 @@ router.post("/generate-translation", authenticate, async (req, res) => {
       .json({ error: "Error generating translation: " + error.message });
   }
 });
+
+router.get(
+  "/translation-context/:documentId",
+  authenticate,
+  async (req, res) => {
+    try {
+      const { documentId } = req.params;
+      const document = await prisma.TranslationContextFile.findMany({
+        where: { documentId: documentId },
+      });
+      return res.json({ success: true, data: document });
+    } catch (error) {
+      console.error("Error fetching translation context:", error);
+      return res
+        .status(500)
+        .json({ error: "Error fetching translation context" });
+    }
+  }
+);
+
+/**
+ * DELETE /documents/translation-context/:fileId
+ * @summary Delete a translation context file
+ * @tags Documents - Document management operations
+ * @security BearerAuth
+ * @param {string} fileId.path.required - Translation context file ID
+ * @return {object} 200 - Translation context file deleted successfully
+ * @return {object} 404 - Translation context file not found
+ * @return {object} 500 - Server error
+ */
+router.delete(
+  "/translation-context/:fileId",
+  authenticate,
+  async (req, res) => {
+    try {
+      const { fileId } = req.params;
+
+      // Check if translation context file exists
+      const contextFile = await prisma.TranslationContextFile.findUnique({
+        where: { id: fileId },
+        include: {
+          document: {
+            include: {
+              rootProject: {
+                include: {
+                  permissions: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!contextFile) {
+        return res.status(404).json({
+          success: false,
+          error: "Translation context file not found",
+        });
+      }
+
+      // Check if user has permission
+      const hasPermission = await checkDocumentPermission(
+        contextFile.document,
+        req.user.id
+      );
+
+      if (!hasPermission) {
+        return res.status(403).json({
+          success: false,
+          error: "You do not have permission to delete this file",
+        });
+      }
+
+      // Delete the translation context file
+      await prisma.TranslationContextFile.delete({
+        where: { id: fileId },
+      });
+
+      return res.json({
+        success: true,
+        message: "Translation context file deleted successfully",
+      });
+    } catch (error) {
+      console.error("Error deleting translation context file:", error);
+      return res.status(500).json({
+        success: false,
+        error: "Error deleting translation context file",
+        message: error.message,
+      });
+    }
+  }
+);
 
 module.exports = router;

@@ -7,10 +7,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ModelSelector } from "@/components/ui/ModelSelector";
-import { Textarea } from "@/components/ui/textarea";
+
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -18,17 +16,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Settings,
-  Globe,
-  Languages,
-  FileText,
-  Bot,
-  Hash,
-  MessageSquare,
-  BookOpen,
-  Lightbulb,
-} from "lucide-react";
+import { Settings, Languages, FileText } from "lucide-react";
 
 import {
   TARGET_LANGUAGES,
@@ -38,8 +26,9 @@ import {
   ModelName,
 } from "@/api/translate";
 import { useTranslation } from "react-i18next";
+import { TranslationContextFileSelector } from "./TranslationContextFileSelector";
 
-interface TranslationConfig {
+export interface TranslationConfig {
   targetLanguage: TargetLanguage;
   textType: TextType;
   modelName: ModelName;
@@ -123,25 +112,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label
-              htmlFor="user-rules"
-              className="text-sm font-medium flex items-center gap-2"
-            >
-              <MessageSquare className="w-3 h-3" />
-              {t("translation.translationGuidelines")}
-            </Label>
-            <Textarea
-              id="user-rules"
-              placeholder="Enter specific instructions for the AI translator (e.g., 'Maintain formal tone', 'Preserve technical terms', etc.)"
-              value={config.userRules}
-              onChange={(e) => onConfigChange("userRules", e.target.value)}
-              className="min-h-[80px] resize-none"
-            />
-            <p className="text-xs">
-              {t("translation.translationGuidelinesDescription")}
-            </p>
-          </div>
+          <TranslationContextFileSelector
+            config={config}
+            onConfigChange={onConfigChange}
+          />
         </div>
       </DialogContent>
     </Dialog>

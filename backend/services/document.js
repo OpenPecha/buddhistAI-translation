@@ -1,5 +1,4 @@
-const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
+const { prisma } = require("./db");
 
 /**
  * Fetches a document's details including its content from the current version.

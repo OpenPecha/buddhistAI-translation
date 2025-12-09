@@ -1,11 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const { PrismaClient } = require("@prisma/client");
 const { authenticate } = require("../middleware/authenticate");
 const fs = require("fs");
 const path = require("path");
-
-const prisma = new PrismaClient();
+const { prisma } = require("../services/db");
 
 /**
  * @typedef {object} SegmentSearchRequest

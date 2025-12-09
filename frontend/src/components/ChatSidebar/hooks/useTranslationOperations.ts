@@ -15,6 +15,7 @@ export interface TranslationConfig {
   batchSize: number;
   userRules: string;
   extractGlossary: boolean;
+  contextFiles: File[];
 }
 
 export interface TranslationResult {

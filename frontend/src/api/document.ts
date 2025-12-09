@@ -92,7 +92,7 @@ export const createDocument = async (formData: FormData) => {
 };
 
 export const createDocumentWithContent = async (
-  data: FormData | Record<string, any>
+  data: FormData | Record<string, unknown>
 ) => {
   const body =
     data instanceof FormData
@@ -294,4 +294,38 @@ export const updateContentDocument = async (
     }
     throw new Error("Failed to update document");
   }
+};
+
+export const fetchTranslationContext = async (documentId: string) => {
+  const response = await fetch(
+    `${server_url}/documents/translation-context/${documentId}`,
+    {
+      headers: getHeaders(),
+    }
+  );
+  if (response.ok) {
+    const data = await response.json();
+    return data.data;
+  }
+  throw new Error("Failed to fetch translation context");
+};
+
+export const deleteTranslationContextFile = async (fileId: string) => {
+  const response = await fetch(
+    `${server_url}/documents/translation-context/${fileId}`,
+    {
+      headers: getHeaders(),
+      method: "DELETE",
+    }
+  );
+  if (response.ok) {
+    const data = await response.json();
+    return data;
+  }
+  const errorData = await response.json().catch(() => ({}));
+  throw new Error(
+    errorData.error ||
+      errorData.message ||
+      "Failed to delete translation context file"
+  );
 };
