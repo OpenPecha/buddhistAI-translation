@@ -4,9 +4,10 @@ import {
   BookOpen,
   FileText,
   MessageSquare,
-  Upload
+  Upload,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useState } from "react";
 import TableOfContent from "../TableOfContent";
 import Resources from "../EditorSideMenu/Resources";
 import { useEditorSidebarStore } from "@/stores/editorSidebarStore";
@@ -24,12 +25,16 @@ interface DocumentSidebarProps {
   isTranslationEditor?: boolean;
 }
 
-const DocumentSidebar: React.FC<DocumentSidebarProps> = ({ documentId, isTranslationEditor = false }) => {
+const DocumentSidebar: React.FC<DocumentSidebarProps> = ({
+  documentId,
+  isTranslationEditor = false,
+}) => {
   const { tabs: editorTabs, setTabs, toggleTab } = useEditorSidebarStore();
   const activeTab = editorTabs[documentId];
   const { t } = useTranslation();
   const { getSidebarView, setSidebarView } = useCommentStore();
   const sidebarView = getSidebarView(documentId);
+  const [isHovered, setIsHovered] = useState(false);
 
   const tabs = [
     {
@@ -75,21 +80,35 @@ const DocumentSidebar: React.FC<DocumentSidebarProps> = ({ documentId, isTransla
   ];
 
   return (
-    <div className={`flex h-full ${isTranslationEditor ? "flex-row-reverse" : ""} border-r border-l`}>
+    <div
+      className={`flex h-full ${
+        isTranslationEditor ? "flex-row-reverse" : ""
+      } border-r border-l overflow-hidden`}
+    >
       {/* Vertical Icon Tabs - Only show when sidebar is closed */}
       {!activeTab && (
-        <div className={`w-12 ${isTranslationEditor ? "border-l" : "border-r"} bg-gray-50/50 dark:bg-gray-900/20 flex flex-col`}>
+        <div
+          role="toolbar"
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          className={`group w-12 hover:w-40 transition-all duration-300 ${
+            isTranslationEditor ? "border-l" : "border-r"
+          } bg-gray-50/50 dark:bg-gray-900/20 flex flex-col`}
+        >
           <SidebarTabs
             tabs={tabs}
             activeTab={activeTab}
             onTabClick={(tabId) => toggleTab(documentId, tabId)}
+            isHovered={isHovered}
           />
         </div>
       )}
 
       {/* Content Panel */}
       {activeTab && (
-        <div className={`w-80 bg-white dark:bg-gray-900 flex flex-col transition-all duration-300`}>
+        <div
+          className={`w-80 bg-white dark:bg-gray-900 flex flex-col transition-all duration-300`}
+        >
           <SidebarHeader
             tabs={tabs}
             activeTab={activeTab}
@@ -114,8 +133,13 @@ const DocumentSidebar: React.FC<DocumentSidebarProps> = ({ documentId, isTransla
               <MetadataContent documentId={documentId} />
             )}
 
-            {activeTab === "comments" && <CommentSidebar documentId={documentId} isOpen={activeTab === 'comments'} />}
-            
+            {activeTab === "comments" && (
+              <CommentSidebar
+                documentId={documentId}
+                isOpen={activeTab === "comments"}
+              />
+            )}
+
             {activeTab === "resources" && (
               <ScrollArea className="h-full">
                 <div className="h-full">
@@ -131,8 +155,8 @@ const DocumentSidebar: React.FC<DocumentSidebarProps> = ({ documentId, isTransla
             )}
 
             {activeTab === "upload" && isTranslationEditor && (
-              <UploadContent 
-                documentId={documentId} 
+              <UploadContent
+                documentId={documentId}
                 onClose={() => setTabs(documentId, null)}
               />
             )}

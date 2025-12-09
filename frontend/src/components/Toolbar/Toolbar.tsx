@@ -16,6 +16,9 @@ import Quill from "quill";
 import { useAuth } from "@/auth/use-auth-hook";
 import isMobile from "@/lib/isMobile";
 import { useCurrentDoc } from "@/hooks/useCurrentDoc";
+import { tokenize } from "@/api/tokenizer/botok";
+import { Loader2 } from "lucide-react";
+import { MdFormatAlignJustify } from "react-icons/md";
 const isEnabled = !EDITOR_READ_ONLY;
 
 interface ToolbarProps {
@@ -44,6 +47,7 @@ const Toolbar = ({
 
   const [showVersionDiff, setShowVersionDiff] = useState(false);
   const [currentHeader, setCurrentHeader] = useState<string | number>("");
+  const [isFormatting, setIsFormatting] = useState(false);
   const quill = getQuill(documentId);
 
   useEffect(() => {
@@ -176,6 +180,22 @@ const Toolbar = ({
     // Get the line number element in the other editor
   };
 
+  const handleFormatChange = async () => {
+    setIsFormatting(true);
+    try {
+      const data = await tokenize({ text: quill?.getText(), type: "sentence" });
+      if (data?.length && data.length > 0) {
+        const newText = data.join("\n");
+        quill?.setText(newText);
+        setIsFormatting(false);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsFormatting(false);
+    }
+  };
+
   const showToolbar = activeEditor === documentId;
   const isEnabledStyle = { display: isEnabled ? "flex" : "none" };
   return (
@@ -243,15 +263,7 @@ const Toolbar = ({
           <option value="#90ee90">Light Green</option>
           <option value="#add8e6">Light Blue</option>
         </select>
-        <span className="ql-formats" title="Section" style={isEnabledStyle}>
-          {/* <ToolbarButton
-            onClick={handleSectionCreation}
-            title="Section"
-            className=""
-          >
-            <FaObjectGroup />
-          </ToolbarButton> */}
-
+        <span className="ql-formats" style={isEnabledStyle}>
           <ToolbarButton
             onClick={() => addComment()}
             title="Suggestion"
@@ -270,7 +282,20 @@ const Toolbar = ({
             <button className="ql-footnote" title="footnote" />
           </span>
         </span>
-
+        <span className="ql-formats" style={isEnabledStyle}>
+          <button
+            className="ql-section"
+            title="botok formatter"
+            onClick={handleFormatChange}
+            disabled={isFormatting}
+          >
+            {isFormatting ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <MdFormatAlignJustify className="w-4 h-4" />
+            )}
+          </button>
+        </span>
         {openHistory && (
           <div
             ref={versionRef}

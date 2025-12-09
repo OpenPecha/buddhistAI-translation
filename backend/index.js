@@ -22,6 +22,7 @@ const resourcesRoutes = require("./routes/resources");
 const modelsRoutes = require("./routes/models");
 const tempAnnotationRoutes = require("./routes/temp_annotation");
 const webuddhistRoutes = require("./routes/webuddhist");
+const tokenizerRoutes = require("./routes/tokenizer");
 
 const options = {
   openapi: "3.0.0",
@@ -125,6 +126,7 @@ app.use("/workspace", workspaceRoutes);
 app.use("/resources", resourcesRoutes);
 app.use("/models", modelsRoutes);
 app.use("/", emailRoutes);
+app.use("/tokenize", tokenizerRoutes);
 
 // temporary routes
 app.use("/temp_annotation", tempAnnotationRoutes);
