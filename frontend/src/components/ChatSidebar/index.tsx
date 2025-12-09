@@ -8,7 +8,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import SettingsModal from "./components/sidebar/SettingsModal";
+import SettingsModal, {
+  TargetLanguageSelector,
+} from "./components/sidebar/SettingsModal";
 import {
   TranslationProvider,
   useTranslation,
@@ -128,8 +130,12 @@ const ChatSidebarContent: React.FC = () => {
   return (
     <div className="h-full w-full flex flex-col bg-white dark:bg-gray-900">
       {/* Header */}
-      <div className="flex items-center justify-end p-1 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-
+      <div className="flex items-center justify-between p-1 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+        <TargetLanguageSelector
+          config={config}
+          onConfigChange={handleConfigChange}
+          showLabel={false}
+        />
         <div className="">
           {messageCount > 0 && (
             <Button
@@ -150,7 +156,6 @@ const ChatSidebarContent: React.FC = () => {
           />
         </div>
       </div>
-
       {/* Selected Text Display */}
       <TooltipProvider>
         {selectedText && (
@@ -197,7 +202,6 @@ const ChatSidebarContent: React.FC = () => {
           </div>
         )}
       </TooltipProvider>
-
       {/* Chat Area */}
       <div className="flex-1 flex flex-col min-h-0">
         {showPanel ? (

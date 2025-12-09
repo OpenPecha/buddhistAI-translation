@@ -48,15 +48,18 @@ interface TranslationConfig {
   extractGlossary: boolean;
 }
 
-interface SettingsModalProps {
+interface TargetLanguageProps {
   config: TranslationConfig;
-  isOpen: boolean;
-  onOpenChange: (open: boolean) => void;
   onConfigChange: <K extends keyof TranslationConfig>(
     key: K,
     value: TranslationConfig[K]
   ) => void;
+  showLabel?: boolean;
 }
+type SettingsModalProps = TargetLanguageProps & {
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+};
 
 const SettingsModal: React.FC<SettingsModalProps> = ({
   config,
@@ -93,31 +96,6 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
           {/* Core Settings */}
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              {/* Target Language */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium flex items-center gap-2">
-                  <Languages className="w-3 h-3" />
-                  {t("translation.targetLanguage")}
-                </Label>
-                <Select
-                  value={config.targetLanguage}
-                  onValueChange={(value: TargetLanguage) =>
-                    onConfigChange("targetLanguage", value)
-                  }
-                >
-                  <SelectTrigger className="h-9">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TARGET_LANGUAGES.map((lang) => (
-                      <SelectItem key={lang} value={lang}>
-                        {lang.charAt(0).toUpperCase() + lang.slice(1)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
               {/* Text Type */}
               <div className="space-y-2">
                 <Label className="text-sm font-medium flex items-center gap-2">
@@ -170,4 +148,38 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   );
 };
 
+export const TargetLanguageSelector: React.FC<TargetLanguageProps> = ({
+  config,
+  onConfigChange,
+  showLabel = true,
+}: TargetLanguageProps) => {
+  const { t } = useTranslation();
+  return (
+    <div className="space-y-2">
+      {showLabel && (
+        <Label className="text-sm font-medium flex items-center gap-2">
+          <Languages className="w-3 h-3" />
+          {t("translation.targetLanguage")}
+        </Label>
+      )}
+      <Select
+        value={config.targetLanguage}
+        onValueChange={(value: TargetLanguage) =>
+          onConfigChange("targetLanguage", value)
+        }
+      >
+        <SelectTrigger className="h-9">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {TARGET_LANGUAGES.map((lang) => (
+            <SelectItem key={lang} value={lang}>
+              {lang.charAt(0).toUpperCase() + lang.slice(1)}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+};
 export default SettingsModal;

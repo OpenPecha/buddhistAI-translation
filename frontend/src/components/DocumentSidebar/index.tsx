@@ -64,10 +64,10 @@ const DocumentSidebar: React.FC<DocumentSidebarProps> = ({
     ...(isTranslationEditor
       ? [
           {
-            id: "chat",
+            id: "translation",
             icon: MessageSquare,
             label: t(`translation.aiTranslation`),
-            shortLabel: "Chat",
+            shortLabel: "Translator",
           },
           {
             id: "upload",
@@ -148,7 +148,7 @@ const DocumentSidebar: React.FC<DocumentSidebarProps> = ({
               </ScrollArea>
             )}
 
-            {activeTab === "chat" && isTranslationEditor && (
+            {activeTab === "translation" && isTranslationEditor && (
               <div className="h-full">
                 <ChatSidebar documentId={documentId} />
               </div>
