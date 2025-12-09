@@ -15,6 +15,7 @@ import VersionDiff from "./VersionDiff";
 import Quill from "quill";
 import { useAuth } from "@/auth/use-auth-hook";
 import isMobile from "@/lib/isMobile";
+import { useCurrentDoc } from "@/hooks/useCurrentDoc";
 const isEnabled = !EDITOR_READ_ONLY;
 
 interface ToolbarProps {
@@ -36,12 +37,11 @@ const Toolbar = ({
   isEditable,
   documentName,
 }: ToolbarProps) => {
-  const { isAuthenticated } = useAuth();
   const versionRef = useRef<HTMLDivElement>(null);
   const [openHistory, setOpenHistory] = useState(false);
   const { getQuill, activeEditor, quillEditors, getElementWithLinenumber } =
     useEditor();
-    
+
   const [showVersionDiff, setShowVersionDiff] = useState(false);
   const [currentHeader, setCurrentHeader] = useState<string | number>("");
   const quill = getQuill(documentId);
@@ -178,19 +178,18 @@ const Toolbar = ({
 
   const showToolbar = activeEditor === documentId;
   const isEnabledStyle = { display: isEnabled ? "flex" : "none" };
-
   return (
     <div
       id={toolbarId}
       style={{
-        display: showToolbar && isAuthenticated && isEditable ? "flex" : "none", // Add isEditable check
-        opacity: showToolbar && isAuthenticated && isEditable ? 1 : 0, // Add isEditable check
+        display: showToolbar ? "flex" : "none", // Add isEditable check
+        opacity: showToolbar ? 1 : 0, // Add isEditable check
         width: !isMobile ? "94vw" : undefined,
         position: "relative",
         margin: "5px auto",
         borderRadius: !isMobile ? "75px" : undefined,
       }}
-      className="bg-neutral-100 dark:bg-neutral-800/40  flex-wrap"
+      className={`bg-neutral-100 dark:bg-neutral-800/40  flex-wrap`}
     >
       <div className="flex items-center flex-1 h-full self-center">
         <span className="ql-formats" style={isEnabledStyle}>

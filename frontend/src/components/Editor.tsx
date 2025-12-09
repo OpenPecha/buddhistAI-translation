@@ -78,7 +78,6 @@ const Editor = ({
   const {
     registerQuill: registerQuill2,
     unregisterQuill: unregisterQuill2,
-    setHoveredLineNumber,
     getLineNumber,
   } = useEditor();
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -87,8 +86,7 @@ const Editor = ({
   const hasContentLoadedRef = useRef<boolean>(false);
   const { t } = useTranslation();
   const { currentUser } = useAuth();
-  const { setSidebarView, setActiveThreadId } =
-    useCommentStore();
+  const { setSidebarView, setActiveThreadId } = useCommentStore();
   const selection = useSelectionStore((state) => state.selections[documentId!]);
   const { setTabs } = useEditorSidebarStore();
   useEffect(() => {
@@ -121,7 +119,7 @@ const Editor = ({
       const text = quillRef.current.getText(range.index, range.length);
       onManualSelect(documentId!, {
         startLine: lineNumber,
-        range: {  
+        range: {
           index: range.index,
           length: range.length,
         },
@@ -141,7 +139,7 @@ const Editor = ({
       const lineNumber = getLineNumber(quillRef.current);
       // background_cleaner();
       if (lineNumber === null) return;
-    
+
       onLineFocus(lineNumber, documentId!);
 
       // Select the 3rd <a> tag within its parent and style it
@@ -206,7 +204,7 @@ const Editor = ({
         // Extra safety: Don't save if content is empty or nearly empty
         const contentOps = content?.ops as any[];
         if (!contentOps || contentOps.length === 0) return;
-        
+
         updateDocumentMutation.mutate(content);
       }, 3000); // 3 second debounce
     },
@@ -289,7 +287,7 @@ const Editor = ({
           unit: "character",
         },
       },
-      readOnly: !isTranslationEditor,
+      readOnly: !isTranslationEditor && !isEditable,
       placeholder: t("editor.startTyping") as string,
       // className is not a valid Quill option, apply these styles to the container instead
     });
@@ -344,15 +342,12 @@ const Editor = ({
     );
     // Fetch comments when the editor loads
     quill.on("text-change", (_delta, _oldDelta, source) => {
+      if (!isEditable) return;
 
       if (source === "user" && hasContentLoadedRef.current) {
-
-
         const currentContent = quill.getLength() > 1 ? quill.getContents() : "";
         // Only save if there's actual content (prevent saving empty editor)
-        if (currentContent?.length || 0 > 1) {
-          debouncedSave(currentContent as any);
-        }
+        debouncedSave(currentContent as any);
       }
     });
 
@@ -475,29 +470,29 @@ const Editor = ({
   //       const lineNumber = calculateLineNumber(target);
   //       if (lineNumber !== null) {
   //         setHoveredLineNumber(lineNumber);
-          
+
   //         // Apply hover class to all editors' text elements with the same line number
   //         const allEditorContainers = document.querySelectorAll(".editor-container");
   //         allEditorContainers.forEach((container) => {
   //           const lineNumberElement = container.querySelector(
   //             `.line-number[id$="-line-${lineNumber}"]`
   //           ) as HTMLElement;
-            
+
   //           if (lineNumberElement) {
   //             const lineTop = parseFloat(lineNumberElement.style.top);
   //             const editorElement = container.querySelector(".ql-editor");
-              
+
   //             if (editorElement) {
   //               const contentElements = editorElement.querySelectorAll(
   //                 "p, h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12, h13, h14, h15, h16, h17, h18, h19, h20"
   //               );
-                
+
   //               contentElements.forEach((element) => {
   //                 const rect = element.getBoundingClientRect();
   //                 const editorRect = editorElement.getBoundingClientRect();
   //                 const editorScrollTop = editorElement.scrollTop;
   //                 const elementTop = rect.top - editorRect.top + editorScrollTop;
-                  
+
   //                 // Check if this element is at the same line number position
   //                 if (Math.abs(elementTop - lineTop) < 5) {
   //                   element.classList.add("editor-line-synced-hover");
@@ -512,7 +507,7 @@ const Editor = ({
 
   //   const handleMouseLeave = () => {
   //     setHoveredLineNumber(null);
-      
+
   //     // Remove hover class from all editors' text elements
   //     const allEditorContainers = document.querySelectorAll(".editor-container");
   //     allEditorContainers.forEach((container) => {
@@ -560,7 +555,7 @@ const Editor = ({
   // }, [documentId, setHoveredLineNumber]);
 
   function addComment() {
-    if(!selection) return;
+    if (!selection) return;
     setTabs(documentId, "comments");
     setSidebarView(documentId, "new");
     setActiveThreadId(documentId, null);
@@ -582,8 +577,15 @@ const Editor = ({
         />,
         document.getElementById("toolbar-container")!
       )}
-      <div className={`relative w-full flex flex-1 h-full overflow-hidden ${isTranslationEditor ? "flex-row-reverse" : ""}`}>
-        <DocumentSidebar documentId={documentId} isTranslationEditor={isTranslationEditor} />
+      <div
+        className={`relative w-full flex flex-1 h-full overflow-hidden ${
+          isTranslationEditor ? "flex-row-reverse" : ""
+        }`}
+      >
+        <DocumentSidebar
+          documentId={documentId}
+          isTranslationEditor={isTranslationEditor}
+        />
 
         <div className="editor-container w-full h-full flex flex-1  relative max-w-6xl mx-auto  ">
           {showLineNumbers && (

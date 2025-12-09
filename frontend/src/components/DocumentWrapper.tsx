@@ -14,7 +14,11 @@ import isMobile from "@/lib/isMobile";
 import DocumentEditor from "./DocumentEditor";
 import SideMenu from "./EditorSideMenu/Sidemenu";
 import Navbar from "./Navbar";
-import { useSelectionStore, Selection, EditorId } from "@/stores/selectionStore";
+import {
+  useSelectionStore,
+  Selection,
+  EditorId,
+} from "@/stores/selectionStore";
 import { useEditor } from "@/contexts/EditorContext";
 import Quill from "quill";
 
@@ -30,7 +34,6 @@ function DocumentsWrapperContent() {
   const [splitPosition, setSplitPosition] = useState<number>(50);
   const { setManualSelection, setLineFocus } = useSelectionStore();
   const { getQuill, getTextByLineNumber } = useEditor();
-
   const getFullLineSelection = (
     quill: Quill | null,
     lineNumber: number
@@ -56,10 +59,7 @@ function DocumentsWrapperContent() {
     };
   };
 
-  const handleManualSelect = (
-    editorId: EditorId,
-    selection: Selection
-  ) => {
+  const handleManualSelect = (editorId: EditorId, selection: Selection) => {
     setManualSelection(editorId, selection);
   };
 
@@ -196,18 +196,18 @@ function DocumentsWrapper() {
 
 function TranslationEditor({
   selectedTranslationId,
-  isEditable,
   sourceDocId: _sourceDocId,
   onManualSelect,
   onLineFocus,
 }: {
   readonly selectedTranslationId: string;
-  readonly isEditable: boolean;
   readonly sourceDocId: string;
   onManualSelect: (editorType: EditorType, selection: Selection) => void;
   onLineFocus: (lineNumber: number, editorType: EditorType) => void;
 }) {
-  const { currentDoc: translationDoc } = useCurrentDoc(selectedTranslationId);
+  const { currentDoc: translationDoc, isEditable } = useCurrentDoc(
+    selectedTranslationId
+  );
   const isLiveEnabled = useLiveBlockActive(translationDoc);
 
   return (
@@ -223,7 +223,7 @@ function TranslationEditor({
               isTranslationEditor={true}
               liveEnabled={isLiveEnabled}
               docId={selectedTranslationId}
-              isEditable={isEditable}
+              isEditable={!!isEditable}
               currentDoc={translationDoc}
               onManualSelect={onManualSelect}
               onLineFocus={onLineFocus}

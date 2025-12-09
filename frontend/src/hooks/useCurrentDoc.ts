@@ -60,6 +60,23 @@ interface UseCurrentDocReturn {
   loading: boolean;
   error: string | null;
   isEditable: boolean | undefined;
+  isPecha: boolean;
+}
+
+interface WritePermissionHandlerProps {
+  isPublic: boolean;
+  isPecha: boolean;
+  hasWritePermission: boolean;
+}
+function writePermissionHandler({
+  isPublic,
+  isPecha,
+  hasWritePermission,
+}: WritePermissionHandlerProps) {
+  if (isPecha) {
+    return false;
+  }
+  return isPublic || hasWritePermission;
 }
 
 export const useCurrentDoc = (
@@ -68,6 +85,7 @@ export const useCurrentDoc = (
 ): UseCurrentDocReturn => {
   const { currentUser } = useAuth();
   const [isEditable, setIsEditable] = useState<boolean | undefined>(undefined);
+  const [isPecha, setIsPecha] = useState<boolean>(false);
   const { data, isLoading, error } = useQuery({
     queryKey: [`document-${docId}`],
     queryFn: async () => {
@@ -78,23 +96,32 @@ export const useCurrentDoc = (
 
       // For public documents, always set as not editable
       const isPublicDocument = doc?.rootProject?.isPublic === true;
-      if (isPublicDocument || isPublic) {
-        setIsEditable(isPublicDocument);
-        return doc;
-      }
+      let hasWrite = false;
       if (doc?.rootProject?.permissions && !EDITOR_READ_ONLY) {
         doc?.rootProject.permissions.map((permission: Permission) => {
           if (permission?.userId === currentUser?.id && permission?.canWrite) {
-            setIsEditable(true);
+            hasWrite = true;
           }
         });
       }
+
+      const hasPermission = writePermissionHandler({
+        isPecha: doc?.metadata?.textId,
+        isPublic: isPublicDocument || isPublic,
+        hasWritePermission: hasWrite,
+      });
+      if (hasPermission) {
+        setIsEditable(true);
+      } else {
+        setIsEditable(false);
+      }
+
       return doc;
     },
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,
     enabled: !!docId,
-    staleTime: 5*60*1000,
+    staleTime: 5 * 60 * 1000,
   });
   return {
     currentDoc: data,
@@ -105,6 +132,7 @@ export const useCurrentDoc = (
         : "Failed to load document"
       : null,
     isEditable,
+    isPecha,
   };
 };
 
@@ -121,7 +149,7 @@ export const useCurrentDocTranslations = (docId: string | undefined) => {
       return await fetchDocumentTranslations(docId);
     },
     enabled: !!docId,
-    staleTime: 5*60*1000, // Always fetch fresh data
+    staleTime: 5 * 60 * 1000, // Always fetch fresh data
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,
   });
