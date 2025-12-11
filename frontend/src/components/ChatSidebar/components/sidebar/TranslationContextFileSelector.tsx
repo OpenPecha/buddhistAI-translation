@@ -166,7 +166,6 @@ export const TranslationContextFileSelector: React.FC<TargetLanguageProps> = ({
       const response = await uploadMultipleFilesToS3(filesToUpload, {
         translationId: translationId || undefined,
       });
-      console.log(response);
 
       // Invalidate and refetch translation context after successful upload
       if (translationId) {

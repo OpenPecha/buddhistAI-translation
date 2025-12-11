@@ -79,14 +79,28 @@
 }
 
 .ql-editor p:not(.focused_p) {
-	color: var(--color-neutral-500);
+	color: var(--color-neutral-400);
 	/* background-color: var(--color-neutral-50); */
 }
 
 .ql-editor p {
 cursor:pointer;
+
 z-index: 9999;
 }
+.ql-editor p:hover {
+	cursor: pointer;
+	z-index: 9999;
+	color:#000
+}
+
+.ql-editor p.selected_text_segment {
+	background-color: var(--color-neutral-100);
+	cursor: pointer;
+	z-index: 9999;
+	color:#000
+} 
+
 
 .hide-line-numbers .ql-editor {
 	padding-left: 5px !important;

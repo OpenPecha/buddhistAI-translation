@@ -128,32 +128,11 @@ const Editor = ({
     },
     onLineFocus: () => {
       if (!quillRef.current) return;
-      // function background_cleaner(){
-      //   const allParagraphs = document.querySelectorAll(".ql-editor p");
-      //   allParagraphs.forEach((p) => {
-      //     p.classList.remove('focused_p');
-      //   });
-      // }
 
-      // Temporarily set selection to get line number, then restore
       const lineNumber = getLineNumber(quillRef.current);
-      // background_cleaner();
       if (lineNumber === null) return;
 
       onLineFocus(lineNumber, documentId!);
-
-      // Select the 3rd <a> tag within its parent and style it
-      // const allParagraphs = document.querySelectorAll(".ql-editor p");
-      // for(let i = 0; i < allParagraphs.length && i< lineNumber; i++) {
-      //   if(allParagraphs[i].textContent?.trim() === "") {
-      //     lineNumber = lineNumber + 1;
-      //   }
-      // }
-      // const selector = `.ql-editor p:nth-child(${lineNumber})`;
-      // const elements = document.querySelectorAll(selector);
-      // elements.forEach((el) => {
-      // el.classList.add('focused_p');
-      // });
     },
   });
 
@@ -198,13 +177,11 @@ const Editor = ({
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current);
       }
-
       saveTimeoutRef.current = setTimeout(() => {
         if (!documentId || !hasContentLoadedRef.current) return;
         // Extra safety: Don't save if content is empty or nearly empty
         const contentOps = content?.ops as any[];
         if (!contentOps || contentOps.length === 0) return;
-
         updateDocumentMutation.mutate(content);
       }, 3000); // 3 second debounce
     },
@@ -340,12 +317,92 @@ const Editor = ({
       },
       signal
     );
+
+    function handleClick(e: MouseEvent) {
+      if (!quillRef.current || !documentId) return;
+
+      const target = e.target as HTMLElement;
+      // Find the closest p element (in case clicking on child elements)
+      const clickedP = target.closest("p");
+      if (clickedP) {
+        // Remove selected_text class from all p elements
+        const allParagraphs = quill.root.querySelectorAll("p");
+        allParagraphs.forEach((p) => {
+          p.classList.remove("selected_text_segment");
+        });
+        // Add selected_text class to the clicked p element
+        clickedP.classList.add("selected_text_segment");
+
+        // Get current selection
+        const currentRange = quillRef.current.getSelection();
+
+        // If selection length is 0, use the paragraph's content
+        if (!currentRange || currentRange.length === 0) {
+          // Get the blot for the clicked paragraph
+          const blot = Quill.find(clickedP);
+          if (!blot || blot === quillRef.current) return;
+
+          // Type guard: check if it's a Blot (has length method)
+          if (typeof (blot as any).length !== "function") return;
+
+          // Get the index and length of the paragraph
+          const paragraphIndex = quillRef.current.getIndex(blot as any);
+          const paragraphLength = (blot as any).length();
+
+          // Get the text content of the paragraph
+          const paragraphText = quillRef.current.getText(
+            paragraphIndex,
+            paragraphLength
+          );
+
+          // Set selection to the paragraph
+          quillRef.current.setSelection(
+            paragraphIndex,
+            paragraphLength,
+            "user"
+          );
+
+          // Get line number for the paragraph
+          const lineNumber = getLineNumber(quillRef.current);
+
+          onManualSelect(documentId, {
+            startLine: lineNumber || 1,
+            range: {
+              index: paragraphIndex,
+              length: paragraphLength,
+            },
+            text: paragraphText,
+          });
+        } else {
+          // Use the existing selection
+          const lineNumber = getLineNumber(quillRef.current);
+          const text = quillRef.current.getText(
+            currentRange.index,
+            currentRange.length
+          );
+
+          onManualSelect(documentId, {
+            startLine: lineNumber || 1,
+            range: {
+              index: currentRange.index,
+              length: currentRange.length,
+            },
+            text,
+          });
+        }
+      }
+    }
+
+    // Handle click on p elements to add/remove selected_text class
+    quill?.root.addEventListener("click", handleClick as EventListener, {
+      signal: signal.signal,
+    });
     // Fetch comments when the editor loads
     quill.on("text-change", (_delta, _oldDelta, source) => {
       if (!isEditable) return;
-
       if (source === "user" && hasContentLoadedRef.current) {
         const currentContent = quill.getLength() > 1 ? quill.getContents() : "";
+        console.log(currentContent);
         // Only save if there's actual content (prevent saving empty editor)
         debouncedSave(currentContent as any);
       }
@@ -370,6 +427,8 @@ const Editor = ({
     return () => {
       // Only save on unmount if content has been loaded and editor has actual content
       // This prevents saving empty content during hot reload
+      if (quill.root)
+        quill.root.removeEventListener("click", handleClick as EventListener);
       if (hasContentLoadedRef.current && quill.getLength() > 1) {
         const currentContent = quill.getContents();
         updateDocumentMutation.mutate(currentContent as any);
