@@ -79,18 +79,28 @@ const Editor = ({
     registerQuill: registerQuill2,
     unregisterQuill: unregisterQuill2,
     getLineNumber,
+    quillEditors,
+    getElementWithLinenumber,
   } = useEditor();
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const quillRef = useRef<Quill | null>(null);
   const isInitializedRef = useRef<boolean>(false);
   const hasContentLoadedRef = useRef<boolean>(false);
+  const quillEditorsRef = useRef(quillEditors);
+  const getElementWithLinenumberRef = useRef(getElementWithLinenumber);
+
+  // Keep refs up to date
+  useEffect(() => {
+    quillEditorsRef.current = quillEditors;
+    getElementWithLinenumberRef.current = getElementWithLinenumber;
+  }, [quillEditors, getElementWithLinenumber]);
   const { t } = useTranslation();
   const { currentUser } = useAuth();
   const { setSidebarView, setActiveThreadId } = useCommentStore();
   const selection = useSelectionStore((state) => state.selections[documentId!]);
   const { setTabs } = useEditorSidebarStore();
   useEffect(() => {
-    if (selection) {
+    if (selection && quillRef.current) {
       const bounds = quillRef.current?.getBounds(
         selection.range.index,
         selection.range.length
@@ -102,8 +112,32 @@ const Editor = ({
         top: bounds?.top || 0,
         lineNumber: selection.startLine,
       });
+
+      // Sync selected_text_segment class to this editor at the same line number
+      if (selection.startLine) {
+        // Remove selected_text_segment class from all paragraphs in this editor
+        const allParagraphs = quillRef.current.root.querySelectorAll("p");
+        allParagraphs.forEach((p) => {
+          p.classList.remove("selected_text_segment");
+        });
+        // Find and add class to the element at the same line number
+        const elementAtLine = getElementWithLinenumberRef.current(
+          quillRef.current,
+          selection.startLine
+        );
+        if (elementAtLine && elementAtLine.tagName.toLowerCase() === "p") {
+          elementAtLine.classList.add("selected_text_segment");
+        }
+      }
     } else {
       setCurrentRange(null);
+      // Clear selected_text_segment class when selection is cleared
+      if (quillRef.current) {
+        const allParagraphs = quillRef.current.root.querySelectorAll("p");
+        allParagraphs.forEach((p) => {
+          p.classList.remove("selected_text_segment");
+        });
+      }
     }
   }, [selection]);
 
@@ -325,7 +359,7 @@ const Editor = ({
       // Find the closest p element (in case clicking on child elements)
       const clickedP = target.closest("p");
       if (clickedP) {
-        // Remove selected_text class from all p elements
+        // Remove selected_text class from all p elements in this editor
         const allParagraphs = quill.root.querySelectorAll("p");
         allParagraphs.forEach((p) => {
           p.classList.remove("selected_text_segment");
@@ -365,6 +399,30 @@ const Editor = ({
           // Get line number for the paragraph
           const lineNumber = getLineNumber(quillRef.current);
 
+          // Sync selected_text_segment class to other editors at the same line number
+          if (lineNumber) {
+            quillEditorsRef.current.forEach((otherQuill, otherEditorId) => {
+              if (otherEditorId !== documentId && otherQuill) {
+                // Remove selected_text_segment class from all paragraphs in other editor
+                const otherParagraphs = otherQuill.root.querySelectorAll("p");
+                otherParagraphs.forEach((p) => {
+                  p.classList.remove("selected_text_segment");
+                });
+                // Find and add class to the element at the same line number
+                const elementAtLine = getElementWithLinenumberRef.current(
+                  otherQuill,
+                  lineNumber
+                );
+                if (
+                  elementAtLine &&
+                  elementAtLine.tagName.toLowerCase() === "p"
+                ) {
+                  elementAtLine.classList.add("selected_text_segment");
+                }
+              }
+            });
+          }
+
           onManualSelect(documentId, {
             startLine: lineNumber || 1,
             range: {
@@ -380,6 +438,30 @@ const Editor = ({
             currentRange.index,
             currentRange.length
           );
+
+          // Sync selected_text_segment class to other editors at the same line number
+          if (lineNumber) {
+            quillEditorsRef.current.forEach((otherQuill, otherEditorId) => {
+              if (otherEditorId !== documentId && otherQuill) {
+                // Remove selected_text_segment class from all paragraphs in other editor
+                const otherParagraphs = otherQuill.root.querySelectorAll("p");
+                otherParagraphs.forEach((p) => {
+                  p.classList.remove("selected_text_segment");
+                });
+                // Find and add class to the element at the same line number
+                const elementAtLine = getElementWithLinenumberRef.current(
+                  otherQuill,
+                  lineNumber
+                );
+                if (
+                  elementAtLine &&
+                  elementAtLine.tagName.toLowerCase() === "p"
+                ) {
+                  elementAtLine.classList.add("selected_text_segment");
+                }
+              }
+            });
+          }
 
           onManualSelect(documentId, {
             startLine: lineNumber || 1,
