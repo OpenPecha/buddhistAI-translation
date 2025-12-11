@@ -256,7 +256,9 @@ export const useTranslationOperations = ({
         setIsTranslating(false);
         return;
       }
-
+      const context = config.contextFiles
+        .map((file) => file.contextFileId)
+        .join("\n");
       const translationParams = {
         texts: textLines,
         target_language: config.targetLanguage,
@@ -264,6 +266,7 @@ export const useTranslationOperations = ({
         model_name: config.modelName ?? "claude-3-5-haiku-20241022",
         batch_size: config.batchSize,
         user_rules: config.userRules,
+        context: context,
       };
 
       await performStreamingTranslation(

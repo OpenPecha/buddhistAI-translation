@@ -53,7 +53,21 @@ router.post("/", authenticate, async (req, res) => {
       model_name = "claude-3-5-haiku-20241022",
       batch_size = 2,
       user_rules = "do translation normally",
+      context = "",
     } = req.body;
+    const files = context.split("\n");
+
+    const contextFiles = await prisma.translationContextFile.findMany({
+      where: {
+        id: { in: files },
+      },
+    });
+    const contextTextPromises = contextFiles.map(async (file) => {
+      const url = file.storageUrl;
+      const response = await fetch(url).then((res) => res.text());
+      return response;
+    });
+    const contextText = await Promise.all(contextTextPromises);
 
     // Validate required fields
     if (!texts || !Array.isArray(texts) || texts.length === 0) {
@@ -74,6 +88,7 @@ router.post("/", authenticate, async (req, res) => {
       model_name,
       batch_size,
       user_rules,
+      context: contextText.join("\n"),
     };
 
     // Set response headers for streaming
