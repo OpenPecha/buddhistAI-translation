@@ -53,3 +53,27 @@ export const searchSegmentInResources = async (
     throw error;
   }
 };
+
+export const getRelatedSegments = async (
+  documentId: string,
+  span_start: number,
+  span_end: number
+): Promise<SegmentSearchResponse> => {
+  try {
+    const response = await fetch(`${server_url}/resources/related`, {
+      method: "POST",
+      headers: getHeaders(),
+      body: JSON.stringify({ documentId, span_start, span_end }),
+    });
+    if (response.ok) {
+      const data: any = await response.json();
+      return data;
+    } else {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Failed to get related segments");
+    }
+  } catch (error) {
+    console.error("Error getting related segments:", error);
+    throw error;
+  }
+};

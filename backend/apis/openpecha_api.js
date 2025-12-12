@@ -35,8 +35,12 @@ async function getText(text_id) {
   return response.json();
 }
 
-async function getTextInstances(text_id) {
-  const response = await fetch(`${API_ENDPOINT}/texts/${text_id}/instances`, {
+async function getTextInstances(text_id, instance_type) {
+  const url = new URL(`${API_ENDPOINT}/texts/${text_id}/instances`);
+  if (instance_type) {
+    url.searchParams.append("instance_type", instance_type);
+  }
+  const response = await fetch(url.toString(), {
     headers: {
       accept: "application/json",
       "Content-Type": "application/json",
@@ -121,7 +125,9 @@ async function getSegmentRelated(
   spanEnd,
   transform = false
 ) {
-  const url = new URL(`${API_ENDPOINT}/instances/${instanceId}/segment-related`);
+  const url = new URL(
+    `${API_ENDPOINT}/instances/${instanceId}/segment-related`
+  );
   url.searchParams.append("span_start", spanStart);
   url.searchParams.append("span_end", spanEnd);
   url.searchParams.append("transform", transform);
@@ -136,7 +142,6 @@ async function getSegmentRelated(
       `Failed to fetch segment related from openpecha: ${response.statusText}`
     );
   }
-
 
   const data = await response.json();
   return data;
@@ -165,22 +170,27 @@ async function getSegmentsContent(instanceId, seg_ids) {
   return data;
 }
 
-async function searchTextByTitle(title) {
-  const url = new URL(`${API_ENDPOINT}/texts/title-search`);
-  url.searchParams.append("title", title);
-  const response = await fetch(url.toString(), {
-    headers: {
-      accept: "application/json",
-    },
-  });
+async function getRelatedInstances(instanceId) {
+  const response = await fetch(
+    `${API_ENDPOINT}/instances/${instanceId}/related`,
+    {
+      headers: {
+        accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
   if (!response.ok) {
     throw new Error(
-      `Failed to search text by title from openpecha: ${response.statusText}`
+      `Failed to fetch related instances from openpecha: ${response.statusText}`
     );
   }
 
-  return response.json();
+  const data = await response.json();
+  return data;
 }
+
 module.exports = {
   getTexts,
   getText,
@@ -190,5 +200,5 @@ module.exports = {
   uploadTranslationToOpenpecha,
   getSegmentRelated,
   getSegmentsContent,
-  searchTextByTitle,
+  getRelatedInstances,
 };

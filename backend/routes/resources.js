@@ -4,6 +4,7 @@ const { authenticate } = require("../middleware/authenticate");
 const fs = require("fs");
 const path = require("path");
 const { prisma } = require("../services/db");
+const { getSegmentRelated } = require("../apis/openpecha_api");
 
 /**
  * @typedef {object} SegmentSearchRequest
@@ -114,6 +115,31 @@ router.post("/", async (req, res) => {
     });
   } catch (error) {
     console.error("Error searching segment:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+async function getMetadataByDocumentId(documentId) {
+  const metadata = await prisma.docMetadata.findUnique({
+    where: { docId: documentId },
+    select: { instanceId: true },
+  });
+  return metadata;
+}
+
+router.post("/related", async (req, res) => {
+  try {
+    const { documentId, span_start, span_end } = req.body;
+    const { instanceId } = await getMetadataByDocumentId(documentId);
+    const relatedInstances = await getSegmentRelated(
+      instanceId,
+      span_start,
+      span_end
+    );
+
+    res.json(relatedInstances);
+  } catch (error) {
+    console.error("Error searching related instances:", error);
     res.status(500).json({ error: error.message });
   }
 });

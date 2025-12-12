@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Search, BookOpen, FileText, Loader2, AlertCircle } from "lucide-react";
 import {
   searchSegmentInResources,
@@ -8,6 +8,10 @@ import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { useTextSelection } from "../ChatSidebar/hooks";
 import { Avatar, AvatarFallback } from "../ui/avatar";
+import { useParams } from "react-router-dom";
+import useRelatedSegments from "@/hooks/useRelatedSegments";
+import { useEditor } from "@/contexts/EditorContext";
+import { useSelectionStore } from "@/stores/selectionStore";
 
 interface CommentaryData {
   key: string;
@@ -57,9 +61,39 @@ function Resources() {
   const { t } = useTranslation();
 
   const { selectedText } = useTextSelection();
+  const { activeEditor } = useEditor();
+  const selection = useSelectionStore((state) =>
+    activeEditor ? state.selections[activeEditor] : null
+  );
   const [searchQuery, setSearchQuery] = useState(selectedText || "");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [shouldSearch, setShouldSearch] = useState(false);
+  const { id } = useParams();
+
+  // Get active selection range (start and end positions)
+  const selectionRange = useMemo(() => {
+    if (!selection?.range || selection.range.length === 0) {
+      return null;
+    }
+    return {
+      start: selection.range.index,
+      end: selection.range.index + selection.range.length,
+    };
+  }, [selection]);
+
+  // Debounce selection range
+  const [debouncedSelectionRange, setDebouncedSelectionRange] = useState<{
+    start: number;
+    end: number;
+  } | null>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSelectionRange(selectionRange);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [selectionRange]);
 
   // Debounce search query
   useEffect(() => {
@@ -86,7 +120,13 @@ function Resources() {
     retry: 2,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
+  const { data: relatedSegments } = useRelatedSegments(
+    id!,
+    debouncedSelectionRange?.start ?? 0,
+    debouncedSelectionRange?.end ?? 0
+  );
 
+  console.log(relatedSegments);
   const handleSearch = () => {
     if (!searchQuery.trim()) {
       return;

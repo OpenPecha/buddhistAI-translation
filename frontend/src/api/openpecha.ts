@@ -59,9 +59,14 @@ export const fetchText = async (textId: string) => {
  * @returns List of text instances
  */
 export const fetchInstances = async (textId: string, type?: string) => {
-  const response = await fetch(`${server_url}/openpecha/${textId}/instances?${type ? `instance_type=${type}` : ''}`, {
-    headers: getHeaders(),
-  });
+  const response = await fetch(
+    `${server_url}/openpecha/${textId}/instances?${
+      type ? `instance_type=${type}` : ""
+    }`,
+    {
+      headers: getHeaders(),
+    }
+  );
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData.error || "Failed to fetch instances");
@@ -152,40 +157,20 @@ export interface SegmentWithContent {
 export const fetchSegmentsWithContent = async (
   textId: string,
   spanStart: number,
-  spanEnd: number,
+  spanEnd: number
 ): Promise<SegmentWithContent[]> => {
-  const response = await fetch(
-    `${server_url}/openpecha/webhook`,
-    {
-      method: "POST",
-      headers: getHeaders(),
-      body: JSON.stringify({ text_id: textId, span_start: spanStart, span_end: spanEnd }),
-    }
-  );
+  const response = await fetch(`${server_url}/openpecha/webhook`, {
+    method: "POST",
+    headers: getHeaders(),
+    body: JSON.stringify({
+      text_id: textId,
+      span_start: spanStart,
+      span_end: spanEnd,
+    }),
+  });
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData.error || "Failed to fetch segments with content");
   }
   return response.json();
-};
-
-export const searchTextByTitle = async (title: string) => {
-  if (!title.trim()) {
-    throw new Error("Title is required");
-  }
-  try {
-    const url = new URL(`${server_url}/openpecha/title-search`);
-    url.searchParams.append("title", title);
-    const response = await fetch(url.toString(), {
-      headers: getHeaders(),
-    });
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || "Failed to search text by title");
-    }
-    return response.json();
-  } catch (error) {
-    console.error("Error searching text by title:", error);
-    throw new Error(`Failed to search text by title: ${error.message}`);
-  }
 };

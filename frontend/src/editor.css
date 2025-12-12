@@ -89,8 +89,13 @@ cursor:pointer;
 z-index: 9999;
 }
 .ql-editor::selection{
+	background-color: lightyellow;
+}
+
+.ql-editor p.selected_text_segment::selection{
 	background-color: transparent;
 }
+
 .ql-editor p:hover {
 	cursor: pointer;
 	z-index: 9999;

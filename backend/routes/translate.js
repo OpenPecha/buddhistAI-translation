@@ -1,5 +1,6 @@
 const express = require("express");
 const { authenticate } = require("../middleware/authenticate");
+const { Prisma } = require("@prisma/client");
 
 const router = express.Router();
 
@@ -57,7 +58,7 @@ router.post("/", authenticate, async (req, res) => {
     } = req.body;
     const files = context.split("\n");
 
-    const contextFiles = await prisma.translationContextFile.findMany({
+    const contextFiles = await Prisma.translationContextFile.findMany({
       where: {
         id: { in: files },
       },

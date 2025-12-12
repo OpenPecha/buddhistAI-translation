@@ -9,7 +9,6 @@ const {
   getSegmentRelated,
   getText,
   getSegmentsContent,
-  searchTextByTitle,
 } = require("../apis/openpecha_api");
 const { prisma } = require("../services/db");
 
@@ -63,6 +62,7 @@ router.get("/texts/:id", async (req, res) => {
  */
 router.get("/:id/instances", async (req, res) => {
   const text_id = req.params.id;
+  const { instance_type } = req.query;
   if (!text_id) {
     return res.status(400).json({
       error: "Text ID is required",
@@ -70,7 +70,7 @@ router.get("/:id/instances", async (req, res) => {
   }
 
   try {
-    const instances = await getTextInstances(text_id);
+    const instances = await getTextInstances(text_id, instance_type);
 
     if (!instances) {
       return res.status(404).json({
@@ -93,7 +93,7 @@ router.get("/:id/instances", async (req, res) => {
 
     res.status(500).json({
       error: "Failed to fetch manifestations",
-      expression_id: expressionId,
+      text_id: text_id,
       details: error.message,
     });
   }
@@ -372,36 +372,6 @@ router.get("/instances/:instanceId/segment-content", async (req, res) => {
 });
 
 /**
- * GET /openpecha/title-search
- * @summary Search text by title
- * @tags Pecha - OpenPecha integration
- * @param {string} title.query - Title of the text
- * @return {array<object>} 200 - Array of texts
- * @return {object} 400 - Bad request - Title is required
- * @return {object} 500 - Server error
- */
-router.get("/title-search", async (req, res) => {
-  const { title } = req.query;
-
-  if (!title || !title.trim()) {
-    return res.status(400).json({
-      error: "Title is required",
-    });
-  }
-  try {
-    const texts = await searchTextByTitle(title.trim());
-    res.json(texts);
-  } catch (error) {
-    console.error("Error searching text by title:", error);
-    res.status(500).json({
-      error: "Failed to search text by title",
-      title,
-      details: error.message,
-    });
-  }
-});
-
-/**
  * POST /openpecha/webhook
  * @summary Forward request to n8n webhook
  * @tags Pecha - OpenPecha integration
@@ -419,7 +389,7 @@ router.get("/title-search", async (req, res) => {
  *   "span_end": 1000
  * }
  */
-router.post("/webhook", async (req, res) => {
+router.post("/linked_resources", async (req, res) => {
   const { text_id, span_start, span_end } = req.body;
 
   if (!text_id) {
