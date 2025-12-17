@@ -72,6 +72,22 @@
 	padding: 10px !important;
 }
 
+.ql-editor::-webkit-scrollbar {
+	width: 8px;
+}
+
+.ql-editor::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+.ql-editor::-webkit-scrollbar-thumb {
+	background: rgba(0, 0, 0, 0.2);
+	border-radius: 4px;
+}
+
+.ql-editor::-webkit-scrollbar-thumb:hover {
+	background: rgba(0, 0, 0, 0.3);
+}
 
 .ql-editor .focused_p {
 	color: var(--color-neutral-800);

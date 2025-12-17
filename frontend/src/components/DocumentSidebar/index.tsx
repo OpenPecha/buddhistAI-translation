@@ -58,12 +58,16 @@ const DocumentSidebar: React.FC<DocumentSidebarProps> = ({
       label: t(`common.comments`),
       shortLabel: "Comments",
     },
-    {
-      id: "resources",
-      icon: FileText,
-      label: t(`common.resources`),
-      shortLabel: "Resources",
-    },
+    ...(isTranslationEditor
+      ? []
+      : [
+          {
+            id: "resources",
+            icon: FileText,
+            label: t(`common.resources`),
+            shortLabel: "Resources",
+          },
+        ]),
     ...(isTranslationEditor
       ? [
           {
