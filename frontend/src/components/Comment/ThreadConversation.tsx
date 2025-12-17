@@ -37,7 +37,9 @@ const ThreadConversation = ({
   const activeThreadId = getActiveThreadId(documentId);
   const sidebarView = getSidebarView(documentId);
   const selection = useSelectionStore((state) => state.selections[documentId]);
-  const { data: thread = null } = useFetchThread({ threadId: activeThreadId as string });
+  const { data: thread = null } = useFetchThread({
+    threadId: activeThreadId as string,
+  });
   const createThreadMutation = useCreateThread();
   const addCommentMutation = useAddComment();
   const { currentUser } = useAuth();
@@ -51,10 +53,10 @@ const ThreadConversation = ({
     const baseUsers = [{ id: "ai", display: "ai" }];
     if (collaborators) {
       const parsedCollaborators = collaborators
-        .filter(collaborator => collaborator.id !== currentUser?.id)
-        .map(collaborator => ({
+        .filter((collaborator) => collaborator.id !== currentUser?.id)
+        .map((collaborator) => ({
           id: collaborator.id,
-          display: collaborator.username
+          display: collaborator.username,
         }));
       return [...parsedCollaborators, ...baseUsers];
     }
@@ -65,7 +67,7 @@ const ThreadConversation = ({
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scroll({
         top: scrollContainerRef.current.scrollHeight,
-        behavior
+        behavior,
       });
     }
   };
@@ -110,7 +112,7 @@ const ThreadConversation = ({
 
   const onProcessing = (message: string) => {
     setAiResponseStatus(message);
-  }
+  };
   const onDelta = (delta: string) => {
     queryClient.setQueryData(["thread", activeThreadId], (old: any) => {
       if (!old || !old.comments) return old;
@@ -132,7 +134,7 @@ const ThreadConversation = ({
       }
       return old;
     });
-  }
+  };
 
   const onCompletion = (finalText: string) => {
     queryClient.setQueryData(["thread", activeThreadId], (old: any) => {
@@ -155,16 +157,18 @@ const ThreadConversation = ({
       }
       return old;
     });
-  }
+  };
 
   const onSave = (comment: any) => {
     queryClient.setQueryData(["thread", activeThreadId], (old: any) => {
       return {
         ...old,
-        comments: old?.comments?.map((c: any) => c.user.id === "ai-assistant" ? comment : c)
+        comments: old?.comments?.map((c: any) =>
+          c.user.id === "ai-assistant" ? comment : c
+        ),
       };
     });
-  }
+  };
 
   const onError = (message: string) => {
     console.error("AI stream error:", message);
@@ -179,24 +183,26 @@ const ThreadConversation = ({
         newComments[aiCommentIndex] = {
           ...newComments[aiCommentIndex],
           content: `${message}`,
-          hasError: true
+          hasError: true,
         };
         return { ...old, comments: newComments };
       }
       return old;
     });
-  }
+  };
 
   const handleSubmitReply = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if(!selection) return;
+    if (!selection) return;
     if (replyContent.trim()) {
       // Clear previous AI errors from the thread
       queryClient.setQueryData(["thread", activeThreadId], (old: any) => {
         if (!old || !old.comments) return old;
         return {
           ...old,
-          comments: old.comments.filter((c: any) => !(c.isSystemGenerated && c.hasError))
+          comments: old.comments.filter(
+            (c: any) => !(c.isSystemGenerated && c.hasError)
+          ),
         };
       });
       if (sidebarView === "thread") {
@@ -263,7 +269,8 @@ const ThreadConversation = ({
             <SelectedText text={thread.selectedText || ""} />
             {(thread.comments || []).map((comment) => {
               const isCurrentUser =
-                comment.user.id === currentUser?.id && !comment.isSystemGenerated;
+                comment.user.id === currentUser?.id &&
+                !comment.isSystemGenerated;
               const isSystem = comment.isSystemGenerated;
               const hasError = comment.hasError;
               return (
@@ -277,9 +284,7 @@ const ThreadConversation = ({
                     <Avatar className="w-5 h-5">
                       {isSystem && <AvatarImage src={comment.user.picture} />}
                       <AvatarFallback className="text-sm">
-                        {isSystem
-                          ? "AI"
-                          : <UserRound size={16} />}
+                        {isSystem ? "AI" : <UserRound size={16} />}
                       </AvatarFallback>
                     </Avatar>
                   )}
@@ -305,12 +310,16 @@ const ThreadConversation = ({
                       className={`px-2 py-1 rounded-lg mt-1 ${
                         isCurrentUser
                           ? "bg-blue-500 text-white"
-                          : isSystem 
-                          ? hasError ? "bg-red-100" : "bg-gray-100"
+                          : isSystem
+                          ? hasError
+                            ? "bg-red-100"
+                            : "bg-gray-100"
                           : "bg-gray-200"
                       }`}
                     >
-                      <div className={`text-sm ${hasError ? "text-red-700" : ""}`}>
+                      <div
+                        className={`text-sm ${hasError ? "text-red-700" : ""}`}
+                      >
                         {isSystem && !comment.content ? (
                           <TypingAnimation message={aiResponseStatus} />
                         ) : (
@@ -335,9 +344,7 @@ const ThreadConversation = ({
             })}
           </>
         ) : (
-          <SelectedText
-            text={selection?.text || "Starting a new thread..."}
-          />
+          <SelectedText text={selection?.text || "Starting a new thread..."} />
         )}
       </div>
 

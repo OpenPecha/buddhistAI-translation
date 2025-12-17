@@ -4,7 +4,10 @@ const { authenticate } = require("../middleware/authenticate");
 const fs = require("fs");
 const path = require("path");
 const { prisma } = require("../services/db");
-const { getSegmentRelated } = require("../apis/openpecha_api");
+const {
+  getSegmentRelated,
+  getSegmentsContent,
+} = require("../apis/openpecha_api");
 
 /**
  * @typedef {object} SegmentSearchRequest
@@ -137,7 +140,47 @@ router.post("/related", async (req, res) => {
       span_end
     );
 
-    res.json(relatedInstances);
+    // Filter commentaries and extract required fields
+    const commentaries = relatedInstances.filter(
+      (item) => item.relation === "commentary"
+    );
+
+    // Fetch content for each segment in each commentary
+    const commentariesWithContent = await Promise.all(
+      commentaries.map(async (item) => {
+        const commentaryInstanceId = item.instance_metadata.id;
+        const segmentIds = item.segments.map((seg) => seg.segment_id);
+
+        // Fetch segment content
+        const segmentContents = await getSegmentsContent(
+          commentaryInstanceId,
+          segmentIds
+        );
+
+        // Create a map of segment_id to content for quick lookup
+        const contentMap = new Map();
+        segmentContents.forEach((contentItem) => {
+          contentMap.set(contentItem.segment_id, contentItem);
+        });
+
+        // Map segments with their content appended
+        const segmentsWithContent = item.segments.map((segment) => {
+          const contentData = contentMap.get(segment.segment_id);
+          return {
+            ...segment,
+            content: contentData?.content || "",
+          };
+        });
+
+        return {
+          segments: segmentsWithContent,
+          text_title: item.text_metadata.title,
+          instance_source: item.instance_metadata.source,
+        };
+      })
+    );
+
+    res.json(commentariesWithContent);
   } catch (error) {
     console.error("Error searching related instances:", error);
     res.status(500).json({ error: error.message });

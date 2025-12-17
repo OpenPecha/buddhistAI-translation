@@ -1,73 +1,19 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Search, BookOpen, FileText, Loader2, AlertCircle } from "lucide-react";
-import {
-  searchSegmentInResources,
-  SegmentSearchResponse,
-} from "../../api/resources";
+import { BookOpen, AlertCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useQuery } from "@tanstack/react-query";
-import { useTextSelection } from "../ChatSidebar/hooks";
-import { Avatar, AvatarFallback } from "../ui/avatar";
 import { useParams } from "react-router-dom";
 import useRelatedSegments from "@/hooks/useRelatedSegments";
 import { useEditor } from "@/contexts/EditorContext";
 import { useSelectionStore } from "@/stores/selectionStore";
-
-interface CommentaryData {
-  key: string;
-  number: number;
-  text: string;
-  metadata?: {
-    title?: { en?: string; bo?: string };
-    author?: { en?: string; bo?: string } | string;
-  };
-}
-
-const truncateText = (text: string, maxLength: number = 150) => {
-  if (text.length <= maxLength) return text;
-  return text.substring(0, maxLength) + "...";
-};
-
-// Generate commentaries list dynamically from match data
-const generateCommentariesList = (match: {
-  matchedEntry: Record<string, string>;
-  metadata: Record<string, any>;
-}): CommentaryData[] => {
-  const commentaries: CommentaryData[] = [];
-
-  // Find all commentary keys in matchedEntry
-  for (const key of Object.keys(match.matchedEntry)) {
-    if (key.startsWith("commentary_") && match.matchedEntry[key]) {
-      const commentaryNumber = Number.parseInt(
-        key.replace("commentary_", ""),
-        10
-      );
-      if (!Number.isNaN(commentaryNumber)) {
-        commentaries.push({
-          key,
-          number: commentaryNumber,
-          text: match.matchedEntry[key],
-          metadata: match.metadata[key],
-        });
-      }
-    }
-  }
-
-  // Sort by commentary number
-  return commentaries.sort((a, b) => a.number - b.number);
-};
+import { RelatedSegmentResult } from "@/api/resources";
 
 function Resources() {
   const { t } = useTranslation();
 
-  const { selectedText } = useTextSelection();
   const { activeEditor } = useEditor();
   const selection = useSelectionStore((state) =>
     activeEditor ? state.selections[activeEditor] : null
   );
-  const [searchQuery, setSearchQuery] = useState(selectedText || "");
-  const [debouncedQuery, setDebouncedQuery] = useState("");
-  const [shouldSearch, setShouldSearch] = useState(false);
   const { id } = useParams();
 
   // Get active selection range (start and end positions)
@@ -95,88 +41,22 @@ function Resources() {
     return () => clearTimeout(timer);
   }, [selectionRange]);
 
-  // Debounce search query
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedQuery(searchQuery);
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
-
-  // React Query for fetching resources
+  // Fetch related segments
   const {
-    data: searchResults,
+    data: relatedSegments,
     isLoading,
     error,
     refetch,
     isFetching,
-  } = useQuery<SegmentSearchResponse>({
-    queryKey: ["resources", debouncedQuery.trim()],
-    queryFn: () => searchSegmentInResources(debouncedQuery.trim()),
-    enabled: shouldSearch && debouncedQuery.trim().length > 0,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes (replaces cacheTime in newer versions)
-    retry: 2,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-  });
-  const { data: relatedSegments } = useRelatedSegments(
+  } = useRelatedSegments(
     id!,
     debouncedSelectionRange?.start ?? 0,
     debouncedSelectionRange?.end ?? 0
   );
 
-  console.log(relatedSegments);
-  const handleSearch = () => {
-    if (!searchQuery.trim()) {
-      return;
-    }
-    setShouldSearch(true);
-    if (debouncedQuery.trim() === searchQuery.trim()) {
-      refetch();
-    }
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      handleSearch();
-    }
-  };
-
-  const highlightSearchTerm = (text: string, term: string) => {
-    if (!term) return text;
-    const regex = new RegExp(`(${term})`, "gi");
-    const parts = text.split(regex);
-
-    return parts.map((part, partIndex) =>
-      regex.test(part) ? (
-        <mark
-          key={`highlight-${partIndex}`}
-          className="bg-yellow-200 dark:bg-yellow-800 px-1 rounded"
-        >
-          {part}
-        </mark>
-      ) : (
-        <span key={`text-${partIndex}`}>{part}</span>
-      )
-    );
-  };
-
-  // Auto-search when selectedText changes
-  useEffect(() => {
-    if (selectedText && selectedText !== searchQuery) {
-      setSearchQuery(selectedText);
-      // Auto-search if there's selected text
-      if (selectedText.trim()) {
-        setShouldSearch(true);
-      }
-    }
-  }, [selectedText, searchQuery]);
-
-  // Derived state from React Query
-  const results = searchResults?.matches || [];
-  const hasSearched = shouldSearch && (searchResults !== undefined || error);
   const loading = isLoading || isFetching;
+  const hasResults = relatedSegments && relatedSegments.length > 0;
+  const hasSelection = !!debouncedSelectionRange;
   return (
     <div className="h-full flex flex-col bg-white dark:bg-gray-900">
       {/* Content */}
@@ -190,7 +70,9 @@ function Resources() {
             <div className="flex items-center gap-2">
               <AlertCircle className="h-4 w-4 text-red-500" />
               <span className="text-red-700 dark:text-red-300 text-sm">
-                {error instanceof Error ? error.message : "Search failed"}
+                {error instanceof Error
+                  ? error.message
+                  : "Failed to load related segments"}
               </span>
             </div>
             <button
@@ -202,111 +84,122 @@ function Resources() {
           </div>
         )}
 
-        {/* Loading State */}
+        {/* Loading State - Skeleton */}
         {loading && (
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
-            <span className="ml-2 text-gray-600 dark:text-gray-400">
-              {t("resources.searching", "Searching...")}
-            </span>
-          </div>
-        )}
-
-        {/* Results */}
-        {results.length > 0 && (
           <div className="space-y-4">
-            {results.map((match) => (
-              <div key={`match-${match.fileName}`}>
-                {/* File Header */}
+            {Array.from({ length: 2 }, (_, index) => (
+              <div key={`skeleton-result-${index}`} className="mb-6">
+                {/* Text Title Header Skeleton */}
                 <div className="flex items-center gap-2 mb-3">
-                  <BookOpen className="h-4 w-4 text-blue-500" />
-                  <div>
-                    <p className="font-medium text-gray-900 dark:text-white">
-                      {match.metadata?.root?.title?.en || match.fileName}
-                    </p>
-                    {match.metadata?.root?.author?.en && (
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        {t("resources.by", "by")}{" "}
-                        {match.metadata.root.author.en}
-                      </p>
-                    )}
+                  <div className="h-4 w-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                  <div className="flex-1">
+                    <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2 animate-pulse" />
+                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2 animate-pulse" />
                   </div>
                 </div>
 
-                {/* Root Text */}
-                <div className="mb-3">
-                  <p className="text-sm font-monlam-2 text-gray-800 dark:text-gray-200 leading-relaxed">
-                    {highlightSearchTerm(
-                      truncateText(match.matchedEntry.root_display_text),
-                      searchQuery
-                    )}
-                  </p>
-                </div>
-                <div>
-                  <div className="flex items-center gap-1 mb-2">
-                    <FileText className="h-3 w-3 text-gray-400" />
-                    <span className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase">
-                      {t("resources.commentary", "Commentary")}{" "}
-                    </span>
-                  </div>
-                  {/* Commentaries */}
-                  <Commentaries
-                    commentaries={generateCommentariesList(match)}
-                    matchIndex={0}
-                  />
-                </div>
-                {/* Sanskrit Text */}
-                {match.matchedEntry.sanskrit_text && (
-                  <div className="mt-3 p-3rounded-lg">
-                    <div className="flex items-center gap-1 mb-2">
-                      <FileText className="h-3 w-3 " />
-                      <span className="text-xs font-medium  uppercase">
-                        {t("resources.sanskrit", "Sanskrit")} Translation
-                      </span>
-                    </div>
-
-                    {/* Sanskrit Title and Author */}
-                    {match.metadata.sanskrit_text && (
-                      <div className="mb-2 flex items-center gap-1">
-                        {match.metadata.sanskrit_text.author && (
-                          <Avatar className="h-6 w-6">
-                            <AvatarFallback className="text-xs">
-                              {match.metadata.sanskrit_text.author
-                                .charAt(0)
-                                .toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                        )}
-                        {match.metadata.sanskrit_text.title?.sa && (
-                          <h5 className="text-xs font-medium ">
-                            {match.metadata.sanskrit_text.title.sa}
-                          </h5>
-                        )}
+                {/* Segments Skeleton */}
+                <div className="space-y-3">
+                  {Array.from({ length: 2 }, (_, segIndex) => (
+                    <div
+                      key={`skeleton-segment-${index}-${segIndex}`}
+                      className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+                    >
+                      <div className="mb-2">
+                        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/4 animate-pulse" />
                       </div>
-                    )}
-
-                    {/* Sanskrit Text */}
-                    <CollapsableDiv>
-                      {match.matchedEntry.sanskrit_text}
-                    </CollapsableDiv>
-                  </div>
-                )}
+                      <div className="space-y-2">
+                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full animate-pulse" />
+                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-5/6 animate-pulse" />
+                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-4/6 animate-pulse" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
         )}
 
-        {/* Empty State */}
-        {!hasSearched && !loading && (
+        {/* Results */}
+        {!loading && hasResults && (
+          <div className="space-y-4">
+            {relatedSegments.map(
+              (result: RelatedSegmentResult, index: number) => {
+                const resultKey = result.instance_source
+                  ? `${result.instance_source}-${index}`
+                  : `result-${index}`;
+                return (
+                  <div key={resultKey} className="mb-6">
+                    {/* Text Title Header */}
+                    <div className="flex items-center gap-2 mb-3">
+                      <BookOpen className="h-4 w-4 text-blue-500" />
+                      <div className="flex-1">
+                        {result.text_title && result.text_title.length > 0 && (
+                          <p className="font-medium text-gray-900 dark:text-white font-monlam-2">
+                            {result.text_title[0].text}
+                          </p>
+                        )}
+                        {result.instance_source && (
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            {t("resources.source", "Source")}:{" "}
+                            {result.instance_source}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Segments */}
+                    {result.segments && result.segments.length > 0 && (
+                      <div className="space-y-3">
+                        {result.segments.map((segment) => (
+                          <div
+                            key={segment.segment_id}
+                            className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+                          >
+                            <CollapsableDiv>
+                              <span className="text-sm font-monlam-2 text-gray-800 dark:text-gray-200 leading-relaxed">
+                                {segment.content}
+                              </span>
+                            </CollapsableDiv>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+            )}
+          </div>
+        )}
+
+        {/* Empty State - No Selection */}
+        {!hasSelection && !loading && (
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <BookOpen className="h-12 w-12 text-gray-400 mb-4" />
             <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-              {t("resources.emptyTitle", "Search Linked Resources")}
+              {t("resources.emptyTitle", "Related Segments")}
             </h4>
             <p className="text-gray-600 dark:text-gray-400 max-w-sm">
               {t(
                 "resources.emptyDescription",
-                "Enter a text segment to search through root texts and commentaries"
+                "Select text in the editor to see related segments from other texts"
+              )}
+            </p>
+          </div>
+        )}
+
+        {/* Empty State - No Results */}
+        {hasSelection && !loading && !hasResults && !error && (
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <BookOpen className="h-12 w-12 text-gray-400 mb-4" />
+            <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+              {t("resources.noResults", "No Related Segments Found")}
+            </h4>
+            <p className="text-gray-600 dark:text-gray-400 max-w-sm">
+              {t(
+                "resources.noResultsDescription",
+                "No related segments found for the selected text"
               )}
             </p>
           </div>
@@ -316,76 +209,30 @@ function Resources() {
   );
 }
 
-interface CommentariesProps {
-  commentaries: CommentaryData[];
-  matchIndex: number;
-}
-
-const Commentaries = ({ commentaries, matchIndex }: CommentariesProps) => {
-  const { t } = useTranslation();
-
-  if (commentaries.length === 0) return null;
-
-  return (
-    <div className="space-y-3">
-      {commentaries.map((commentary) => {
-        const commentaryTitle =
-          commentary.metadata?.title?.en ||
-          commentary.metadata?.title?.bo ||
-          "";
-        const commentaryAuthor =
-          typeof commentary.metadata?.author === "string"
-            ? commentary.metadata.author
-            : commentary.metadata?.author?.en ||
-              commentary.metadata?.author?.bo ||
-              "";
-
-        return (
-          <div
-            key={`commentary-${commentary.number}-${matchIndex}`}
-            className="mb-3 p-3 bg-gray-100 dark:bg-gray-700 rounded-lg"
-          >
-            {/* Commentary Title and Author */}
-            {(commentaryTitle || commentaryAuthor) && (
-              <div className="mb-2 flex items-center gap-2">
-                {commentaryAuthor && (
-                  <div title={commentaryAuthor} className="inline-block">
-                    <Avatar className="h-6 w-6">
-                      <AvatarFallback className="text-xs">
-                        {commentaryAuthor.charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                  </div>
-                )}
-                <div>
-                  {commentaryTitle && (
-                    <p className="text-xs font-medium text-gray-800 dark:text-gray-200">
-                      {commentaryTitle}
-                    </p>
-                  )}
-                  {commentaryAuthor && (
-                    <p className="text-xs text-gray-600 dark:text-gray-400">
-                      {t("resources.by", "by")} {commentaryAuthor}
-                    </p>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Commentary Text */}
-            <CollapsableDiv>{commentary.text}</CollapsableDiv>
-          </div>
-        );
-      })}
-    </div>
-  );
-};
-
 const CollapsableDiv = ({ children }: { children: React.ReactNode }) => {
-  const [isExpanded, setIsExpanded] = React.useState(false);
-  const text = typeof children === "string" ? children : String(children);
-  const shouldCollapse = text.length > 150;
+  const [isExpanded, setIsExpanded] = useState(false);
   const { t } = useTranslation();
+
+  // Extract text content from children for length check
+  const getTextContent = (node: React.ReactNode): string => {
+    if (typeof node === "string") {
+      return node;
+    }
+    if (typeof node === "number") {
+      return String(node);
+    }
+    if (React.isValidElement(node)) {
+      const props = node.props as Record<string, unknown>;
+      const propsChildren = props?.children as React.ReactNode | undefined;
+      if (propsChildren) {
+        return getTextContent(propsChildren);
+      }
+    }
+    return "";
+  };
+
+  const textContent = getTextContent(children);
+  const shouldCollapse = textContent.length > 150;
 
   return (
     <div className="flex flex-col gap-2 font-monlam-2">

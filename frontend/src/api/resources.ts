@@ -54,25 +54,48 @@ export const searchSegmentInResources = async (
   }
 };
 
+export interface RelatedSegment {
+  segment_id: string;
+  span: {
+    start: number;
+    end: number;
+  };
+  content: string;
+}
+
+export interface RelatedSegmentResult {
+  segments: RelatedSegment[];
+  text_title: Array<{
+    language: string;
+    text: string;
+  }>;
+  instance_source: string;
+}
+
 export const getRelatedSegments = async (
   documentId: string,
   span_start: number,
-  span_end: number
-): Promise<SegmentSearchResponse> => {
+  span_end: number,
+  signal?: AbortSignal
+): Promise<RelatedSegmentResult[]> => {
   try {
     const response = await fetch(`${server_url}/resources/related`, {
       method: "POST",
       headers: getHeaders(),
       body: JSON.stringify({ documentId, span_start, span_end }),
+      signal,
     });
     if (response.ok) {
-      const data: any = await response.json();
+      const data: RelatedSegmentResult[] = await response.json();
       return data;
     } else {
       const errorData = await response.json();
       throw new Error(errorData.error || "Failed to get related segments");
     }
   } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      throw error;
+    }
     console.error("Error getting related segments:", error);
     throw error;
   }

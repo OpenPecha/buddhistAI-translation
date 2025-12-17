@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { useEditor } from "@/contexts/EditorContext";
 import { useSelectionStore } from "@/stores/selectionStore";
-import { useState } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import useDebounce from "@/hooks/useDebounce";
 import { Thread } from "@/api/thread";
 import { useFetchThreads } from "./hooks/useFetchThreads";
@@ -65,7 +65,12 @@ const ErrorState = ({
 );
 
 const ThreadList = ({ documentId }: { documentId: string }) => {
-  const { setSidebarView, setActiveThreadId } = useCommentStore();
+  const {
+    setSidebarView,
+    setActiveThreadId,
+    getActiveThreadId,
+    getSidebarView,
+  } = useCommentStore();
   const deleteThreadMutation = useDeleteThread();
   const [threadPendingDelete, setThreadPendingDelete] = useState<Thread | null>(
     null
@@ -77,12 +82,24 @@ const ThreadList = ({ documentId }: { documentId: string }) => {
     return state.selections[documentId];
   });
   const debouncedSelection = useDebounce(selection, 300);
+  const activeThreadId = getActiveThreadId(documentId);
+  const sidebarView = getSidebarView(documentId);
+  const previousSelectionRef = useRef<string | null>(null);
+
+  // Fetch all threads by default
   const {
-    data: threadsInSelection = [],
+    data: allThreads = [],
     isLoading: threadsLoading,
     error: threadsError,
     refetch: refetchThreads,
   } = useFetchThreads({
+    documentId,
+    startOffset: undefined,
+    endOffset: undefined,
+  });
+
+  // Fetch threads for selected segment to find matching thread
+  const { data: threadsInSelection = [] } = useFetchThreads({
     documentId,
     startOffset: debouncedSelection?.range?.index,
     endOffset:
@@ -91,6 +108,64 @@ const ThreadList = ({ documentId }: { documentId: string }) => {
         ? debouncedSelection.range.index + debouncedSelection.range.length
         : undefined,
   });
+
+  // Find the thread that matches the current selection
+  const matchingThread = useMemo(() => {
+    if (!debouncedSelection?.range || threadsInSelection.length === 0) {
+      return null;
+    }
+    const { index, length } = debouncedSelection.range;
+    const endOffset = index + length;
+
+    // Find thread that overlaps with the selection
+    return (
+      threadsInSelection.find((thread: Thread) => {
+        const threadStart = thread.initialStartOffset;
+        const threadEnd = thread.initialEndOffset;
+        // Check if selection overlaps with thread range
+        return (
+          (index >= threadStart && index <= threadEnd) ||
+          (endOffset >= threadStart && endOffset <= threadEnd) ||
+          (index <= threadStart && endOffset >= threadEnd)
+        );
+      }) || null
+    );
+  }, [debouncedSelection, threadsInSelection]);
+
+  // Auto-select thread when text is selected and a matching thread is found
+  // Only auto-select if selection actually changed (not when user manually navigated back)
+  useEffect(() => {
+    const currentSelectionKey = debouncedSelection?.range
+      ? `${debouncedSelection.range.index}-${debouncedSelection.range.length}`
+      : null;
+
+    // Only auto-select if:
+    // 1. There's a matching thread
+    // 2. It's not already selected
+    // 3. We're in list view
+    // 4. The selection actually changed (not just the active thread was cleared)
+    if (
+      matchingThread &&
+      matchingThread.id !== activeThreadId &&
+      sidebarView === "list" &&
+      currentSelectionKey !== previousSelectionRef.current &&
+      currentSelectionKey !== null
+    ) {
+      setSidebarView(documentId, "thread");
+      setActiveThreadId(documentId, matchingThread.id);
+    }
+
+    // Update the previous selection ref
+    previousSelectionRef.current = currentSelectionKey;
+  }, [
+    matchingThread,
+    activeThreadId,
+    sidebarView,
+    debouncedSelection,
+    documentId,
+    setSidebarView,
+    setActiveThreadId,
+  ]);
 
   const handleThreadClick = (threadId: string) => {
     setSidebarView(documentId, "thread");
@@ -122,7 +197,7 @@ const ThreadList = ({ documentId }: { documentId: string }) => {
     });
   };
 
-  const hasNoData = threadsInSelection.length === 0;
+  const hasNoData = allThreads.length === 0;
   const isLoading = threadsLoading;
   const hasError = threadsError;
 
@@ -157,44 +232,56 @@ const ThreadList = ({ documentId }: { documentId: string }) => {
             onRetry={() => refetchThreads()}
             icon={MessageSquare}
           />
-        ) : threadsInSelection.length > 0 ? (
+        ) : allThreads.length > 0 ? (
           <>
             <div className="px-2 py-1 text-xs font-medium text-neutral-500 uppercase tracking-wide">
-              Comments ({threadsInSelection.length})
+              Comments ({allThreads.length})
             </div>
-            {threadsInSelection.map((thread: Thread) => (
-              <div key={thread.id} className="relative group">
-                <Button
-                  variant="ghost"
-                  data-thread-id={thread.id}
-                  className="cursor-pointer w-full flex items-center justify-between border border-neutral-200 rounded-lg p-2 hover:border-neutral-300 hover:bg-neutral-50 transition-all"
-                  onClick={() => handleThreadClick(thread.id)}
-                >
-                  <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <MessageSquare
-                      size={16}
-                      className="text-neutral-400 flex-shrink-0"
-                    />
-                    <p className="truncate text-left">{thread.selectedText}</p>
-                  </div>
-                  <div
-                    className="cursor-pointer rounded-md p-1 text-neutral-400 transition hover:bg-neutral-100 hover:text-red-500 flex-shrink-0 ml-2"
-                    role="button"
-                    aria-label="Delete thread"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      setThreadPendingDelete(thread);
-                    }}
+            {allThreads.map((thread: Thread) => {
+              const isActive = activeThreadId === thread.id;
+              const isMatching = matchingThread?.id === thread.id;
+              return (
+                <div key={thread.id} className="relative group">
+                  <Button
+                    variant="ghost"
+                    data-thread-id={thread.id}
+                    className={`cursor-pointer w-full flex items-center justify-between border rounded-lg p-2 transition-all ${
+                      isActive
+                        ? "border-blue-500 bg-blue-50 hover:bg-blue-100"
+                        : isMatching
+                        ? "border-blue-300 bg-blue-50/50 hover:border-blue-400 hover:bg-blue-50"
+                        : "border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50"
+                    }`}
+                    onClick={() => handleThreadClick(thread.id)}
                   >
-                    <Trash2 size={16} />
-                  </div>
-                </Button>
-              </div>
-            ))}
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <MessageSquare
+                        size={16}
+                        className={`flex-shrink-0 text-blue-500`}
+                      />
+                      <p className="truncate text-left font-monlam-2">
+                        {thread.selectedText}
+                      </p>
+                    </div>
+                    <div
+                      className="cursor-pointer rounded-md p-1 text-neutral-400 transition hover:bg-neutral-100 hover:text-red-500 flex-shrink-0 ml-2"
+                      role="button"
+                      aria-label="Delete thread"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setThreadPendingDelete(thread);
+                      }}
+                    >
+                      <Trash2 size={16} />
+                    </div>
+                  </Button>
+                </div>
+              );
+            })}
           </>
         ) : (
           <div className="p-4 text-center text-gray-500">
-            <p>No comments for this selection.</p>
+            <p>No comments found.</p>
           </div>
         )}
       </div>

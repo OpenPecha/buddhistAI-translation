@@ -14,6 +14,7 @@ import { useEditorSidebarStore } from "@/stores/editorSidebarStore";
 import CommentSidebar from "../Comment/CommentSidebar";
 import { ScrollArea } from "../ui/scroll-area";
 import { useCommentStore } from "@/stores/commentStore";
+import { useSelectionStore } from "@/stores/selectionStore";
 import ChatSidebar from "../ChatSidebar";
 import MetadataContent from "./MetadataContent";
 import UploadContent from "./UploadContent";
@@ -32,7 +33,9 @@ const DocumentSidebar: React.FC<DocumentSidebarProps> = ({
   const { tabs: editorTabs, setTabs, toggleTab } = useEditorSidebarStore();
   const activeTab = editorTabs[documentId];
   const { t } = useTranslation();
-  const { getSidebarView, setSidebarView } = useCommentStore();
+  const { getSidebarView, setSidebarView, setActiveThreadId } =
+    useCommentStore();
+  const setLineFocus = useSelectionStore((state) => state.setLineFocus);
   const sidebarView = getSidebarView(documentId);
   const [isHovered, setIsHovered] = useState(false);
 
@@ -116,7 +119,12 @@ const DocumentSidebar: React.FC<DocumentSidebarProps> = ({
             onClose={() => setTabs(documentId, null)}
             isTranslationEditor={isTranslationEditor}
             sidebarView={sidebarView}
-            onBack={() => setSidebarView(documentId, "list")}
+            onBack={() => {
+              setSidebarView(documentId, "list");
+              setActiveThreadId(documentId, null);
+              // Clear the selection so auto-selection doesn't trigger
+              setLineFocus(documentId, null);
+            }}
           />
 
           {/* Content */}
