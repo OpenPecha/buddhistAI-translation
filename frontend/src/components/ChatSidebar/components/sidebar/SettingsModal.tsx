@@ -9,14 +9,7 @@ import {
 } from "@/components/ui/select";
 
 import { Label } from "@/components/ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Settings, Languages, FileText } from "lucide-react";
+import { Settings, Languages, FileText, X } from "lucide-react";
 
 import {
   TARGET_LANGUAGES,
@@ -57,68 +50,104 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   onConfigChange,
 }) => {
   const { t } = useTranslation();
-  return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="w-6 h-6 rounded-md"
-          title={t("translation.translationSettings")}
-        >
-          <Settings className="w-3 h-3" />
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-2xl">
-        <DialogHeader className="space-y-3">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-secondary-100 rounded-lg flex items-center justify-center">
-              <Settings className="w-4 h-4 text-secondary-600" />
-            </div>
-            <DialogTitle className="text-lg font-semibold">
-              {t("translation.translationSettings")}
-            </DialogTitle>
-          </div>
-        </DialogHeader>
 
-        <div className="space-y-6 py-4">
-          {/* Core Settings */}
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              {/* Text Type */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium flex items-center gap-2">
-                  <FileText className="w-3 h-3" />
-                  {t("translation.contentType")}
-                </Label>
-                <Select
-                  value={config.textType}
-                  onValueChange={(value: TextType) =>
-                    onConfigChange("textType", value)
-                  }
-                >
-                  <SelectTrigger className="h-9">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TEXT_TYPES.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {type.charAt(0).toUpperCase() + type.slice(1)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+  const handleOverlayClick = () => {
+    onOpenChange(false);
+  };
+
+  const handleOverlayKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Escape") {
+      onOpenChange(false);
+    }
+  };
+
+  return (
+    <>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="w-6 h-6 rounded-md"
+        title={t("translation.translationSettings")}
+        onClick={() => onOpenChange(true)}
+      >
+        <Settings className="w-3 h-3" />
+      </Button>
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000] p-4"
+          onClick={handleOverlayClick}
+          onKeyDown={handleOverlayKeyDown}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="settings-modal-title"
+        >
+          <div
+            className="bg-neutral-50 dark:bg-neutral-800 rounded-lg shadow-xl w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between p-3 border-b border-neutral-200 dark:border-neutral-800">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-secondary-100 rounded-lg flex items-center justify-center">
+                  <Settings className="w-4 h-4 text-secondary-600" />
+                </div>
+                <h2 id="settings-modal-title" className="text-lg font-semibold">
+                  {t("translation.translationSettings")}
+                </h2>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onOpenChange(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="space-y-6">
+                {/* Core Settings */}
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Text Type */}
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium flex items-center gap-2">
+                        <FileText className="w-3 h-3" />
+                        {t("translation.contentType")}
+                      </Label>
+                      <Select
+                        value={config.textType}
+                        onValueChange={(value: TextType) =>
+                          onConfigChange("textType", value)
+                        }
+                      >
+                        <SelectTrigger className="h-9">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {TEXT_TYPES.map((type) => (
+                            <SelectItem key={type} value={type}>
+                              {type.charAt(0).toUpperCase() + type.slice(1)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+
+                <TranslationContextFileSelector
+                  config={config}
+                  onConfigChange={onConfigChange}
+                />
               </div>
             </div>
           </div>
-
-          <TranslationContextFileSelector
-            config={config}
-            onConfigChange={onConfigChange}
-          />
         </div>
-      </DialogContent>
-    </Dialog>
+      )}
+    </>
   );
 };
 

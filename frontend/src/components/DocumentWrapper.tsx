@@ -85,20 +85,19 @@ function DocumentsWrapperContent() {
     const isSplitView = !!selectedTranslationId;
 
     return (
-      <div className="relative h-full w-full group">
+      <div className="group relative h-full w-full ">
         {isSplitView && (
           <button
-            className="absolute bg-neutral-50 dark:bg-neutral-600 border-2 border-gray-300 cursor-pointer rounded-full p-2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-neutral-700 dark:text-neutral-300 text-xl opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-hover/translation:opacity-100 duration-200 shadow-lg hover:shadow-xl hover:border-gray-400 transition-opacity z-10"
-            style={{ left: isMobile ? "97%" : `${splitPosition}%` }}
+            className="absolute z-50 bg-neutral-50 dark:bg-neutral-600 border-2 border-gray-300 cursor-pointer rounded-full p-2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-neutral-700 dark:text-neutral-300 text-xl opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-hover/translation:opacity-100 duration-200 shadow-lg hover:shadow-xl hover:border-gray-400 transition-opacity "
             onClick={clearSelectedTranslationId}
             aria-label="Close translation view"
             title="Close translation view"
             type="button"
+            style={{ left: isMobile ? "97%" : `${splitPosition}%` }}
           >
             <IoIosArrowForward />
           </button>
         )}
-
         <Split
           sizes={isSplitView ? [splitPosition, 100 - splitPosition] : [100, 0]}
           minSize={isSplitView ? [300, 400] : [100, 0]}
@@ -152,7 +151,7 @@ function DocumentsWrapperContent() {
           </div>
 
           {/* Pane 2: Translation Editor (content mounted conditionally) */}
-          <div className="group/translation h-full w-full overflow-hidden">
+          <div className="group/translation h-full w-full overflow-hidden group relative">
             {isSplitView && selectedTranslationId && (
               <TranslationEditor
                 selectedTranslationId={selectedTranslationId}
