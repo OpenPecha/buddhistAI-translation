@@ -16,10 +16,7 @@ if (process.env.NODE_ENV === "production") {
   // In development, use the global object to store the instance
   // This prevents creating new clients on every code reload (hot-reloading)
   if (!globalForPrisma.prisma) {
-    globalForPrisma.prisma = new PrismaClient({
-      // Optional: Add logging for better debugging
-      log: ["query", "info", "warn", "error"],
-    });
+    globalForPrisma.prisma = new PrismaClient();
   }
   prisma = globalForPrisma.prisma;
 }

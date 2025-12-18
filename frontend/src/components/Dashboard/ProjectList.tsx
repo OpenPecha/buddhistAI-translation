@@ -34,6 +34,7 @@ import { INITIAL_PROJECT_LIMIT } from "@/config";
 import { useFetchProjects } from "@/api/queries/projects";
 
 const ProjectList = () => {
+  const [showGalleryButton, setShowGalleryButton] = useState(false);
   const { t } = useTranslation();
   const [param, setParam] = useSearchParams();
   const ftv = param.get("ftv");
@@ -58,23 +59,28 @@ const ProjectList = () => {
             <h1 className="text-lg font-medium mb-6">
               {t(`projects.startNewProject`)}
             </h1>
-            <Button
-              variant="ghost"
-              size="sm"
-              className={`hover:bg-neutral-300/50 capitalize ${
-                ftv ? "bg-neutral-300/50" : ""
-              }`}
-              onClick={handleViewAllPublicProjects}
-            >
-              {t(`project.gallery`)} <ArrowUpDownIcon size={16} />
-            </Button>
+            {showGalleryButton && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className={`hover:bg-neutral-300/50 capitalize ${
+                  ftv ? "bg-neutral-300/50" : ""
+                }`}
+                onClick={handleViewAllPublicProjects}
+              >
+                {t(`project.gallery`)} <ArrowUpDownIcon size={16} />
+              </Button>
+            )}
           </div>
 
           <div className={`flex items-stretch gap-6 mb-24 `}>
             {!ftv && <DocumentCreateModal />}
-            <div className="flex gap-6 flex-wrap">
+            <div className="flex flex-1 gap-6 flex-wrap">
               {ftv && <DocumentCreateModal />}
-              <PublicProjects showAll={!!ftv} />
+              <PublicProjects
+                showAll={!!ftv}
+                setShowGalleryButton={setShowGalleryButton}
+              />
             </div>
           </div>
         </div>

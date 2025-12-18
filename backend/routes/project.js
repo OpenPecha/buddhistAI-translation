@@ -1272,7 +1272,7 @@ router.post("/:id/share", authenticate, async (req, res) => {
           where: { isRoot: true },
           select: {
             id: true,
-            username: true,
+            name: true,
           },
         },
       },

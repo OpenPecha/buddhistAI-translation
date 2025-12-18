@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { AlertCircle, Search } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import {
   Pagination,
@@ -70,7 +70,13 @@ interface ApiResponse {
   };
 }
 
-const PublicProjects = ({ showAll = false }: { showAll?: boolean }) => {
+const PublicProjects = ({
+  showAll = false,
+  setShowGalleryButton,
+}: {
+  showAll?: boolean;
+  setShowGalleryButton: (show: boolean) => void;
+}) => {
   const { t } = useTranslation();
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
@@ -87,6 +93,13 @@ const PublicProjects = ({ showAll = false }: { showAll?: boolean }) => {
     limit,
     searchQuery,
   });
+  useEffect(() => {
+    if (data?.data.length > 0) {
+      setShowGalleryButton(true);
+    } else {
+      setShowGalleryButton(false);
+    }
+  }, [data, setShowGalleryButton]);
 
   const publicProjectData: OpenPechaTemplateProject[] | undefined =
     data?.data ?? [];
@@ -288,38 +301,33 @@ const PublicProjects = ({ showAll = false }: { showAll?: boolean }) => {
         to={rootDocument ? `/documents/${rootDocument.id}` : "#"}
         title={cardTitle}
         key={publicProject.id}
-        className="cursor-pointer group w-full"
+        className="cursor-pointer group  flex flex-col gap-2 w-[180px]"
       >
-        <div className="space-y-2">
-          <div
-            className={`border border-border/50 hover:shadow-lg transition-all duration-300 overflow-hidden aspect-square bg-neutral-50 dark:bg-neutral-700`}
-          >
-            <div className="px-4 pt-6 h-full flex justify-center bg-gradient-to-br from-secondary/30 to-muted/30">
-              <div className="w-full text-center space-y-3">
-                <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  TEXT
-                </div>
-                <div className="text-[10px] leading-[normal] font-monlam text-foreground/80 line-clamp-4 px-2">
-                  {publicProject.name}
-                </div>
-              </div>
+        <div className="flex-1 h-[180px]   border border-border/50 hover:shadow-lg transition-all duration-300 overflow-hidden aspect-square bg-white dark:bg-neutral-700">
+          <div className="px-4 pt-6 h-full flex justify-center items-center bg-gradient-to-br from-secondary/30 to-muted/30">
+            <div className="w-full flex flex-col justify-center items-center">
+              <img
+                src={"/src/assets/doc_icon.png"}
+                alt="Public Project"
+                className="w-10 h-10"
+              />
+              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide mt-2">
+                {publicProject.name}
+              </span>
             </div>
           </div>
-          <div className="space-y-0.5 px-1" title={publicProject.name}>
-            <span className="text-md truncate text-foreground font-light font-monlam-2 line-clamp-1">
-              {publicProject.name}
-            </span>
-            <span className="text-xs flex justify-end gap-1 text-muted-foreground">
-              {publicProject.owner?.picture && (
-                <img
-                  src={publicProject.owner.picture}
-                  className="w-4 h-4 rounded-full inline-block mr-1"
-                  alt={publicProject.owner.username}
-                />
-              )}
-              {publicProject.owner?.username}
-            </span>
-          </div>
+        </div>
+        <div className="space-y-0.5 px-1" title={publicProject.name}>
+          <span className="text-xs flex justify-end gap-1 text-muted-foreground">
+            {publicProject.owner?.picture && (
+              <img
+                src={publicProject.owner.picture}
+                className="w-4 h-4 rounded-full inline-block mr-1"
+                alt={publicProject.owner.username}
+              />
+            )}
+            {publicProject.owner?.username}
+          </span>
         </div>
       </Link>
     );
@@ -347,7 +355,7 @@ const PublicProjects = ({ showAll = false }: { showAll?: boolean }) => {
 
       {/* Mobile List View */}
       <div className="flex flex-col gap-2 sm:hidden">
-        {publicProjectData?.map((publicProject) => {
+        {publicProjectData?.slice(0, 4).map((publicProject) => {
           if (!publicProject) return null;
           return (
             <ProjectListItem
@@ -359,8 +367,8 @@ const PublicProjects = ({ showAll = false }: { showAll?: boolean }) => {
       </div>
 
       {/* Desktop Grid View */}
-      <div className="hidden sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-        {publicProjectData?.map((publicProject) => {
+      <div className="hidden h-full sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+        {publicProjectData?.slice(0, 4).map((publicProject) => {
           if (!publicProject) return null;
           return renderProjectCard(publicProject);
         })}
