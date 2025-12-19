@@ -484,7 +484,6 @@ const Editor = ({
       if (!isEditable) return;
       if (source === "user" && hasContentLoadedRef.current) {
         const currentContent = quill.getLength() > 1 ? quill.getContents() : "";
-        console.log(currentContent);
         // Only save if there's actual content (prevent saving empty editor)
         debouncedSave(currentContent as any);
       }
