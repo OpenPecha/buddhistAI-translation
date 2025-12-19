@@ -293,14 +293,14 @@ const ProjectsSection = ({
   const selectedOwnerName = selectedOwner
     ? uniqueOwners.find((owner) => owner === selectedOwner)
     : "All";
-
+  const firstCategoryTitle = categorizedProjects[0]?.category;
   return (
     <div className="mb-8">
       {/* Header Section */}
-      <div className="flex items-center py-2 px-1 mb-6 gap-4">
+      <div className="flex items-center py-2 px-1 mb-2 gap-4">
         <div className="flex-grow min-w-0">
-          <span className="text-md md:text-xl font-medium text-neutral-700/80 dark:text-neutral-100">
-            {t(`project.myProjects`)}
+          <span className=" text-sm capitalize text-neutral-600 dark:text-neutral-300 mb-3 px-1">
+            {firstCategoryTitle}
           </span>
         </div>
 
@@ -440,11 +440,13 @@ const ProjectsSection = ({
       )}
 
       {/* Categorized Projects */}
-      {categorizedProjects.map((category) => (
+      {categorizedProjects.map((category, index) => (
         <div key={category.category} className="mb-8">
-          <div className=" text-smtext-neutral-600 dark:text-neutral-300 mb-3 px-1">
-            {t(`${getCategoryTitle(category.category)}`)}
-          </div>
+          {index !== 0 && (
+            <div className=" text-sm text-neutral-600 dark:text-neutral-300 mb-3 px-1">
+              {t(`${getCategoryTitle(category.category)}`)}
+            </div>
+          )}
           <div
             className={`${
               view === "grid"
