@@ -13,7 +13,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { useFetchPublicDocuments } from "@/api/queries/documents";
-
+import DocIcon from "@/assets/doc_icon.png";
 // Types for OpenPecha data structures and backend API response
 
 export interface OpenPechaTemplateProject {
@@ -306,11 +306,7 @@ const PublicProjects = ({
         <div className="flex-1 h-[180px]   border border-border/50 hover:shadow-lg transition-all duration-300 overflow-hidden aspect-square bg-white dark:bg-neutral-700">
           <div className="px-4 pt-6 h-full flex justify-center items-center bg-gradient-to-br from-secondary/30 to-muted/30">
             <div className="w-full flex flex-col justify-center items-center">
-              <img
-                src={"/src/assets/doc_icon.png"}
-                alt="Public Project"
-                className="w-10 h-10"
-              />
+              <img src={DocIcon} alt="Public Project" className="w-10 h-10" />
               <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide mt-2">
                 {publicProject.name}
               </span>
