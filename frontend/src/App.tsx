@@ -40,7 +40,6 @@ declare global {
 if (import.meta.env.MODE === "development") {
   (window as any).__TANSTACK_QUERY_CLIENT__ = queryClient;
 }
-
 function AppContent() {
   const { i18n } = useTranslation();
   const currentLanguage = i18n.language;
