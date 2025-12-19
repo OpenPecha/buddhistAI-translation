@@ -43,7 +43,7 @@ if (import.meta.env.MODE === "development") {
 function AppContent() {
   const { i18n } = useTranslation();
   const currentLanguage = i18n.language;
-
+  console.log("AppContent");
   return (
     <div
       className={`flex s flex-col h-full ${

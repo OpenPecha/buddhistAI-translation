@@ -2,11 +2,12 @@ import fs from "node:fs";
 import path from "node:path";
 
 const ROOT = process.cwd();
-const PATTERN = "console.log";
-const MAX_SHOW = 20;
+const PATTERN = "console.log(";
 
+const MAX_SHOW = 20;
 const EXCLUDE_DIRS = new Set([
   ".git",
+  ".github",
   "node_modules",
   "dist",
   "build",
@@ -15,7 +16,7 @@ const EXCLUDE_DIRS = new Set([
   "coverage",
   "out",
 ]);
-
+const EXCLUDE_FILES = new Set([path.join("scripts", "no-console-log.mjs")]);
 const EXCLUDE_EXT = new Set([
   ".png",
   ".jpg",
@@ -37,15 +38,21 @@ const EXCLUDE_EXT = new Set([
   ".eot",
   ".map",
 ]);
+const ALLOW_EXT = new Set([".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs"]);
 
 function shouldSkip(filePath, stats) {
   const rel = path.relative(ROOT, filePath);
+
+  if (EXCLUDE_FILES.has(rel)) return true;
+
   const parts = rel.split(path.sep);
   if (parts.some((p) => EXCLUDE_DIRS.has(p))) return true;
+
   if (!stats.isFile()) return true;
   const ext = path.extname(filePath).toLowerCase();
+  if (!ALLOW_EXT.has(ext)) return true;
   if (EXCLUDE_EXT.has(ext)) return true;
-  // Skip minified files
+
   if (filePath.endsWith(".min.js") || filePath.endsWith(".min.css"))
     return true;
   return false;
