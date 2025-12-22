@@ -20,6 +20,7 @@ import MetadataContent from "./MetadataContent";
 import UploadContent from "./UploadContent";
 import SidebarTabs from "./SidebarTabs";
 import SidebarHeader from "./SidebarHeader";
+import { RiGeminiLine } from "react-icons/ri";
 
 interface DocumentSidebarProps {
   documentId: string;
@@ -72,7 +73,7 @@ const DocumentSidebar: React.FC<DocumentSidebarProps> = ({
       ? [
           {
             id: "translation",
-            icon: MessageSquare,
+            icon: RiGeminiLine,
             label: t(`translation.aiTranslation`),
             shortLabel: "Translator",
           },
