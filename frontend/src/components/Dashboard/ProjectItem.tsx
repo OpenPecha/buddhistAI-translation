@@ -140,6 +140,13 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
             <div className="flex items-center text-xs text-gray-500">
               <span className="mr-2">{date}</span>
               {owner && <span>· {owner}</span>}
+              {isPublic && (
+                <MdPublic
+                  size={16}
+                  className="text-gray-500 ml-2"
+                  title="Public"
+                />
+              )}
             </div>
             {hasSharedUsers && (
               <span>
