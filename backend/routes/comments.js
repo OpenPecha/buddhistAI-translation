@@ -583,20 +583,6 @@ router.post("/", authenticate, async (req, res, next) => {
     }
   } catch (error) {
     logger.error("Error creating comment", error);
-    if (!res.headersSent) {
-      res.writeHead(500, { "Content-Type": "application/json" });
-      res.end(
-        JSON.stringify({ type: "error", message: "Failed to add comment" })
-      );
-    } else {
-      res.write(
-        `data: ${JSON.stringify({
-          type: "error",
-          message: "Failed to process AI comment",
-        })}\n\n`
-      );
-      res.end();
-    }
     next(error);
   }
 });

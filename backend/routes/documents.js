@@ -843,7 +843,7 @@ router.patch("/:id", authenticate, async (req, res) => {
     });
 
     if (!document) {
-      return res.status(404).json({ error: "Document not found" });
+      throw new Error("Document not found");
     }
 
     // Check if user has permission to access this document
@@ -851,10 +851,7 @@ router.patch("/:id", authenticate, async (req, res) => {
 
     // If user doesn't have permission, deny access
     if (!hasPermission) {
-      return res.status(403).json({
-        success: false,
-        message: "You do not have permission to edit this document",
-      });
+      throw new Error("You do not have permission to edit this document");
     }
 
     // If only name and/or language is provided, just update those fields
@@ -882,16 +879,12 @@ router.patch("/:id", authenticate, async (req, res) => {
 
     // Validate the request
     if (rootId && isRoot) {
-      return res.status(400).json({
-        error: "A document cannot be both a root and a translation",
-      });
+      throw new Error("A document cannot be both a root and a translation");
     }
 
     // If translations array is provided and document is not a root, reject
     if (translations && !document.isRoot && !isRoot) {
-      return res.status(400).json({
-        error: "Only root documents can have translations",
-      });
+      throw new Error("Only root documents can have translations");
     }
 
     // If rootId is provided, verify it exists
@@ -901,13 +894,11 @@ router.patch("/:id", authenticate, async (req, res) => {
       });
 
       if (!rootDoc) {
-        return res.status(404).json({ error: "Root document not found" });
+        throw new Error("Root document not found");
       }
 
       if (!rootDoc.isRoot) {
-        return res.status(400).json({
-          error: "Target document is not a root document",
-        });
+        throw new Error("Target document is not a root document");
       }
     }
 
@@ -922,10 +913,7 @@ router.patch("/:id", authenticate, async (req, res) => {
       });
 
       if (translationDocs.length !== translations.length) {
-        return sendBadRequest(
-          res,
-          "One or more translation documents not found"
-        );
+        throw new Error("One or more translation documents not found");
       }
 
       // Check if any of these documents are roots or already translations
@@ -934,10 +922,7 @@ router.patch("/:id", authenticate, async (req, res) => {
       );
 
       if (invalidDocs.length > 0) {
-        return sendBadRequest(
-          res,
-          "Some documents are already roots or translations"
-        );
+        throw new Error("Some documents are already roots or translations");
       }
     }
 
