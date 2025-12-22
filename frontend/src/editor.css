@@ -154,7 +154,10 @@ z-index: 9999;
 }
 .ql-formats button:hover {
 	border-radius: 4px;
-	background-color: var(--color-neutral-700);
+	background-color: var(--color-neutral-200);
+}
+.dark .ql-formats button:hover {
+	background-color: var(--color-neutral-700) !important;
 }
 .ql-toolbar.ql-snow {
 	border: none !important;
