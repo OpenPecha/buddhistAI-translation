@@ -7,6 +7,7 @@ import {
   Copy,
   FileText,
   Globe,
+  StopCircle,
   X,
 } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -55,6 +56,7 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
     startStandardizationTranslation,
     standardizationSelections,
     setStandardizationSelections,
+    stopTranslation,
   } = useTranslation();
 
   useEffect(() => {
@@ -91,13 +93,19 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
   const getPanelTitle = (type: PanelType) => {
     switch (type) {
       case "translation": {
-        return t("translation.translationResultsCount", { count: translationResults.length });
+        return t("translation.translationResultsCount", {
+          count: translationResults.length,
+        });
       }
       case "glossary": {
-        return t("translation.glossaryTermsCount", { count: glossaryTerms.length });
+        return t("translation.glossaryTermsCount", {
+          count: glossaryTerms.length,
+        });
       }
       case "inconsistency": {
-        return t("translation.inconsistencyReportCount", { count: Object.keys(inconsistentTerms).length });
+        return t("translation.inconsistencyReportCount", {
+          count: Object.keys(inconsistentTerms).length,
+        });
       }
       case "standardized": {
         const suffix = hasStandardizedResults
@@ -164,7 +172,9 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
                         <TbReplaceFilled className="w-3 h-3 " />
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent>{t("translation.overwriteAllResults")}</TooltipContent>
+                    <TooltipContent>
+                      {t("translation.overwriteAllResults")}
+                    </TooltipContent>
                   </Tooltip>
                 )}
 
@@ -180,7 +190,9 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
                       <BookText className="w-3 h-3" />
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>{t("translation.generateGlossary")}</TooltipContent>
+                  <TooltipContent>
+                    {t("translation.generateGlossary")}
+                  </TooltipContent>
                 </Tooltip>
               )}
               {/* Close button for translation */}
@@ -200,6 +212,14 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
                 </Tooltip>
               )}
             </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-5 w-5 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30"
+              onClick={stopTranslation}
+            >
+              <StopCircle />
+            </Button>
           </div>
 
           {expandedPanel === "translation" && (
