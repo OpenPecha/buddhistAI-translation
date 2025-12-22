@@ -414,6 +414,10 @@ const Editor = ({
                   elementAtLine.tagName.toLowerCase() === "p"
                 ) {
                   elementAtLine.classList.add("selected_text_segment");
+                  elementAtLine.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center",
+                  });
                 }
               }
             });
