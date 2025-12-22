@@ -133,6 +133,11 @@ router.get("/public", authenticate, async (req, res, next) => {
 
   const whereClause = {
     isPublic: true,
+    owner: {
+      NOT: {
+        id: req.user.id,
+      },
+    },
   };
 
   if (searchQuery) {

@@ -10,6 +10,7 @@ import {
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { BiRename } from "react-icons/bi";
 import { useTranslation } from "react-i18next";
+import { MdPublic } from "react-icons/md";
 
 interface ProjectItemProps {
   title: string;
@@ -26,6 +27,7 @@ interface ProjectItemProps {
   status?: string;
   documentCount?: number;
   url?: string;
+  isPublic?: boolean;
 }
 
 const ProjectItem: React.FC<ProjectItemProps> = ({
@@ -42,6 +44,7 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
   view,
   documentCount = 0,
   url,
+  isPublic = false,
 }) => {
   if (view === "list") {
     return (
@@ -52,7 +55,7 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
 
         <div className="flex-grow  w-fit md:w-auto">
           <div className="flex items-center">
-            <span className="text-sm font-monlam-2 truncate capitalize font-semibold tracking-wider">
+            <span className="flex text-sm font-monlam-2 truncate capitalize font-semibold tracking-wider">
               {title}
             </span>
 
@@ -86,8 +89,11 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
         </div>
 
         {/* Desktop: Show owner and date in separate columns */}
-        <div className="hidden sm:flex flex-shrink-0 text-sm text-neutral-500 dark:text-neutral-400 mx-4 w-36 text-right">
+        <div className="hidden sm:flex items-center flex-shrink-0 text-sm text-neutral-500 dark:text-neutral-400 mx-4 w-36 text-right">
           {owner ?? "—"}
+          {isPublic && (
+            <MdPublic size={16} className="text-gray-500 ml-2" title="Public" />
+          )}
         </div>
 
         <div className="hidden sm:flex flex-shrink-0 text-sm text-neutral-500 dark:text-neutral-400 w-36">

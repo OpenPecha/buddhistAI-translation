@@ -19,6 +19,7 @@ export interface Project {
   createdAt: string;
   updatedAt: string;
   status: string;
+  isPublic: boolean;
   metadata?: Record<string, unknown>;
   roots?: {
     id: string;
@@ -569,7 +570,7 @@ export const getPorjectCollaborators = async (
     const response = await fetch(
       `${server_url}/projects/${projectId}/accessible-users`,
       {
-        headers: getHeaders()
+        headers: getHeaders(),
       }
     );
 

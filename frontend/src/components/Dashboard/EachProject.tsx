@@ -138,6 +138,7 @@ export default function EachProject({
           view={view}
           status={project.status}
           url={url}
+          isPublic={project.isPublic}
         />
       </Link>
 
