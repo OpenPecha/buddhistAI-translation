@@ -1208,10 +1208,6 @@ router.get("/:id/export", authenticate, async (req, res, next) => {
       await archive.finalize();
     }
   } catch (error) {
-    logger.error("Error creating zip file", error);
-    if (!res.headersSent) {
-      return sendError(res, error.message, 500);
-    }
     next(error);
   }
 });

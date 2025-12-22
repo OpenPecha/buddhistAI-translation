@@ -206,9 +206,14 @@ export const useTranslationController = ({
   ) => {
     updateConfig(key, value);
   };
-
+  function getTextToTranslate() {
+    if (selectedText.trim() !== "") {
+      return selectedText;
+    }
+    return manualText.trim();
+  }
   const startTranslation = async () => {
-    const currentText = selectedText.trim();
+    const currentText = getTextToTranslate();
 
     if (!currentText) {
       setError("Please select text or enter text to translate");
@@ -220,7 +225,7 @@ export const useTranslationController = ({
     resetCopyFeedback();
     resetGlossaryInternal(); // Reset glossary list
     resetStandardization();
-    await startTranslationInternal();
+    await startTranslationInternal(currentText);
   };
 
   const copyGlossaryTerms = () => {
