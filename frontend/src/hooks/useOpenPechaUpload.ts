@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { uploadTranslationToOpenpecha } from "@/api/openpecha";
-import { useEditor } from "@/contexts/EditorContext";
+import { useEditor } from "@/hooks/useEditor";
 import { calculateAnnotations } from "@/utils/calculateAnnotations";
 import type { Document } from "./useCurrentDoc";
 
@@ -15,7 +15,7 @@ interface Metadata {
 }
 const isMetadataAvailable = (metadata: Metadata | undefined) => {
   return metadata?.instanceId && metadata?.textId && metadata?.docId;
-}
+};
 export function useOpenPechaUpload({
   sourceDoc,
   translationDoc,
@@ -25,8 +25,11 @@ export function useOpenPechaUpload({
   const [error, setError] = useState<string | null>(null);
 
   const instance_id = sourceDoc?.metadata?.instanceId as string | undefined;
-  const isUploadable =(() => {
-    if (isMetadataAvailable(sourceDoc?.metadata) && !isMetadataAvailable(translationDoc?.metadata)) {
+  const isUploadable = (() => {
+    if (
+      isMetadataAvailable(sourceDoc?.metadata) &&
+      !isMetadataAvailable(translationDoc?.metadata)
+    ) {
       return true;
     }
     return false;
@@ -59,11 +62,11 @@ export function useOpenPechaUpload({
       const translationContentRaw = translationQuill.getText();
       const translationContentProcessed = translationContentRaw.replace(
         /\n+/g,
-        "\n",
+        "\n"
       );
 
       const { annotations: sourceAnnotations } = calculateAnnotations(
-        sourceContentProcessed,
+        sourceContentProcessed
       );
       const {
         annotations: translationAnnotations,
@@ -80,7 +83,7 @@ export function useOpenPechaUpload({
           ...anno,
           index,
           alignment_index: [index],
-        }),
+        })
       );
 
       const payload = {
@@ -92,10 +95,16 @@ export function useOpenPechaUpload({
         alignment_annotation,
       };
 
-      await uploadTranslationToOpenpecha(instance_id, payload,translationDoc.id);
+      await uploadTranslationToOpenpecha(
+        instance_id,
+        payload,
+        translationDoc.id
+      );
       return true;
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An unknown error occurred.");
+      setError(
+        err instanceof Error ? err.message : "An unknown error occurred."
+      );
       return false;
     } finally {
       setIsUploading(false);

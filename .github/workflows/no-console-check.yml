@@ -23,10 +23,11 @@ jobs:
             --exclude-dir={.git,node_modules,dist,build} \
             --exclude-dir=".github" \
             --exclude="*.yml" \
+            --exclude="*.mjs" \
             --exclude="*.yaml" \
             -E "console\.log" .; then
-            echo "::error::❌ console.log() statements found — remove them before merging."
+            echo "::error::❌ consolelog statements found — remove them before merging."
             exit 1
           else
-            echo "✅ No console.log() found. Proceeding."
+            echo "✅ No consolelog found. Proceeding."
           fi

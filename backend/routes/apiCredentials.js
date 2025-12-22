@@ -2,39 +2,15 @@ const express = require("express");
 const router = express.Router();
 const { prisma } = require("../services/db");
 const { authenticate } = require("../middleware/authenticate");
-const crypto = require("crypto");
-
-// Encryption functions for API keys
-const ENCRYPTION_KEY =
-  process.env.ENCRYPTION_KEY || "default-encryption-key-32-characters";
-const IV_LENGTH = 16; // For AES, this is always 16
-
-// Create a 32-byte key from any length input using SHA-256
-function getKey(password) {
-  return crypto.createHash("sha256").update(String(password)).digest();
-}
-
-function encrypt(text) {
-  // Get a 32-byte key from our variable length password
-  const key = getKey(ENCRYPTION_KEY);
-  const iv = crypto.randomBytes(IV_LENGTH);
-  const cipher = crypto.createCipheriv("aes-256-cbc", key, iv);
-  let encrypted = cipher.update(text);
-  encrypted = Buffer.concat([encrypted, cipher.final()]);
-  return iv.toString("hex") + ":" + encrypted.toString("hex");
-}
-
-function decrypt(text) {
-  // Get a 32-byte key from our variable length password
-  const key = getKey(ENCRYPTION_KEY);
-  const textParts = text.split(":");
-  const iv = Buffer.from(textParts.shift(), "hex");
-  const encryptedText = Buffer.from(textParts.join(":"), "hex");
-  const decipher = crypto.createDecipheriv("aes-256-cbc", key, iv);
-  let decrypted = decipher.update(encryptedText);
-  decrypted = Buffer.concat([decrypted, decipher.final()]);
-  return decrypted.toString();
-}
+const { encrypt, decrypt, maskApiKey } = require("../utils/encryption");
+const logger = require("../utils/logger");
+const {
+  sendSuccess,
+  sendError,
+  sendNotFound,
+  sendForbidden,
+  sendBadRequest,
+} = require("../utils/response");
 
 /**
  * GET /api-credentials
@@ -44,7 +20,7 @@ function decrypt(text) {
  * @return {object} 200 - List of API credentials
  * @return {object} 500 - Server error
  */
-router.get("/", authenticate, async (req, res) => {
+router.get("/", authenticate, async (req, res, next) => {
   try {
     const credentials = await prisma.apiCredential.findMany({
       where: { userId: req.user.id },
@@ -56,13 +32,10 @@ router.get("/", authenticate, async (req, res) => {
       },
     });
 
-    res.json({
-      success: true,
-      data: credentials,
-    });
+    return sendSuccess(res, credentials);
   } catch (error) {
-    console.error("Error fetching API credentials:", error);
-    res.status(500).json({ error: error.message });
+    logger.error("Error fetching API credentials", error);
+    next(error);
   }
 });
 
@@ -77,7 +50,7 @@ router.get("/", authenticate, async (req, res) => {
  * @return {object} 404 - Credential not found
  * @return {object} 500 - Server error
  */
-router.get("/:id", authenticate, async (req, res) => {
+router.get("/:id", authenticate, async (req, res, next) => {
   try {
     const { id } = req.params;
 
@@ -94,14 +67,15 @@ router.get("/:id", authenticate, async (req, res) => {
     });
 
     if (!credential) {
-      return res.status(404).json({ error: "API credential not found" });
+      return sendNotFound(res, "API credential");
     }
 
     // Check if the user owns this credential
     if (credential.userId !== req.user.id) {
-      return res
-        .status(403)
-        .json({ error: "You don't have permission to view this credential" });
+      return sendForbidden(
+        res,
+        "You don't have permission to view this credential"
+      );
     }
 
     // Decrypt the API key
@@ -109,25 +83,19 @@ router.get("/:id", authenticate, async (req, res) => {
 
     // Include both the full API key and a masked version
     // The frontend will decide which one to display based on user interaction
-    const maskedApiKey =
-      apiKey.length > 8
-        ? `${apiKey.substring(0, 4)}...${apiKey.substring(apiKey.length - 4)}`
-        : "****";
+    const maskedApiKey = maskApiKey(apiKey);
 
-    res.json({
-      success: true,
-      data: {
-        id: credential.id,
-        provider: credential.provider,
-        apiKey: apiKey, // Send the full API key
-        maskedApiKey: maskedApiKey, // Also send the masked version
-        createdAt: credential.createdAt,
-        updatedAt: credential.updatedAt,
-      },
+    return sendSuccess(res, {
+      id: credential.id,
+      provider: credential.provider,
+      apiKey: apiKey, // Send the full API key
+      maskedApiKey: maskedApiKey, // Also send the masked version
+      createdAt: credential.createdAt,
+      updatedAt: credential.updatedAt,
     });
   } catch (error) {
-    console.error("Error fetching API credential:", error);
-    res.status(500).json({ error: error.message });
+    logger.error("Error fetching API credential", error);
+    next(error);
   }
 });
 
@@ -143,15 +111,13 @@ router.get("/:id", authenticate, async (req, res) => {
  * @return {object} 400 - Bad request - Missing required fields
  * @return {object} 500 - Server error
  */
-router.post("/", authenticate, async (req, res) => {
+router.post("/", authenticate, async (req, res, next) => {
   try {
     const { provider, apiKey } = req.body;
 
     // Validate required fields
     if (!provider || !apiKey) {
-      return res.status(400).json({
-        error: "Provider and API key are required",
-      });
+      return sendBadRequest(res, "Provider and API key are required");
     }
 
     // Check if user already has a credential for this provider
@@ -178,11 +144,7 @@ router.post("/", authenticate, async (req, res) => {
         },
       });
 
-      return res.json({
-        success: true,
-        data: updatedCredential,
-        message: "API credential updated",
-      });
+      return sendSuccess(res, updatedCredential, "API credential updated");
     }
 
     // Create new credential
@@ -200,13 +162,10 @@ router.post("/", authenticate, async (req, res) => {
       },
     });
 
-    res.status(201).json({
-      success: true,
-      data: newCredential,
-    });
+    return sendSuccess(res, newCredential, null, 201);
   } catch (error) {
-    console.error("Error creating API credential:", error);
-    res.status(500).json({ error: error.message });
+    logger.error("Error creating API credential", error);
+    next(error);
   }
 });
 
@@ -224,7 +183,7 @@ router.post("/", authenticate, async (req, res) => {
  * @return {object} 404 - Credential not found
  * @return {object} 500 - Server error
  */
-router.put("/:id", authenticate, async (req, res) => {
+router.put("/:id", authenticate, async (req, res, next) => {
   try {
     const { id } = req.params;
     const { provider, apiKey } = req.body;
@@ -236,13 +195,14 @@ router.put("/:id", authenticate, async (req, res) => {
     });
 
     if (!credential) {
-      return res.status(404).json({ error: "API credential not found" });
+      return sendNotFound(res, "API credential");
     }
 
     if (credential.userId !== req.user.id) {
-      return res
-        .status(403)
-        .json({ error: "You don't have permission to update this credential" });
+      return sendForbidden(
+        res,
+        "You don't have permission to update this credential"
+      );
     }
 
     // Prepare update data
@@ -262,13 +222,10 @@ router.put("/:id", authenticate, async (req, res) => {
       },
     });
 
-    res.json({
-      success: true,
-      data: updatedCredential,
-    });
+    return sendSuccess(res, updatedCredential);
   } catch (error) {
-    console.error("Error updating API credential:", error);
-    res.status(500).json({ error: error.message });
+    logger.error("Error updating API credential", error);
+    next(error);
   }
 });
 
@@ -283,7 +240,7 @@ router.put("/:id", authenticate, async (req, res) => {
  * @return {object} 404 - Credential not found
  * @return {object} 500 - Server error
  */
-router.delete("/:id", authenticate, async (req, res) => {
+router.delete("/:id", authenticate, async (req, res, next) => {
   try {
     const { id } = req.params;
 
@@ -294,13 +251,14 @@ router.delete("/:id", authenticate, async (req, res) => {
     });
 
     if (!credential) {
-      return res.status(404).json({ error: "API credential not found" });
+      return sendNotFound(res, "API credential");
     }
 
     if (credential.userId !== req.user.id) {
-      return res
-        .status(403)
-        .json({ error: "You don't have permission to delete this credential" });
+      return sendForbidden(
+        res,
+        "You don't have permission to delete this credential"
+      );
     }
 
     // Delete the credential
@@ -308,13 +266,10 @@ router.delete("/:id", authenticate, async (req, res) => {
       where: { id },
     });
 
-    res.json({
-      success: true,
-      message: "API credential deleted successfully",
-    });
+    return sendSuccess(res, null, "API credential deleted successfully");
   } catch (error) {
-    console.error("Error deleting API credential:", error);
-    res.status(500).json({ error: error.message });
+    logger.error("Error deleting API credential", error);
+    next(error);
   }
 });
 
@@ -328,7 +283,7 @@ router.delete("/:id", authenticate, async (req, res) => {
  * @return {object} 404 - No credential found for this provider
  * @return {object} 500 - Server error
  */
-router.get("/provider/:provider", authenticate, async (req, res) => {
+router.get("/provider/:provider", authenticate, async (req, res, next) => {
   try {
     const { provider } = req.params;
 
@@ -346,18 +301,13 @@ router.get("/provider/:provider", authenticate, async (req, res) => {
     });
 
     if (!credential) {
-      return res
-        .status(404)
-        .json({ error: `No API credential found for ${provider}` });
+      return sendNotFound(res, `API credential for ${provider}`);
     }
 
-    res.json({
-      success: true,
-      data: credential,
-    });
+    return sendSuccess(res, credential);
   } catch (error) {
-    console.error("Error fetching API credential by provider:", error);
-    res.status(500).json({ error: error.message });
+    logger.error("Error fetching API credential by provider", error);
+    next(error);
   }
 });
 
@@ -373,14 +323,12 @@ router.get("/provider/:provider", authenticate, async (req, res) => {
  * @return {object} 400 - Bad request - Missing required fields
  * @return {object} 500 - Server error
  */
-router.post("/verify", authenticate, async (req, res) => {
+router.post("/verify", authenticate, async (req, res, next) => {
   try {
     const { provider, apiKey } = req.body;
 
     if (!provider || !apiKey) {
-      return res.status(400).json({
-        error: "Provider and API key are required",
-      });
+      return sendBadRequest(res, "Provider and API key are required");
     }
 
     // Here you would implement provider-specific verification logic
@@ -410,17 +358,14 @@ router.post("/verify", authenticate, async (req, res) => {
       errorMessage = verificationError.message;
     }
 
-    res.json({
-      success: true,
-      data: {
-        isValid,
-        provider,
-        errorMessage,
-      },
+    return sendSuccess(res, {
+      isValid,
+      provider,
+      errorMessage,
     });
   } catch (error) {
-    console.error("Error verifying API key:", error);
-    res.status(500).json({ error: error.message });
+    logger.error("Error verifying API key", error);
+    next(error);
   }
 });
 

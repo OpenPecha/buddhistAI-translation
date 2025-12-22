@@ -30,14 +30,13 @@ const ChatSidebarContent: React.FC = () => {
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
   const { messages, clearHistory, messageCount, handleAction } = useChatFlow();
-
   const {
     config,
+    selectedText,
     handleConfigChange,
     isTranslating,
     isExtractingGlossary,
     isAnalyzingStandardization,
-    selectedText,
     selectedTextLineNumbers,
     clearSelection,
     resetTranslations,
@@ -47,7 +46,6 @@ const ChatSidebarContent: React.FC = () => {
     inconsistentTerms,
     inputMode,
   } = useTranslation();
-
   const hasTranslationResults = translationResults.length > 0;
   const hasGlossaryResults = glossaryTerms.length > 0;
   const hasInconsistentTerms = Object.keys(inconsistentTerms).length > 0;
@@ -126,7 +124,6 @@ const ChatSidebarContent: React.FC = () => {
       </div>
     );
   }
-
   return (
     <div className="h-full w-full flex flex-col bg-white dark:bg-gray-900">
       {/* Header */}

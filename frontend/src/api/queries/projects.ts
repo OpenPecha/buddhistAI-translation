@@ -32,6 +32,7 @@ const useFetchProjects = ({
       }),
     refetchOnWindowFocus: false,
     keepPreviousData: true,
+    select: (data) => data.data,
   });
 };
 

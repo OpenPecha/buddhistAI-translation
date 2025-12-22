@@ -216,19 +216,18 @@ export const useTranslationOperations = ({
     }
   };
 
-  const startTranslation = async () => {
+  const startTranslation = async (text: string) => {
+    const selectedText = text;
     if (!selectedText.trim()) {
       setError("Please enter text to translate");
       return;
     }
     resetTranslations();
-
     // Reset segment index counter
     currentSegmentIndexRef.current = 0;
 
     // Capture current line numbers before translation starts
     const capturedLineNumbers = selectedTextLineNumbers;
-
     setIsTranslating(true);
     setCurrentStatus(t("translation.initializing"));
     setProgressPercent(0);
@@ -268,7 +267,6 @@ export const useTranslationOperations = ({
         user_rules: config.userRules,
         context: context,
       };
-
       await performStreamingTranslation(
         translationParams,
         // onEvent - handle structured events

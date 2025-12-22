@@ -34,12 +34,18 @@ const {
   getProjectWithDocuments,
 } = require("../utils/model");
 const { sendProgress, progressStreams } = require("../utils/progress");
-const { sendEmail } = require("../services/utils");
 const {
-  projectSharedTemplate,
-  projectPermissionUpdatedTemplate,
-  projectPermissionRemovedTemplate,
-} = require("../utils/emailTemplates");
+  sendSuccess,
+  sendError,
+  sendNotFound,
+  sendForbidden,
+  sendBadRequest,
+} = require("../utils/response");
+const logger = require("../utils/logger");
+const {
+  sendProjectPermissionEmail,
+  sendProjectPermissionRemovedEmail,
+} = require("../utils/notifications");
 
 const { prisma } = require("../services/db");
 
@@ -47,7 +53,7 @@ const { prisma } = require("../services/db");
 const TEXT_CHUNK_LENGTH = 300; // Characters per chunk
 
 // Get all projects
-router.get("/", authenticate, async (req, res) => {
+router.get("/", authenticate, async (req, res, next) => {
   const searchQuery = req.query.search || "";
   const status = req.query.status || "active";
   const page = parseInt(req.query.page) || 1;
@@ -103,7 +109,7 @@ router.get("/", authenticate, async (req, res) => {
     ]);
     const totalPages = Math.ceil(totalCount / limit);
 
-    res.json({
+    return sendSuccess(res, {
       data: projects,
       pagination: {
         page,
@@ -113,13 +119,13 @@ router.get("/", authenticate, async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error fetching projects:", error);
-    res.status(500).json({ error: error.message });
+    logger.error("Error fetching projects", error);
+    next(error);
   }
 });
 
 //get project templates
-router.get("/public", authenticate, async (req, res) => {
+router.get("/public", authenticate, async (req, res, next) => {
   const searchQuery = req.query.search || "";
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
@@ -169,8 +175,7 @@ router.get("/public", authenticate, async (req, res) => {
     const startItem = (page - 1) * limit + 1;
     const endItem = Math.min(page * limit, totalCount);
 
-    res.json({
-      success: true,
+    return sendSuccess(res, {
       data: publicProjects,
       pagination: {
         currentPage: page, // ftv - current page number
@@ -195,40 +200,38 @@ router.get("/public", authenticate, async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error fetching project templates:", error);
-    res.status(500).json({ error: error.message });
+    logger.error("Error fetching project templates", error);
+    next(error);
   }
 });
 
 // Add user to project by email
-router.post("/:id/users/email", authenticate, async (req, res) => {
+router.post("/:id/users/email", authenticate, async (req, res, next) => {
   try {
     const { id } = req.params;
     const { email, canWrite = false } = req.body;
 
     if (!email) {
-      return res.status(400).json({ error: "Email is required" });
+      return sendBadRequest(res, "Email is required");
     }
 
     // Check if project exists and user has permission
     const existingProject = await getProjectById(id);
 
     if (!existingProject) {
-      return res.status(404).json({ error: "Project not found" });
+      return sendNotFound(res, "Project");
     }
 
     // Only the owner can add users
     if (existingProject.ownerId !== req.user.id) {
-      return res
-        .status(403)
-        .json({ error: "Not authorized to add users to this project" });
+      return sendForbidden(res, "Not authorized to add users to this project");
     }
 
     // Find the user by email
     const userToAdd = await getUserByEmail(email);
 
     if (!userToAdd) {
-      return res.status(404).json({ error: "User not found" });
+      return sendNotFound(res, "User");
     }
 
     // Check if user already has permission
@@ -244,52 +247,38 @@ router.post("/:id/users/email", authenticate, async (req, res) => {
       );
 
       // Send email notification
-      try {
-        const accessLevel = canWrite ? "editor" : "viewer";
-        const emailMessage = projectPermissionUpdatedTemplate({
-          projectName: existingProject.name,
-          accessLevel: accessLevel,
-        });
-        await sendEmail([email], emailMessage);
-      } catch (emailError) {
-        console.error("Failed to send email notification:", emailError);
-      }
+      const accessLevel = canWrite ? "editor" : "viewer";
+      await sendProjectPermissionEmail(
+        email,
+        existingProject.name,
+        accessLevel,
+        true
+      );
 
-      return res.json({
-        success: true,
-        message: "User permission updated",
-        data: updatedPermission,
-      });
+      return sendSuccess(res, updatedPermission, "User permission updated");
     }
 
     // Create new permission
     const newPermission = await createPermission(id, userToAdd, canWrite);
 
     // Send email notification for new permission
-    try {
-      const accessLevel = canWrite ? "editor" : "viewer";
-      const emailMessage = projectSharedTemplate({
-        projectName: existingProject.name,
-        accessLevel: accessLevel,
-      });
-      await sendEmail([email], emailMessage);
-    } catch (emailError) {
-      console.error("Failed to send email notification:", emailError);
-    }
+    const accessLevel = canWrite ? "editor" : "viewer";
+    await sendProjectPermissionEmail(
+      email,
+      existingProject.name,
+      accessLevel,
+      false
+    );
 
-    res.status(201).json({
-      success: true,
-      message: "User added to project",
-      data: newPermission,
-    });
+    return sendSuccess(res, newPermission, "User added to project", 201);
   } catch (error) {
-    console.error("Error adding user to project:", error);
-    res.status(500).json({ error: error.message });
+    logger.error("Error adding user to project", error);
+    next(error);
   }
 });
 
 // Get project permissions
-router.get("/:id/permissions", authenticate, async (req, res) => {
+router.get("/:id/permissions", authenticate, async (req, res, next) => {
   try {
     const { id } = req.params;
 
@@ -297,7 +286,7 @@ router.get("/:id/permissions", authenticate, async (req, res) => {
     const existingProject = await getProjectWithPermissions(id);
 
     if (!existingProject) {
-      return res.status(404).json({ error: "Project not found" });
+      return sendNotFound(res, "Project");
     }
 
     // Check if user has permission to view project
@@ -306,21 +295,16 @@ router.get("/:id/permissions", authenticate, async (req, res) => {
       existingProject.permissions.some((p) => p.userId === req.user.id);
 
     if (!hasPermission) {
-      return res
-        .status(403)
-        .json({ error: "Not authorized to view this project" });
+      return sendForbidden(res, "Not authorized to view this project");
     }
 
-    res.json({
-      success: true,
-      data: {
-        owner: existingProject.owner,
-        permissions: existingProject.permissions,
-      },
+    return sendSuccess(res, {
+      owner: existingProject.owner,
+      permissions: existingProject.permissions,
     });
   } catch (error) {
-    console.error("Error fetching project permissions:", error);
-    res.status(500).json({ error: error.message });
+    logger.error("Error fetching project permissions", error);
+    next(error);
   }
 });
 
@@ -335,7 +319,7 @@ router.get("/:id/permissions", authenticate, async (req, res) => {
  * @return {object} 404 - Project not found
  * @return {object} 500 - Server error
  */
-router.get("/:id/accessible-users", authenticate, async (req, res) => {
+router.get("/:id/accessible-users", authenticate, async (req, res, next) => {
   try {
     const { id } = req.params;
 
@@ -366,7 +350,7 @@ router.get("/:id/accessible-users", authenticate, async (req, res) => {
     });
 
     if (!project) {
-      return res.status(404).json({ error: "Project not found" });
+      return sendNotFound(res, "Project");
     }
 
     const hasPermission =
@@ -374,9 +358,7 @@ router.get("/:id/accessible-users", authenticate, async (req, res) => {
       project.permissions.some((p) => p.userId === req.user.id);
 
     if (!hasPermission) {
-      return res
-        .status(403)
-        .json({ error: "Not authorized to view this project's users" });
+      return sendForbidden(res, "Not authorized to view this project's users");
     }
 
     const accessibleUsers = [];
@@ -399,62 +381,56 @@ router.get("/:id/accessible-users", authenticate, async (req, res) => {
       }
     });
 
-    res.json({
-      success: true,
-      data: accessibleUsers,
-    });
+    return sendSuccess(res, accessibleUsers);
   } catch (error) {
-    console.error("Error fetching accessible users:", error);
-    res.status(500).json({ error: error.message });
+    logger.error("Error fetching accessible users", error);
+    next(error);
   }
 });
 
 // Update user permissions in project
-router.patch("/:id/users/:userId", authenticate, async (req, res) => {
+router.patch("/:id/users/:userId", authenticate, async (req, res, next) => {
   try {
     const { id, userId } = req.params;
     const { canWrite } = req.body;
 
     if (canWrite === undefined) {
-      return res.status(400).json({ error: "canWrite is required" });
+      return sendBadRequest(res, "canWrite is required");
     }
 
     // Check if project exists and user has permission
     const existingProject = await getProject(id);
 
     if (!existingProject) {
-      return res.status(404).json({ error: "Project not found" });
+      return sendNotFound(res, "Project");
     }
 
     // Only the owner can update permissions
     if (existingProject.ownerId !== req.user.id) {
-      return res.status(403).json({
-        error: "Not authorized to update permissions in this project",
-      });
+      return sendForbidden(
+        res,
+        "Not authorized to update permissions in this project"
+      );
     }
 
     // Find the permission
     const permission = await getPermission(id, userId);
 
     if (!permission) {
-      return res.status(404).json({ error: "Permission not found" });
+      return sendNotFound(res, "Permission");
     }
 
     // Update the permission
     const updatedPermission = await updatePermission(permission, canWrite);
-    res.json({
-      success: true,
-      message: "User permission updated",
-      data: updatedPermission,
-    });
+    return sendSuccess(res, updatedPermission, "User permission updated");
   } catch (error) {
-    console.error("Error updating user permission:", error);
-    res.status(500).json({ error: error.message });
+    logger.error("Error updating user permission", error);
+    next(error);
   }
 });
 
 // Remove user from project
-router.delete("/:id/users/:userId", authenticate, async (req, res) => {
+router.delete("/:id/users/:userId", authenticate, async (req, res, next) => {
   try {
     const { id, userId } = req.params;
 
@@ -462,14 +438,15 @@ router.delete("/:id/users/:userId", authenticate, async (req, res) => {
     const existingProject = await getProject(id);
 
     if (!existingProject) {
-      return res.status(404).json({ error: "Project not found" });
+      return sendNotFound(res, "Project");
     }
 
     // Only the owner can remove users
     if (existingProject.ownerId !== req.user.id) {
-      return res
-        .status(403)
-        .json({ error: "Not authorized to remove users from this project" });
+      return sendForbidden(
+        res,
+        "Not authorized to remove users from this project"
+      );
     }
 
     // Find the permission with user details
@@ -489,31 +466,24 @@ router.delete("/:id/users/:userId", authenticate, async (req, res) => {
     });
 
     if (!permission) {
-      return res.status(404).json({ error: "Permission not found" });
+      return sendNotFound(res, "Permission");
     }
 
     // Delete the permission
     await deletePermission(permission);
 
     // Send email notification
-    try {
-      if (permission.user && permission.user.email) {
-        const emailMessage = projectPermissionRemovedTemplate({
-          projectName: existingProject.name,
-        });
-        await sendEmail([permission.user.email], emailMessage);
-      }
-    } catch (emailError) {
-      console.error("Failed to send email notification:", emailError);
+    if (permission.user && permission.user.email) {
+      await sendProjectPermissionRemovedEmail(
+        permission.user.email,
+        existingProject.name
+      );
     }
 
-    res.json({
-      success: true,
-      message: "User removed from project",
-    });
+    return sendSuccess(res, null, "User removed from project");
   } catch (error) {
-    console.error("Error removing user from project:", error);
-    res.status(500).json({ error: error.message });
+    logger.error("Error removing user from project", error);
+    next(error);
   }
 });
 
@@ -561,14 +531,14 @@ router.get("/:id/export-progress/:progressId", async (req, res) => {
 });
 
 // Get documents list for export options
-router.get("/:id/documents", authenticate, async (req, res) => {
+router.get("/:id/documents", authenticate, async (req, res, next) => {
   try {
     const { id } = req.params;
 
     const project = await getProjectWithPermissions(id);
 
     if (!project) {
-      return res.status(404).json({ error: "Project not found" });
+      return sendNotFound(res, "Project");
     }
 
     // Check if user has permission to view this project
@@ -577,9 +547,7 @@ router.get("/:id/documents", authenticate, async (req, res) => {
       project.permissions.some((p) => p.userId === req.user.id);
 
     if (!hasPermission) {
-      return res
-        .status(403)
-        .json({ error: "Not authorized to view this project" });
+      return sendForbidden(res, "Not authorized to view this project");
     }
 
     // Format documents for export selection
@@ -606,45 +574,40 @@ router.get("/:id/documents", authenticate, async (req, res) => {
       }
     }
 
-    res.json({
-      success: true,
-      data: {
-        projectName: project.name,
-        documents: documents,
-      },
+    return sendSuccess(res, {
+      projectName: project.name,
+      documents: documents,
     });
   } catch (error) {
-    console.error("Error fetching project documents:", error);
-    res.status(500).json({ error: error.message });
+    logger.error("Error fetching project documents", error);
+    next(error);
   }
 });
 
 // Get project by ID
-router.get("/:id", authenticate, async (req, res) => {
+router.get("/:id", authenticate, async (req, res, next) => {
   try {
     const { id } = req.params;
     const project = await getProjectWithPermissions(id);
 
     if (!project) {
-      return res.status(404).json({ error: "Project not found" });
+      return sendNotFound(res, "Project");
     }
 
-    res.json({ success: true, data: project });
+    return sendSuccess(res, project);
   } catch (error) {
-    console.error("Error fetching project:", error);
-    res.status(500).json({ error: error.message });
+    logger.error("Error fetching project", error);
+    next(error);
   }
 });
 
 // Create project
-router.post("/", authenticate, async (req, res) => {
+router.post("/", authenticate, async (req, res, next) => {
   try {
     const { name, identifier, metadata, rootId } = req.body;
 
     if (!name || !identifier) {
-      return res
-        .status(400)
-        .json({ error: "Name and identifier are required" });
+      return sendBadRequest(res, "Name and identifier are required");
     }
     // Create project with proper permission structure
     const project = await createProject(
@@ -655,15 +618,15 @@ router.post("/", authenticate, async (req, res) => {
       req.user.id
     );
 
-    res.status(201).json({ success: true, data: project });
+    return sendSuccess(res, project, null, 201);
   } catch (error) {
-    console.error("Error creating project:", error);
-    res.status(500).json({ error: error.message });
+    logger.error("Error creating project", error);
+    next(error);
   }
 });
 
 // Update project
-router.put("/:id", authenticate, async (req, res) => {
+router.put("/:id", authenticate, async (req, res, next) => {
   try {
     const { id } = req.params;
     const { name, identifier, metadata, status } = req.body;
@@ -672,13 +635,11 @@ router.put("/:id", authenticate, async (req, res) => {
     const existingProject = await getProject(id);
 
     if (!existingProject) {
-      return res.status(404).json({ error: "Project not found" });
+      return sendNotFound(res, "Project");
     }
 
     if (existingProject.ownerId !== req.user.id) {
-      return res
-        .status(403)
-        .json({ error: "Not authorized to update this project" });
+      return sendForbidden(res, "Not authorized to update this project");
     }
 
     const updatedProject = await updateProject(
@@ -689,15 +650,15 @@ router.put("/:id", authenticate, async (req, res) => {
       status
     );
 
-    res.json({ success: true, data: updatedProject });
+    return sendSuccess(res, updatedProject);
   } catch (error) {
-    console.error("Error updating project:", error);
-    res.status(500).json({ error: error.message });
+    logger.error("Error updating project", error);
+    next(error);
   }
 });
 
 // Delete project (soft delete)
-router.delete("/:id", authenticate, async (req, res) => {
+router.delete("/:id", authenticate, async (req, res, next) => {
   try {
     const { id } = req.params;
 
@@ -705,27 +666,25 @@ router.delete("/:id", authenticate, async (req, res) => {
     const existingProject = await getProject(id);
 
     if (!existingProject) {
-      return res.status(404).json({ error: "Project not found" });
+      return sendNotFound(res, "Project");
     }
 
     if (existingProject.ownerId !== req.user.id) {
-      return res
-        .status(403)
-        .json({ error: "Not authorized to delete this project" });
+      return sendForbidden(res, "Not authorized to delete this project");
     }
 
     // Soft delete by updating status
     await deleteProject(id);
 
-    res.json({ success: true, message: "Project deleted successfully" });
+    return sendSuccess(res, null, "Project deleted successfully");
   } catch (error) {
-    console.error("Error deleting project:", error);
-    res.status(500).json({ error: error.message });
+    logger.error("Error deleting project", error);
+    next(error);
   }
 });
 
 // Download all documents in a project as a zip file
-router.get("/:id/export", authenticate, async (req, res) => {
+router.get("/:id/export", authenticate, async (req, res, next) => {
   try {
     const { id } = req.params;
     const { type, translationId } = req.query;
@@ -735,7 +694,10 @@ router.get("/:id/export", authenticate, async (req, res) => {
       const project = await getProjectWithDocuments(id, req.user.id);
 
       if (!project) {
-        return res.status(404).json({ error: "Project not found" });
+        if (!res.headersSent) {
+          return sendNotFound(res, "Project");
+        }
+        return;
       }
 
       // Create a zip file
@@ -792,7 +754,10 @@ router.get("/:id/export", authenticate, async (req, res) => {
       const project = await getProjectWithDocuments(id, req.user.id);
 
       if (!project) {
-        return res.status(404).json({ error: "Project not found" });
+        if (!res.headersSent) {
+          return sendNotFound(res, "Project");
+        }
+        return;
       }
 
       // Create a zip file
@@ -851,7 +816,10 @@ router.get("/:id/export", authenticate, async (req, res) => {
       // Check if project exists and user has permission
       const project = await getProjectWithDocuments(id, req.user.id);
       if (!project) {
-        return res.status(404).json({ error: "Project not found" });
+        if (!res.headersSent) {
+          return sendNotFound(res, "Project");
+        }
+        return;
       }
 
       // Create a zip file
@@ -919,8 +887,8 @@ router.get("/:id/export", authenticate, async (req, res) => {
               const fileName = `${rootDoc.name}_${translation.language}_docx_template.docx`;
               archive.append(combinedDocx, { name: fileName });
             } else {
-              console.warn(
-                `❌ No content found for translation ${translation.language} (ID: ${translation.id})`
+              logger.warn(
+                `No content found for translation ${translation.language} (ID: ${translation.id})`
               );
             }
           }
@@ -954,7 +922,7 @@ router.get("/:id/export", authenticate, async (req, res) => {
             try {
               stream.end();
             } catch (error) {
-              console.error("Error closing progress stream:", error);
+              logger.error("Error closing progress stream", error);
             }
             progressStreams.delete(progressId);
           }
@@ -967,7 +935,10 @@ router.get("/:id/export", authenticate, async (req, res) => {
       // Check if project exists and user has permission
       const project = await getProjectWithDocuments(id, req.user.id);
       if (!project) {
-        return res.status(404).json({ error: "Project not found" });
+        if (!res.headersSent) {
+          return sendNotFound(res, "Project");
+        }
+        return;
       }
 
       // Create a zip file
@@ -1053,7 +1024,7 @@ router.get("/:id/export", authenticate, async (req, res) => {
             try {
               stream.end();
             } catch (error) {
-              console.error("Error closing progress stream:", error);
+              logger.error("Error closing progress stream", error);
             }
             progressStreams.delete(progressId);
           }
@@ -1067,7 +1038,10 @@ router.get("/:id/export", authenticate, async (req, res) => {
       const project = await getProjectWithDocuments(id, req.user.id);
 
       if (!project) {
-        return res.status(404).json({ error: "Project not found" });
+        if (!res.headersSent) {
+          return sendNotFound(res, "Project");
+        }
+        return;
       }
 
       // Create a zip file
@@ -1164,7 +1138,7 @@ router.get("/:id/export", authenticate, async (req, res) => {
             try {
               stream.end();
             } catch (error) {
-              console.error("Error closing progress stream:", error);
+              logger.error("Error closing progress stream", error);
             }
             progressStreams.delete(progressId);
           }
@@ -1175,7 +1149,10 @@ router.get("/:id/export", authenticate, async (req, res) => {
       const project = await getProjectWithDocuments(id, req.user.id);
 
       if (!project) {
-        return res.status(404).json({ error: "Project not found" });
+        if (!res.headersSent) {
+          return sendNotFound(res, "Project");
+        }
+        return;
       }
 
       // Check if user has permission to access this project
@@ -1231,8 +1208,7 @@ router.get("/:id/export", authenticate, async (req, res) => {
       await archive.finalize();
     }
   } catch (error) {
-    console.error("Error creating zip file:", error);
-    res.status(500).json({ error: error.message });
+    next(error);
   }
 });
 
@@ -1259,7 +1235,7 @@ router.get("/:id/export", authenticate, async (req, res) => {
  * @return {object} 404 - Project not found
  * @return {object} 500 - Server error
  */
-router.post("/:id/share", authenticate, async (req, res) => {
+router.post("/:id/share", authenticate, async (req, res, next) => {
   try {
     const { id } = req.params;
     const { isPublic, publicAccess } = req.body;
@@ -1279,21 +1255,20 @@ router.post("/:id/share", authenticate, async (req, res) => {
     });
 
     if (!project) {
-      return res.status(404).json({ error: "Project not found" });
+      return sendNotFound(res, "Project");
     }
 
     // Only owner can update sharing settings
     if (project.ownerId !== req.user.id) {
-      return res.status(403).json({
-        error: "Not authorized to update sharing settings",
-      });
+      return sendForbidden(res, "Not authorized to update sharing settings");
     }
 
     // Check if project has a root document
     if (!project.roots || project.roots.length === 0) {
-      return res.status(400).json({
-        error: "Project must have a root document to be shared",
-      });
+      return sendBadRequest(
+        res,
+        "Project must have a root document to be shared"
+      );
     }
 
     // Generate share link if making public
@@ -1319,17 +1294,14 @@ router.post("/:id/share", authenticate, async (req, res) => {
       ? `${baseUrl}/documents/public/${rootDocument.id}`
       : null;
 
-    res.json({
-      success: true,
-      data: {
-        ...updatedProject,
-        shareableLink,
-        rootDocument,
-      },
+    return sendSuccess(res, {
+      ...updatedProject,
+      shareableLink,
+      rootDocument,
     });
   } catch (error) {
-    console.error("Error updating project sharing:", error);
-    res.status(500).json({ error: error.message });
+    logger.error("Error updating project sharing", error);
+    next(error);
   }
 });
 
@@ -1344,7 +1316,7 @@ router.post("/:id/share", authenticate, async (req, res) => {
  * @return {object} 404 - Project not found
  * @return {object} 500 - Server error
  */
-router.get("/:id/share", authenticate, async (req, res) => {
+router.get("/:id/share", authenticate, async (req, res, next) => {
   try {
     const { id } = req.params;
 
@@ -1381,7 +1353,7 @@ router.get("/:id/share", authenticate, async (req, res) => {
     });
 
     if (!project) {
-      return res.status(404).json({ error: "Project not found" });
+      return sendNotFound(res, "Project");
     }
 
     // Check if user has permission to view sharing settings
@@ -1390,9 +1362,7 @@ router.get("/:id/share", authenticate, async (req, res) => {
       project.permissions.some((p) => p.userId === req.user.id);
 
     if (!hasPermission) {
-      return res.status(403).json({
-        error: "Not authorized to view sharing settings",
-      });
+      return sendForbidden(res, "Not authorized to view sharing settings");
     }
 
     // Generate direct link to root document instead of project link
@@ -1404,23 +1374,20 @@ router.get("/:id/share", authenticate, async (req, res) => {
         ? `${baseUrl}/documents/public/${rootDocument.id}`
         : null;
 
-    res.json({
-      success: true,
-      data: {
-        id: project.id,
-        name: project.name,
-        isPublic: project.isPublic,
-        publicAccess: project.publicAccess,
-        shareableLink,
-        isOwner: project.ownerId === req.user.id,
-        permissions: project.permissions,
-        owner: project.owner,
-        rootDocument,
-      },
+    return sendSuccess(res, {
+      id: project.id,
+      name: project.name,
+      isPublic: project.isPublic,
+      publicAccess: project.publicAccess,
+      shareableLink,
+      isOwner: project.ownerId === req.user.id,
+      permissions: project.permissions,
+      owner: project.owner,
+      rootDocument,
     });
   } catch (error) {
-    console.error("Error fetching project sharing info:", error);
-    res.status(500).json({ error: error.message });
+    logger.error("Error fetching project sharing info", error);
+    next(error);
   }
 });
 
@@ -1439,38 +1406,36 @@ router.get("/:id/share", authenticate, async (req, res) => {
  * @return {object} 404 - User or project not found
  * @return {object} 500 - Server error
  */
-router.post("/:id/collaborators", authenticate, async (req, res) => {
+router.post("/:id/collaborators", authenticate, async (req, res, next) => {
   try {
     const { id } = req.params;
     const { email, accessLevel = "viewer", message } = req.body;
 
     if (!email) {
-      return res.status(400).json({ error: "Email is required" });
+      return sendBadRequest(res, "Email is required");
     }
 
     // Validate access level
     if (!["viewer", "editor", "admin"].includes(accessLevel)) {
-      return res.status(400).json({ error: "Invalid access level" });
+      return sendBadRequest(res, "Invalid access level");
     }
 
     // Check if project exists
     const project = await getProject(id);
     if (!project) {
-      return res.status(404).json({ error: "Project not found" });
+      return sendNotFound(res, "Project");
     }
 
     // Check if user has permission to add collaborators
     const hasPermission = project.ownerId === req.user.id;
     if (!hasPermission) {
-      return res.status(403).json({
-        error: "Not authorized to add collaborators",
-      });
+      return sendForbidden(res, "Not authorized to add collaborators");
     }
 
     // Find user by email
     const userToAdd = await getUserByEmail(email);
     if (!userToAdd) {
-      return res.status(404).json({ error: "User not found" });
+      return sendNotFound(res, "User");
     }
 
     // Check if user is already a collaborator
@@ -1500,21 +1465,18 @@ router.post("/:id/collaborators", authenticate, async (req, res) => {
         },
       });
 
-      try {
-        const emailMessage = projectPermissionUpdatedTemplate({
-          projectName: project.name,
-          accessLevel: accessLevel,
-        });
-        await sendEmail([userToAdd.email], emailMessage);
-      } catch (emailError) {
-        console.error("Failed to send email notification:", emailError);
-      }
+      await sendProjectPermissionEmail(
+        userToAdd.email,
+        project.name,
+        accessLevel,
+        true
+      );
 
-      return res.json({
-        success: true,
-        message: "Collaborator access level updated",
-        data: updatedPermission,
-      });
+      return sendSuccess(
+        res,
+        updatedPermission,
+        "Collaborator access level updated"
+      );
     }
 
     // Create new permission
@@ -1538,24 +1500,22 @@ router.post("/:id/collaborators", authenticate, async (req, res) => {
     });
 
     // Send email notification to the new collaborator
-    try {
-      const emailMessage = projectSharedTemplate({
-        projectName: project.name,
-        accessLevel: accessLevel,
-      });
-      await sendEmail([userToAdd.email], emailMessage);
-    } catch (emailError) {
-      console.error("Failed to send email notification:", emailError);
-    }
+    await sendProjectPermissionEmail(
+      userToAdd.email,
+      project.name,
+      accessLevel,
+      false
+    );
 
-    res.status(201).json({
-      success: true,
-      message: "Collaborator added successfully",
-      data: newPermission,
-    });
+    return sendSuccess(
+      res,
+      newPermission,
+      "Collaborator added successfully",
+      201
+    );
   } catch (error) {
-    console.error("Error adding collaborator:", error);
-    res.status(500).json({ error: error.message });
+    logger.error("Error adding collaborator", error);
+    next(error);
   }
 });
 
@@ -1573,87 +1533,82 @@ router.post("/:id/collaborators", authenticate, async (req, res) => {
  * @return {object} 404 - Permission not found
  * @return {object} 500 - Server error
  */
-router.patch("/:id/collaborators/:userId", authenticate, async (req, res) => {
-  try {
-    const { id, userId } = req.params;
-    const { accessLevel } = req.body;
+router.patch(
+  "/:id/collaborators/:userId",
+  authenticate,
+  async (req, res, next) => {
+    try {
+      const { id, userId } = req.params;
+      const { accessLevel } = req.body;
 
-    if (!accessLevel) {
-      return res.status(400).json({ error: "Access level is required" });
-    }
+      if (!accessLevel) {
+        return sendBadRequest(res, "Access level is required");
+      }
 
-    // Validate access level
-    if (!["viewer", "editor", "admin"].includes(accessLevel)) {
-      return res.status(400).json({ error: "Invalid access level" });
-    }
+      // Validate access level
+      if (!["viewer", "editor", "admin"].includes(accessLevel)) {
+        return sendBadRequest(res, "Invalid access level");
+      }
 
-    // Check if project exists
-    const project = await getProject(id);
-    if (!project) {
-      return res.status(404).json({ error: "Project not found" });
-    }
+      // Check if project exists
+      const project = await getProject(id);
+      if (!project) {
+        return sendNotFound(res, "Project");
+      }
 
-    // Check if user has permission to update collaborators
-    const hasPermission = project.ownerId === req.user.id;
-    if (!hasPermission) {
-      return res.status(403).json({
-        error: "Not authorized to update collaborators",
+      // Check if user has permission to update collaborators
+      const hasPermission = project.ownerId === req.user.id;
+      if (!hasPermission) {
+        return sendForbidden(res, "Not authorized to update collaborators");
+      }
+
+      // Find the permission
+      const permission = await prisma.permission.findFirst({
+        where: {
+          projectId: id,
+          userId,
+        },
       });
-    }
 
-    // Find the permission
-    const permission = await prisma.permission.findFirst({
-      where: {
-        projectId: id,
-        userId,
-      },
-    });
+      if (!permission) {
+        return sendNotFound(res, "Collaborator");
+      }
 
-    if (!permission) {
-      return res.status(404).json({ error: "Collaborator not found" });
-    }
-
-    // Update permission
-    const updatedPermission = await prisma.permission.update({
-      where: { id: permission.id },
-      data: {
-        accessLevel,
-        canWrite: ["editor", "admin"].includes(accessLevel),
-      },
-      include: {
-        user: {
-          select: {
-            id: true,
-            username: true,
-            email: true,
+      // Update permission
+      const updatedPermission = await prisma.permission.update({
+        where: { id: permission.id },
+        data: {
+          accessLevel,
+          canWrite: ["editor", "admin"].includes(accessLevel),
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              username: true,
+              email: true,
+            },
           },
         },
-      },
-    });
+      });
 
-    // Send email notification
-    try {
+      // Send email notification
       if (updatedPermission.user && updatedPermission.user.email) {
-        const emailMessage = projectPermissionUpdatedTemplate({
-          projectName: project.name,
-          accessLevel: accessLevel,
-        });
-        await sendEmail([updatedPermission.user.email], emailMessage);
+        await sendProjectPermissionEmail(
+          updatedPermission.user.email,
+          project.name,
+          accessLevel,
+          true
+        );
       }
-    } catch (emailError) {
-      console.error("Failed to send email notification:", emailError);
-    }
 
-    res.json({
-      success: true,
-      message: "Access level updated",
-      data: updatedPermission,
-    });
-  } catch (error) {
-    console.error("Error updating collaborator:", error);
-    res.status(500).json({ error: error.message });
+      return sendSuccess(res, updatedPermission, "Access level updated");
+    } catch (error) {
+      logger.error("Error updating collaborator", error);
+      next(error);
+    }
   }
-});
+);
 
 /**
  * DELETE /projects/{id}/collaborators/{userId}
@@ -1667,76 +1622,69 @@ router.patch("/:id/collaborators/:userId", authenticate, async (req, res) => {
  * @return {object} 404 - Permission not found
  * @return {object} 500 - Server error
  */
-router.delete("/:id/collaborators/:userId", authenticate, async (req, res) => {
-  try {
-    const { id, userId } = req.params;
+router.delete(
+  "/:id/collaborators/:userId",
+  authenticate,
+  async (req, res, next) => {
+    try {
+      const { id, userId } = req.params;
 
-    // Check if project exists
-    const project = await getProject(id);
-    if (!project) {
-      return res.status(404).json({ error: "Project not found" });
-    }
+      // Check if project exists
+      const project = await getProject(id);
+      if (!project) {
+        return sendNotFound(res, "Project");
+      }
 
-    // Check if user has permission to remove collaborators
-    const hasPermission = project.ownerId === req.user.id;
-    if (!hasPermission) {
-      return res.status(403).json({
-        error: "Not authorized to remove collaborators",
-      });
-    }
+      // Check if user has permission to remove collaborators
+      const hasPermission = project.ownerId === req.user.id;
+      if (!hasPermission) {
+        return sendForbidden(res, "Not authorized to remove collaborators");
+      }
 
-    // Don't allow removing the owner
-    if (userId === project.ownerId) {
-      return res.status(400).json({
-        error: "Cannot remove project owner",
-      });
-    }
+      // Don't allow removing the owner
+      if (userId === project.ownerId) {
+        return sendBadRequest(res, "Cannot remove project owner");
+      }
 
-    // Find the permission with user details
-    const permission = await prisma.permission.findFirst({
-      where: {
-        projectId: id,
-        userId,
-      },
-      include: {
-        user: {
-          select: {
-            email: true,
-            username: true,
+      // Find the permission with user details
+      const permission = await prisma.permission.findFirst({
+        where: {
+          projectId: id,
+          userId,
+        },
+        include: {
+          user: {
+            select: {
+              email: true,
+              username: true,
+            },
           },
         },
-      },
-    });
+      });
 
-    if (!permission) {
-      return res.status(404).json({ error: "Collaborator not found" });
-    }
-
-    // Delete permission
-    await prisma.permission.delete({
-      where: { id: permission.id },
-    });
-
-    // Send email notification
-    try {
-      if (permission.user && permission.user.email) {
-        const emailMessage = projectPermissionRemovedTemplate({
-          projectName: project.name,
-        });
-        await sendEmail([permission.user.email], emailMessage);
+      if (!permission) {
+        return sendNotFound(res, "Collaborator");
       }
-    } catch (emailError) {
-      console.error("Failed to send email notification:", emailError);
-    }
 
-    res.json({
-      success: true,
-      message: "Collaborator removed",
-    });
-  } catch (error) {
-    console.error("Error removing collaborator:", error);
-    res.status(500).json({ error: error.message });
+      // Delete permission
+      await prisma.permission.delete({
+        where: { id: permission.id },
+      });
+
+      // Send email notification
+      if (permission.user && permission.user.email) {
+        await sendProjectPermissionRemovedEmail(
+          permission.user.email,
+          project.name
+        );
+      }
+
+      return sendSuccess(res, null, "Collaborator removed");
+    } catch (error) {
+      logger.error("Error removing collaborator", error);
+      next(error);
+    }
   }
-});
+);
 
 module.exports = router;

@@ -103,7 +103,6 @@ const PublicProjects = ({
 
   const publicProjectData: OpenPechaTemplateProject[] | undefined =
     data?.data ?? [];
-
   const pagination = data?.pagination;
 
   // Handle search with debounce

@@ -109,7 +109,7 @@ z-index: 9999;
 }
 
 .ql-editor p.selected_text_segment::selection{
-	background-color: transparent;
+	background-color: lightyellow;
 }
 
 .ql-editor p:hover {

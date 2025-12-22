@@ -90,10 +90,11 @@ export const useCurrentDoc = (
     queryKey: [`document-${docId}`],
     queryFn: async () => {
       if (!docId) return null;
-      const doc = isPublic
+      const document = isPublic
         ? await fetchPublicDocument(docId)
         : await fetchDocument(docId);
-
+      const doc = document?.data;
+      if (!doc) return null;
       // For public documents, always set as not editable
       const isPublicDocument = doc?.rootProject?.isPublic === true;
       let hasWrite = false;
@@ -116,12 +117,13 @@ export const useCurrentDoc = (
         setIsEditable(false);
       }
 
-      return doc;
+      return document;
     },
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,
     enabled: !!docId,
     staleTime: 5 * 60 * 1000,
+    select: (data) => data?.data,
   });
   return {
     currentDoc: data,

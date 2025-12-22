@@ -9,7 +9,7 @@ import {
 } from "react";
 import { debounce } from "lodash";
 import { useParams } from "react-router-dom";
-import { useEditor } from "@/contexts/EditorContext";
+import { useEditor } from "@/hooks/useEditor";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { FaBookmark, FaChevronUp, FaChevronDown } from "react-icons/fa";
 import { createPortal } from "react-dom";

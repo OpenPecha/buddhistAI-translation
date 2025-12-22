@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react";
 import { useAnnotation } from "@/contexts/AnnotationContext";
 import { Button } from "../ui/button";
 import Quill from "quill";
-import { useEditor } from "@/contexts/EditorContext";
+import { useEditor } from "@/hooks/useEditor";
 
 interface AnnotationListProps {
   onVote?: (
