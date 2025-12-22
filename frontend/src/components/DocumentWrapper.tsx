@@ -19,8 +19,8 @@ import {
   Selection,
   EditorId,
 } from "@/stores/selectionStore";
-import { useEditor } from "@/contexts/EditorContext";
 import Quill from "quill";
+import { useEditor } from "@/hooks/useEditor";
 
 export type { Translation } from "@/hooks/useCurrentDoc";
 

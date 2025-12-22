@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useEditor } from "@/contexts/EditorContext";
+import { useEditor } from "@/hooks/useEditor";
 import { useSelectionStore } from "@/stores/selectionStore";
 import { useState, useEffect, useMemo, useRef } from "react";
 import useDebounce from "@/hooks/useDebounce";

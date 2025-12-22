@@ -5,120 +5,27 @@ const {
 } = require("../middleware/authenticate");
 const multer = require("multer");
 const { WSSharedDoc } = require("../services");
-const { sendEmail } = require("../services/utils");
+const { sendEmailSafe } = require("../utils/email");
 const {
   documentSharedTemplate,
   documentPermissionUpdatedTemplate,
 } = require("../utils/emailTemplates");
 const { prisma } = require("../services/db");
+const logger = require("../utils/logger");
+const {
+  checkDocumentPermission,
+  checkDocumentWritePermission,
+} = require("../utils/permissions");
+const {
+  sendSuccess,
+  sendError,
+  sendNotFound,
+  sendForbidden,
+  sendBadRequest,
+} = require("../utils/response");
 
 const router = express.Router();
 const { docxToText } = require("../utils/docxToText");
-/**
- * Check if a user has permission to access a document
- * @param {Object} document - The document object with rootProject information
- * @param {string} userId - The ID of the user to check permissions for
- * @returns {boolean} - Whether the user has permission to access the document
- */
-async function checkDocumentPermission(document, userId) {
-  // If the document doesn't exist, no permission
-  if (!document) return false;
-  // If the document's project is public, everyone has read access
-  if (document.rootProject && document.rootProject.isPublic) return true;
-
-  // If no user provided (anonymous), they can only access public documents
-  if (!userId) return false;
-
-  // Check if user is the owner of the document
-  if (document.ownerId === userId) return true;
-
-  // Check if user is the owner of the project
-  if (document.rootProject && document.rootProject.ownerId === userId) {
-    return true;
-  }
-
-  // Check if user has explicit permission in the project
-  if (document.rootProject && document.rootProject.permissions) {
-    const userPermission = document.rootProject.permissions.find(
-      (permission) => permission.userId === userId
-    );
-
-    if (userPermission) {
-      return true;
-    }
-  }
-
-  // Check if user has explicit permission on the document
-  if (document.permissions) {
-    const userPermission = document.permissions.find(
-      (permission) => permission.userId === userId
-    );
-
-    if (userPermission) {
-      return true;
-    }
-  }
-
-  // No permission found
-  return false;
-}
-
-/**
- * Check if a user has write permission to a document
- * @param {Object} document - The document object with rootProject information
- * @param {string} userId - The ID of the user to check permissions for (can be undefined for anonymous users)
- * @returns {boolean} - Whether the user has write permission to the document
- */
-async function checkDocumentWritePermission(document, userId) {
-  // If the document doesn't exist, no permission
-  if (!document) return false;
-
-  // If the document's project is public and allows editing, anyone with a user ID can write
-  if (
-    userId &&
-    document.rootProject &&
-    document.rootProject.isPublic &&
-    document.rootProject.publicAccess === "editor"
-  ) {
-    return true;
-  }
-
-  // Anonymous users never have write access
-  if (!userId) return false;
-
-  // Check if user is the owner of the document
-  if (document.ownerId === userId) return true;
-
-  // Check if user is the owner of the project
-  if (document.rootProject && document.rootProject.ownerId === userId) {
-    return true;
-  }
-
-  // Check if user has explicit write permission in the project
-  if (document.rootProject && document.rootProject.permissions) {
-    const userPermission = document.rootProject.permissions.find(
-      (permission) => permission.userId === userId && permission.canWrite
-    );
-
-    if (userPermission) {
-      return true;
-    }
-  }
-
-  // Check if user has explicit write permission on the document
-  if (document.permissions) {
-    const userPermission = document.permissions.find(
-      (permission) => permission.userId === userId && permission.canWrite
-    );
-
-    if (userPermission) {
-      return true;
-    }
-  }
-
-  // No write permission found
-  return false;
-}
 
 const upload = multer({
   storage: multer.memoryStorage(), // Use memory storage to keep files as buffers
@@ -137,7 +44,7 @@ const upload = multer({
  * @return {object} 404 - Document not found
  * @return {object} 500 - Server error
  */
-router.get("/public/:id", optionalAuthenticate, async (req, res) => {
+router.get("/public/:id", optionalAuthenticate, async (req, res, next) => {
   try {
     const document = await prisma.doc.findUnique({
       where: { id: req.params.id },
@@ -172,22 +79,18 @@ router.get("/public/:id", optionalAuthenticate, async (req, res) => {
       },
     });
 
-    if (!document) return res.status(404).json({ error: "Document not found" });
-    const isPublic = document.rootProject.isPublic;
+    if (!document) return sendNotFound(res, "Document");
+
+    const isPublic = document.rootProject?.isPublic;
     if (!isPublic) {
-      return res.status(403).json({
-        success: false,
-        message: "This document is not publicly accessible",
-      });
+      return sendForbidden(res, "This document is not publicly accessible");
     }
+
     // Check if user has permission to access this document
     const hasPermission = await checkDocumentPermission(document, req.user?.id);
 
     if (!hasPermission) {
-      return res.status(403).json({
-        success: false,
-        message: "This document is not publicly accessible",
-      });
+      return sendForbidden(res, "This document is not publicly accessible");
     }
 
     // Determine access level from project settings
@@ -205,10 +108,10 @@ router.get("/public/:id", optionalAuthenticate, async (req, res) => {
       inheritedFromProject: document.rootProject?.isPublic || false,
     };
 
-    res.json(responseDocument);
+    return sendSuccess(res, responseDocument);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Error retrieving document" });
+    logger.error("Error retrieving public document", error);
+    next(error);
   }
 });
 
@@ -228,126 +131,124 @@ router.get("/public/:id", optionalAuthenticate, async (req, res) => {
  * @return {object} 400 - Bad request
  * @return {object} 500 - Server error
  */
-router.post("/", authenticate, upload.single("file"), async (req, res) => {
-  try {
-    const { identifier, isRoot, rootId, language, name } = req.body;
+router.post(
+  "/",
+  authenticate,
+  upload.single("file"),
+  async (req, res, next) => {
+    try {
+      const { identifier, isRoot, rootId, language, name } = req.body;
 
-    // Validate required fields
-    if (!identifier) {
-      return res
-        .status(400)
-        .json({ error: "Missing identifier in request body" });
-    }
-    if (!name) {
-      return res.status(400).json({ error: "Missing name in request body" });
-    }
-    if (!language) {
-      return res
-        .status(400)
-        .json({ error: "Missing language in request body" });
-    }
-    let textContent = null;
-    if (req.file) {
-      if (
-        req.file.mimetype ===
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-      ) {
-        textContent = await docxToText(req.file.buffer);
-      } else if (req.file.mimetype === "text/plain") {
-        textContent = req.file.buffer.toString("utf-8");
-      } else {
-        return res
-          .status(400)
-          .json({ error: "Unsupported file type: " + req.file.mimetype });
+      // Validate required fields
+      if (!identifier) {
+        return sendBadRequest(res, "Missing identifier in request body");
       }
-    }
-    const doc = new WSSharedDoc(identifier, req.user.id);
-    const text = doc.getText(identifier);
-    if (textContent) {
-      text.delete(0, text.length);
-      text.insert(0, textContent);
-    }
-    const delta = text.toDelta();
+      if (!name) {
+        return sendBadRequest(res, "Missing name in request body");
+      }
+      if (!language) {
+        return sendBadRequest(res, "Missing language in request body");
+      }
+      let textContent = null;
+      if (req.file) {
+        if (
+          req.file.mimetype ===
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        ) {
+          textContent = await docxToText(req.file.buffer);
+        } else if (req.file.mimetype === "text/plain") {
+          textContent = req.file.buffer.toString("utf-8");
+        } else {
+          return sendBadRequest(
+            res,
+            "Unsupported file type: " + req.file.mimetype
+          );
+        }
+      }
+      const doc = new WSSharedDoc(identifier, req.user.id);
+      const text = doc.getText(identifier);
+      if (textContent) {
+        text.delete(0, text.length);
+        text.insert(0, textContent);
+      }
+      const delta = text.toDelta();
 
-    const document = await prisma.$transaction(async (tx) => {
-      let rootProjectId = null;
-      if (rootId) {
-        const rootDoc = await prisma.doc.findUnique({
-          where: { id: rootId },
-          select: { rootProjectId: true },
+      const document = await prisma.$transaction(async (tx) => {
+        let rootProjectId = null;
+        if (rootId) {
+          const rootDoc = await prisma.doc.findUnique({
+            where: { id: rootId },
+            select: { rootProjectId: true },
+          });
+          rootProjectId = rootDoc?.rootProjectId;
+        }
+        let document = await tx.doc.create({
+          data: {
+            id: identifier,
+            identifier,
+            name,
+            ownerId: req.user.id,
+            isRoot: isRoot === "true",
+            rootId: rootId ?? null,
+            language,
+            rootProjectId: rootProjectId,
+          },
+          select: {
+            id: true,
+            name: true,
+          },
         });
-        rootProjectId = rootDoc?.rootProjectId;
-      }
-      let document = await tx.doc.create({
-        data: {
-          id: identifier,
-          identifier,
-          name,
-          ownerId: req.user.id,
-          isRoot: isRoot === "true",
-          rootId: rootId ?? null,
-          language,
-          rootProjectId: rootProjectId,
-        },
-        select: {
-          id: true,
-          name: true,
-        },
-      });
-      await tx.permission.create({
-        data: {
-          docId: document.id,
-          userId: req.user.id,
-          canRead: true,
-          canWrite: true,
-        },
-      });
-      const version = await tx.version.create({
-        data: {
-          content: { ops: delta },
-          docId: document.id,
-          label: "initial Auto-save",
-        },
-      });
+        await tx.permission.create({
+          data: {
+            docId: document.id,
+            userId: req.user.id,
+            canRead: true,
+            canWrite: true,
+          },
+        });
+        const version = await tx.version.create({
+          data: {
+            content: { ops: delta },
+            docId: document.id,
+            label: "initial Auto-save",
+          },
+        });
 
-      await tx.doc.update({
-        where: { id: document.id },
-        data: {
-          currentVersionId: version.id,
-        },
-      });
+        await tx.doc.update({
+          where: { id: document.id },
+          data: {
+            currentVersionId: version.id,
+          },
+        });
 
-      const responseDocument = {
-        ...document,
-        textContent,
-      };
-      return responseDocument;
-    });
-    res.status(201).json(document);
-  } catch (error) {
-    console.error("Error creating document:", error);
-    res.status(500).json({ error: "Error creating document: " + error });
+        const responseDocument = {
+          ...document,
+          textContent,
+        };
+        return responseDocument;
+      });
+      return sendSuccess(res, document, null, 201);
+    } catch (error) {
+      logger.error("Error creating document", error);
+      next(error);
+    }
   }
-});
+);
 
-router.post("/content", authenticate, async (req, res) => {
+router.post("/content", authenticate, async (req, res, next) => {
   try {
     const { identifier, isRoot, rootId, language, name, content, metadata } =
       req.body;
 
     // Validate required fields
     if (!identifier) {
-      return res
-        .status(400)
-        .json({ error: "Missing identifier in request body" });
+      return sendBadRequest(res, "Missing identifier in request body");
     }
     if (!name) {
-      return res.status(400).json({ error: "Missing name in request body" });
+      return sendBadRequest(res, "Missing name in request body");
     }
     if (!language) {
-      return res
-        .status(400)
-        .json({ error: "Missing language in request body" });
+      return sendBadRequest(res, "Missing language in request body");
     }
 
     const doc = new WSSharedDoc(identifier, req.user.id);
@@ -429,9 +330,10 @@ router.post("/content", authenticate, async (req, res) => {
       return doc;
     });
 
-    res.status(201).json(document);
+    return sendSuccess(res, document, null, 201);
   } catch (error) {
-    res.status(500).json({ error: "Error creating document: " + error });
+    logger.error("Error creating document with content", error);
+    next(error);
   }
 });
 
@@ -446,7 +348,7 @@ router.post("/content", authenticate, async (req, res) => {
  * @return {array<object>} 200 - List of documents
  * @return {object} 500 - Server error
  */
-router.get("/", authenticate, async (req, res) => {
+router.get("/", authenticate, async (req, res, next) => {
   try {
     const { search, isRoot, public: isPublic } = req.query;
 
@@ -532,10 +434,10 @@ router.get("/", authenticate, async (req, res) => {
         isRoot: "desc",
       },
     });
-    res.json(documents);
+    return sendSuccess(res, documents);
   } catch (error) {
-    console.warn(error);
-    res.status(500).json({ error: "Error fetching documents" });
+    logger.warn("Error fetching documents", error);
+    next(error);
   }
 });
 /**
@@ -549,7 +451,7 @@ router.get("/", authenticate, async (req, res) => {
  * @return {object} 404 - Document not found
  * @return {object} 500 - Server error
  */
-router.get("/:id", authenticate, async (req, res) => {
+router.get("/:id", authenticate, async (req, res, next) => {
   try {
     const document = await prisma.doc.findUnique({
       where: { id: req.params.id },
@@ -584,23 +486,23 @@ router.get("/:id", authenticate, async (req, res) => {
       },
     });
 
-    if (!document) return res.status(404).json({ error: "Document not found" });
+    if (!document) return sendNotFound(res, "Document");
 
     // Check if user has permission to access this document
     const hasPermission = await checkDocumentPermission(document, req.user.id);
 
     // If document is not public and user doesn't have permission, deny access
     if (!hasPermission) {
-      return res.status(403).json({
-        success: false,
-        message: "You do not have permission to access this document",
-      });
+      return sendForbidden(
+        res,
+        "You do not have permission to access this document"
+      );
     }
 
-    res.json(document);
+    return sendSuccess(res, document);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Error retrieving document" });
+    logger.error("Error retrieving document", error);
+    next(error);
   }
 });
 
@@ -615,7 +517,7 @@ router.get("/:id", authenticate, async (req, res) => {
  * @return {object} 404 - Document not found
  * @return {object} 500 - Server error
  */
-router.get("/:id/content", optionalAuthenticate, async (req, res) => {
+router.get("/:id/content", optionalAuthenticate, async (req, res, next) => {
   try {
     const document = await prisma.doc.findUnique({
       where: { id: req.params.id },
@@ -645,23 +547,23 @@ router.get("/:id/content", optionalAuthenticate, async (req, res) => {
         },
       },
     });
-    if (!document) return res.status(404).json({ error: "Document not found" });
+    if (!document) return sendNotFound(res, "Document");
 
     // Check if user has permission to access this document
-    const hasPermission = await checkDocumentPermission(document, req.user.id);
+    const hasPermission = await checkDocumentPermission(document, req.user?.id);
 
     // If document is not public and user doesn't have permission, deny access
     if (!hasPermission) {
-      return res.status(403).json({
-        success: false,
-        message: "You do not have permission to access this document",
-      });
+      return sendForbidden(
+        res,
+        "You do not have permission to access this document"
+      );
     }
 
-    res.json(document);
+    return sendSuccess(res, document);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Error retrieving document" });
+    logger.error("Error retrieving document content", error);
+    next(error);
   }
 });
 
@@ -676,73 +578,70 @@ router.get("/:id/content", optionalAuthenticate, async (req, res) => {
  * @return {object} 404 - Document not found
  * @return {object} 500 - Server error
  */
-router.get("/:id/translations", optionalAuthenticate, async (req, res) => {
-  try {
-    const documentId = req.params.id;
+router.get(
+  "/:id/translations",
+  optionalAuthenticate,
+  async (req, res, next) => {
+    try {
+      const documentId = req.params.id;
 
-    // First check if the document exists
-    const document = await prisma.doc.findUnique({
-      where: { id: documentId },
-      include: {
-        rootProject: {
-          include: {
-            permissions: true,
+      // First check if the document exists
+      const document = await prisma.doc.findUnique({
+        where: { id: documentId },
+        include: {
+          rootProject: {
+            include: {
+              permissions: true,
+            },
           },
         },
-      },
-    });
-
-    if (!document) {
-      return res.status(404).json({
-        success: false,
-        message: "Document not found",
       });
-    }
 
-    // Check if user has permission to access this document
-    const hasPermission = await checkDocumentPermission(document, req.user?.id);
-    if (!hasPermission) {
-      return res.status(403).json({
-        success: false,
-        message: "You do not have permission to access this document",
-      });
-    }
+      if (!document) {
+        return sendNotFound(res, "Document");
+      }
 
-    // Get all translations for this document
-    const translations = await prisma.doc.findMany({
-      where: {
-        rootId: documentId,
-      },
-      select: {
-        id: true,
-        name: true,
-        language: true,
-        ownerId: true,
-        updatedAt: true,
-        owner: {
-          select: {
-            username: true,
+      // Check if user has permission to access this document
+      const hasPermission = await checkDocumentPermission(
+        document,
+        req.user?.id
+      );
+      if (!hasPermission) {
+        return sendForbidden(
+          res,
+          "You do not have permission to access this document"
+        );
+      }
+
+      // Get all translations for this document
+      const translations = await prisma.doc.findMany({
+        where: {
+          rootId: documentId,
+        },
+        select: {
+          id: true,
+          name: true,
+          language: true,
+          ownerId: true,
+          updatedAt: true,
+          owner: {
+            select: {
+              username: true,
+            },
           },
         },
-      },
-      orderBy: {
-        updatedAt: "desc",
-      },
-    });
+        orderBy: {
+          updatedAt: "desc",
+        },
+      });
 
-    return res.json({
-      success: true,
-      data: translations,
-    });
-  } catch (error) {
-    console.error("Error fetching translations:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to fetch translations",
-      error: error.message,
-    });
+      return sendSuccess(res, translations);
+    } catch (error) {
+      logger.error("Error fetching translations", error);
+      next(error);
+    }
   }
-});
+);
 
 /**
  * DELETE /documents/{id}
@@ -755,7 +654,7 @@ router.get("/:id/translations", optionalAuthenticate, async (req, res) => {
  * @return {object} 404 - Document not found
  * @return {object} 500 - Server error
  */
-router.delete("/:id", authenticate, async (req, res) => {
+router.delete("/:id", authenticate, async (req, res, next) => {
   try {
     const document = await prisma.doc.findUnique({
       where: { id: req.params.id },
@@ -772,7 +671,7 @@ router.delete("/:id", authenticate, async (req, res) => {
         },
       },
     });
-    if (!document) return res.status(404).json({ error: "Document not found" });
+    if (!document) return sendNotFound(res, "Document");
 
     // Check if user has permission to access this document
     const hasPermission = await checkDocumentPermission(document, req.user.id);
@@ -783,20 +682,20 @@ router.delete("/:id", authenticate, async (req, res) => {
 
     // Only allow deletion by document owner, root document owner, or if user has permission
     if (!isOwner && !isRootOwner && !hasPermission) {
-      return res.status(403).json({
-        success: false,
-        message: "You do not have permission to delete this document",
-      });
+      return sendForbidden(
+        res,
+        "You do not have permission to delete this document"
+      );
     }
 
     // Delete the document and related permissions
     await prisma.doc.delete({ where: { id: document.id } });
     await prisma.permission.deleteMany({ where: { docId: document.id } });
 
-    res.json({ message: "Document deleted successfully" });
+    return sendSuccess(res, null, "Document deleted successfully");
   } catch (error) {
-    console.error("Error deleting document:", error);
-    res.status(500).json({ error: "Error deleting document" });
+    logger.error("Error deleting document", error);
+    next(error);
   }
 });
 
@@ -815,12 +714,12 @@ router.delete("/:id", authenticate, async (req, res) => {
  * @return {object} 404 - User or document not found
  * @return {object} 500 - Server error
  */
-router.post("/:id/permissions", authenticate, async (req, res) => {
+router.post("/:id/permissions", authenticate, async (req, res, next) => {
   let { email, canRead, canWrite } = req.body;
   const documentId = req.params.id;
   try {
     let user = await prisma.user.findFirst({ where: { email } });
-    if (!user) return res.status(404).json({ error: "User not found" });
+    if (!user) return sendNotFound(res, "User");
     const userId = user.id;
     // Check if the document exists
     canRead = canRead === "true" || canRead === true;
@@ -836,17 +735,17 @@ router.post("/:id/permissions", authenticate, async (req, res) => {
         },
       },
     });
-    if (!document) return res.status(404).json({ error: "Document not found" });
+    if (!document) return sendNotFound(res, "Document");
 
     // Check if user has permission to access this document
     const hasPermission = await checkDocumentPermission(document, req.user.id);
 
     // Only allow permission changes by document owner
     if (!hasPermission) {
-      return res.status(403).json({
-        success: false,
-        message: "You do not have permission to modify this document",
-      });
+      return sendForbidden(
+        res,
+        "You do not have permission to modify this document"
+      );
     }
 
     // Check if the user already has permissions
@@ -874,8 +773,8 @@ router.post("/:id/permissions", authenticate, async (req, res) => {
           },
         });
       } catch (error) {
-        console.error(error);
-        return res.status(500).json({ error: "user doesnt exist" });
+        logger.error("Error creating permission", error);
+        return sendError(res, "User doesn't exist", 500);
       }
     }
 
@@ -905,27 +804,22 @@ router.post("/:id/permissions", authenticate, async (req, res) => {
     }
 
     // Send email notification to the user
-    try {
-      const accessType = canWrite ? "edit" : "view";
-      const emailMessage = isUpdate
-        ? documentPermissionUpdatedTemplate({
-            documentName: document.name,
-            accessType: accessType,
-          })
-        : documentSharedTemplate({
-            documentName: document.name,
-            accessType: accessType,
-          });
-      await sendEmail([email], emailMessage);
-    } catch (emailError) {
-      console.error("Failed to send email notification:", emailError);
-      // Don't fail the request if email fails
-    }
+    const accessType = canWrite ? "edit" : "view";
+    const emailMessage = isUpdate
+      ? documentPermissionUpdatedTemplate({
+          documentName: document.name,
+          accessType: accessType,
+        })
+      : documentSharedTemplate({
+          documentName: document.name,
+          accessType: accessType,
+        });
+    await sendEmailSafe([email], emailMessage);
 
-    res.json({ message: "Permission granted successfully" });
+    return sendSuccess(res, null, "Permission granted successfully");
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Error granting permission" });
+    logger.error("Error granting permission", error);
+    next(error);
   }
 });
 
@@ -1028,9 +922,10 @@ router.patch("/:id", authenticate, async (req, res) => {
       });
 
       if (translationDocs.length !== translations.length) {
-        return res.status(400).json({
-          error: "One or more translation documents not found",
-        });
+        return sendBadRequest(
+          res,
+          "One or more translation documents not found"
+        );
       }
 
       // Check if any of these documents are roots or already translations
@@ -1039,10 +934,10 @@ router.patch("/:id", authenticate, async (req, res) => {
       );
 
       if (invalidDocs.length > 0) {
-        return res.status(400).json({
-          error: "Some documents are already roots or translations",
-          invalidDocs: invalidDocs.map((d) => d.id),
-        });
+        return sendBadRequest(
+          res,
+          "Some documents are already roots or translations"
+        );
       }
     }
 
@@ -1113,13 +1008,10 @@ router.patch("/:id", authenticate, async (req, res) => {
       return updated;
     });
 
-    res.json({
-      success: true,
-      data: updatedDocument,
-    });
+    return sendSuccess(res, updatedDocument);
   } catch (error) {
-    console.error("Error updating document:", error);
-    res.status(500).json({ error: error.message });
+    logger.error("Error updating document", error);
+    next(error);
   }
 });
 
@@ -1137,7 +1029,7 @@ router.patch("/:id", authenticate, async (req, res) => {
  * @return {object} 404 - Document not found
  * @return {object} 500 - Server error
  */
-router.patch("/:id/content", authenticate, async (req, res) => {
+router.patch("/:id/content", authenticate, async (req, res, next) => {
   const { content } = req.body;
   try {
     // First, get the document with its current version
@@ -1159,7 +1051,7 @@ router.patch("/:id/content", authenticate, async (req, res) => {
       },
     });
 
-    if (!document) return res.status(404).json({ error: "Document not found" });
+    if (!document) return sendNotFound(res, "Document");
 
     // Check permissions
     if (document.ownerId !== req.user.id) {
@@ -1170,7 +1062,7 @@ router.patch("/:id/content", authenticate, async (req, res) => {
           canWrite: true,
         },
       });
-      if (!permission) return res.status(403).json({ error: "No edit access" });
+      if (!permission) return sendForbidden(res, "No edit access");
     }
 
     // Document content is now managed through versions only
@@ -1216,7 +1108,7 @@ router.patch("/:id/content", authenticate, async (req, res) => {
 
         currentVersionId = newVersion.id;
       } else {
-        console.warn("Content is the same, skipping version creation");
+        logger.warn("Content is the same, skipping version creation");
       }
       // If content is the same, don't create a new version - keep using the existing one
     } else {
@@ -1229,14 +1121,16 @@ router.patch("/:id/content", authenticate, async (req, res) => {
       });
     }
 
-    res.json({
-      success: true,
-      currentVersionId: currentVersionId,
-      message: "Version content updated successfully",
-    });
+    return sendSuccess(
+      res,
+      {
+        currentVersionId: currentVersionId,
+      },
+      "Version content updated successfully"
+    );
   } catch (error) {
-    console.error("Error updating version content:", error);
-    res.status(500).json({ error: "Error updating version content" });
+    logger.error("Error updating version content", error);
+    next(error);
   }
 });
 
@@ -1379,30 +1273,26 @@ router.post("/generate-translation", authenticate, async (req, res) => {
     if (typeof use_segmentation === "string") {
       translationData["use_segmentation"] = use_segmentation;
     }
-    return res.status(201).json({ success: true, data: translationDoc });
+    return sendSuccess(res, translationDoc, null, 201);
   } catch (error) {
-    console.error("Error generating translation:", error);
-    res
-      .status(500)
-      .json({ error: "Error generating translation: " + error.message });
+    logger.error("Error generating translation", error);
+    next(error);
   }
 });
 
 router.get(
   "/translation-context/:documentId",
   authenticate,
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const { documentId } = req.params;
       const document = await prisma.TranslationContextFile.findMany({
         where: { documentId: documentId },
       });
-      return res.json({ success: true, data: document });
+      return sendSuccess(res, document);
     } catch (error) {
-      console.error("Error fetching translation context:", error);
-      return res
-        .status(500)
-        .json({ error: "Error fetching translation context" });
+      logger.error("Error fetching translation context", error);
+      next(error);
     }
   }
 );
@@ -1420,7 +1310,7 @@ router.get(
 router.delete(
   "/translation-context/:fileId",
   authenticate,
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const { fileId } = req.params;
 
@@ -1441,10 +1331,7 @@ router.delete(
       });
 
       if (!contextFile) {
-        return res.status(404).json({
-          success: false,
-          error: "Translation context file not found",
-        });
+        return sendNotFound(res, "Translation context file");
       }
 
       // Check if user has permission
@@ -1454,10 +1341,10 @@ router.delete(
       );
 
       if (!hasPermission) {
-        return res.status(403).json({
-          success: false,
-          error: "You do not have permission to delete this file",
-        });
+        return sendForbidden(
+          res,
+          "You do not have permission to delete this file"
+        );
       }
 
       // Delete the translation context file
@@ -1465,17 +1352,14 @@ router.delete(
         where: { id: fileId },
       });
 
-      return res.json({
-        success: true,
-        message: "Translation context file deleted successfully",
-      });
+      return sendSuccess(
+        res,
+        null,
+        "Translation context file deleted successfully"
+      );
     } catch (error) {
-      console.error("Error deleting translation context file:", error);
-      return res.status(500).json({
-        success: false,
-        error: "Error deleting translation context file",
-        message: error.message,
-      });
+      logger.error("Error deleting translation context file", error);
+      next(error);
     }
   }
 );

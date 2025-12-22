@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { FaHistory } from "react-icons/fa";
 import QuillVersionControls from "./QuillVersionControls";
-import { useEditor } from "@/contexts/EditorContext";
+import { useEditor } from "@/hooks/useEditor";
 import HeaderDropdown from "@/components/quillExtension/HeaderDropdown";
 import { EDITOR_READ_ONLY, MAX_HEADING_LEVEL } from "@/utils/editorConfig";
 import { BiCommentAdd } from "react-icons/bi";

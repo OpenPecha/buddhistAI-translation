@@ -9,6 +9,13 @@ const {
 const { sendEmail } = require("../services/utils");
 const { getSegmentsContent } = require("../apis/openpecha_api");
 const { getSegmentRelated } = require("../apis/openpecha_api");
+const {
+  sendSuccess,
+  sendError,
+  sendNotFound,
+  sendBadRequest,
+} = require("../utils/response");
+const logger = require("../utils/logger");
 const router = express.Router();
 
 //references = [{type: "commentary", content: "The content of the reference"}]
@@ -55,7 +62,7 @@ async function generateMessagesFromThread(threadId, selectedText) {
 
     return messages;
   } catch (error) {
-    console.error("Error generating messages from thread:", error);
+    logger.error("Error generating messages from thread", error);
     return [];
   }
 }
@@ -134,8 +141,8 @@ async function getAIComment(
                   finalCommentText = finalCommentText.substring(9); // Remove "@Comment " (9 characters)
                 }
               } else if (parsed.type === "error") {
-                console.error(
-                  "Error:",
+                logger.error(
+                  "AI comment API error",
                   parsed.message || "An unknown error occurred"
                 );
               }
@@ -149,7 +156,7 @@ async function getAIComment(
               // Force flush to ensure immediate delivery
               if (res.flush) res.flush();
             } catch (e) {
-              console.error("Failed to parse stream data:", e);
+              logger.error("Failed to parse stream data", e);
             }
           }
         }
@@ -159,7 +166,7 @@ async function getAIComment(
     // Return the final comment text for database storage
     return finalCommentText;
   } catch (error) {
-    console.error("Error calling AI comment API:", error);
+    logger.error("Error calling AI comment API", error);
     res.write(
       `data: ${JSON.stringify({
         type: "error",
@@ -222,7 +229,7 @@ This is an automated message. Please do not reply to this email.`,
         await sendEmail([mentionedUser.email], emailContent);
       }
     } catch (error) {
-      console.error(`Error sending mention notification to @${userId}:`, error);
+      logger.error(`Error sending mention notification to @${userId}`, error);
     }
   }
 }
@@ -236,7 +243,7 @@ This is an automated message. Please do not reply to this email.`,
  * @return {array<object>} 200 - List of comments
  * @return {object} 500 - Server error
  */
-router.get("/", authenticate, async (req, res) => {
+router.get("/", authenticate, async (req, res, next) => {
   try {
     const { docId } = req.query;
 
@@ -255,10 +262,10 @@ router.get("/", authenticate, async (req, res) => {
       });
     }
 
-    res.json(comments);
+    return sendSuccess(res, comments);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Server error while fetching comments" });
+    logger.error("Error fetching comments", error);
+    next(error);
   }
 });
 
@@ -270,7 +277,7 @@ router.get("/", authenticate, async (req, res) => {
  * @return {array<object>} 200 - List of comments for the document
  * @return {object} 500 - Server error
  */
-router.get("/:docId", optionalAuthenticate, async (req, res) => {
+router.get("/:docId", optionalAuthenticate, async (req, res, next) => {
   try {
     const { docId } = req.params;
 
@@ -278,10 +285,10 @@ router.get("/:docId", optionalAuthenticate, async (req, res) => {
       where: { docId },
       include: { user: true },
     });
-    res.json(comments);
+    return sendSuccess(res, comments);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Error fetching document comments" });
+    logger.error("Error fetching document comments", error);
+    next(error);
   }
 });
 /**
@@ -292,17 +299,26 @@ router.get("/:docId", optionalAuthenticate, async (req, res) => {
  * @return {array<object>} 200 - List of comments in the thread
  * @return {object} 500 - Server error
  */
-router.get("/thread/:threadId", optionalAuthenticate, async (req, res) => {
-  const { threadId } = req.params;
-  const comments = await prisma.comment.findMany({
-    where: { threadId },
-    include: { user: true },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
-  res.json(comments);
-});
+router.get(
+  "/thread/:threadId",
+  optionalAuthenticate,
+  async (req, res, next) => {
+    try {
+      const { threadId } = req.params;
+      const comments = await prisma.comment.findMany({
+        where: { threadId },
+        include: { user: true },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+      return sendSuccess(res, comments);
+    } catch (error) {
+      logger.error("Error fetching thread comments", error);
+      next(error);
+    }
+  }
+);
 /**
  * POST /comments
  * @summary Create a new comment
@@ -366,11 +382,11 @@ router.get("/thread/:threadId", optionalAuthenticate, async (req, res) => {
  *   }
  * }
  */
-router.post("/", authenticate, async (req, res) => {
+router.post("/", authenticate, async (req, res, next) => {
   try {
     const user = req.user;
     if (!user) {
-      return res.status(400).json({ error: "missing user" });
+      return sendBadRequest(res, "Missing user");
     }
     const {
       docId,
@@ -382,14 +398,12 @@ router.post("/", authenticate, async (req, res) => {
       selectedText,
     } = req.body;
     if (!docId || !content) {
-      return res.status(400).json({ error: "Missing required fields" });
+      return sendBadRequest(res, "Missing required fields");
     }
 
     // Validate suggestion data if isSuggestion is true
     if (isSuggestion === true && !suggestedText) {
-      return res
-        .status(400)
-        .json({ error: "Suggested text is required for suggestions" });
+      return sendBadRequest(res, "Suggested text is required for suggestions");
     }
 
     // Always create the user's comment first
@@ -432,7 +446,7 @@ router.post("/", authenticate, async (req, res) => {
         },
       });
       if (!instance) {
-        return res.status(404).json({ error: "Instance not found" });
+        return sendNotFound(res, "Instance");
       }
       // STATUS UPDATE 1: Start
       // Set headers for Server-Sent Events
@@ -544,7 +558,7 @@ router.post("/", authenticate, async (req, res) => {
         );
         res.end();
       } catch (error) {
-        console.error("Error processing AI comment:", error);
+        logger.error("Error processing AI comment", error);
         // Still end the response stream properly on error
         if (!res.headersSent) {
           res.writeHead(500, { "Content-Type": "application/json" });
@@ -565,10 +579,10 @@ router.post("/", authenticate, async (req, res) => {
         }
       }
     } else {
-      res.status(201).json(newComment);
+      return sendSuccess(res, newComment, null, 201);
     }
   } catch (error) {
-    console.error(error);
+    logger.error("Error creating comment", error);
     if (!res.headersSent) {
       res.writeHead(500, { "Content-Type": "application/json" });
       res.end(
@@ -583,6 +597,7 @@ router.post("/", authenticate, async (req, res) => {
       );
       res.end();
     }
+    next(error);
   }
 });
 
@@ -601,7 +616,7 @@ router.post("/", authenticate, async (req, res) => {
  * @return {object} 400 - Bad request - Missing required fields for suggestions
  * @return {object} 500 - Server error
  */
-router.put("/:id", authenticate, async (req, res) => {
+router.put("/:id", authenticate, async (req, res, next) => {
   try {
     const { id } = req.params;
     const { content, isSuggestion, suggestedText } = req.body;
@@ -611,7 +626,7 @@ router.put("/:id", authenticate, async (req, res) => {
     });
 
     if (!existingComment) {
-      return res.status(404).json({ error: "Comment not found" });
+      return sendNotFound(res, "Comment");
     }
 
     // Validate suggestion data if isSuggestion is being updated to true
@@ -620,9 +635,7 @@ router.put("/:id", authenticate, async (req, res) => {
       !suggestedText &&
       !existingComment.suggestedText
     ) {
-      return res
-        .status(400)
-        .json({ error: "Suggested text is required for suggestions" });
+      return sendBadRequest(res, "Suggested text is required for suggestions");
     }
 
     const updatedComment = await prisma.comment.update({
@@ -641,10 +654,10 @@ router.put("/:id", authenticate, async (req, res) => {
       },
     });
 
-    res.json(updatedComment);
+    return sendSuccess(res, updatedComment);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Error updating comment" });
+    logger.error("Error updating comment", error);
+    next(error);
   }
 });
 
@@ -658,7 +671,7 @@ router.put("/:id", authenticate, async (req, res) => {
  * @return {object} 404 - Comment not found
  * @return {object} 500 - Server error
  */
-router.delete("/:id", authenticate, async (req, res) => {
+router.delete("/:id", authenticate, async (req, res, next) => {
   try {
     const { id } = req.params;
 
@@ -667,17 +680,17 @@ router.delete("/:id", authenticate, async (req, res) => {
     });
 
     if (!comment) {
-      return res.status(404).json({ error: "Comment not found" });
+      return sendNotFound(res, "Comment");
     }
 
     await prisma.comment.delete({
       where: { id },
     });
 
-    res.json({ message: "Comment deleted successfully" });
+    return sendSuccess(res, null, "Comment deleted successfully");
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Error deleting comment" });
+    logger.error("Error deleting comment", error);
+    next(error);
   }
 });
 

@@ -5,11 +5,10 @@ import {
   useCopyOperations,
   useGlossaryOperations,
   useStandardizationOperations,
-  useTextSelection,
   useTranslationOperations,
   useTranslationResults,
 } from ".";
-import { useEditor } from "@/contexts/EditorContext";
+import { useEditor } from "@/hooks/useEditor";
 import { useTranslationSettings } from "@/hooks/useTranslationSettings";
 
 interface UseTranslationControllerProps {
@@ -40,17 +39,15 @@ export const useTranslationController = ({
     getQuill,
     getTextByLineNumber,
     activeEditor,
-  } = useEditor();
 
-  // Text selection hook
-  const {
     selectedText,
+    setSelectedText,
     activeSelectedEditor,
     selectedTextLineNumbers,
     clearSelection,
     clearUISelection,
     getTranslatedTextForLine,
-  } = useTextSelection();
+  } = useEditor();
 
   // Translation results hook
   const {
@@ -94,11 +91,6 @@ export const useTranslationController = ({
     [CHARACTER_LIMIT]
   );
 
-  // Get current input text based on mode
-  const getCurrentInputText = useCallback(() => {
-    return inputMode === "selection" ? selectedText : manualText;
-  }, [inputMode, selectedText, manualText]);
-
   // Get current line numbers (only for selection mode)
   const getCurrentLineNumbers = useCallback(() => {
     return inputMode === "selection" ? selectedTextLineNumbers : null;
@@ -117,7 +109,7 @@ export const useTranslationController = ({
     setError,
   } = useTranslationOperations({
     config,
-    selectedText: getCurrentInputText(),
+    selectedText: selectedText,
     selectedTextLineNumbers: getCurrentLineNumbers(),
     onStreamComplete: (finalResults) => {
       // Clear UI selection but keep line numbers for replace functionality
@@ -216,9 +208,9 @@ export const useTranslationController = ({
   };
 
   const startTranslation = async () => {
-    const currentText = getCurrentInputText();
+    const currentText = selectedText.trim();
 
-    if (!currentText.trim()) {
+    if (!currentText) {
       setError("Please select text or enter text to translate");
       return;
     }
@@ -291,6 +283,7 @@ export const useTranslationController = ({
     resetStandardization();
     setAnalysisSourceItems([]);
   };
+
   return {
     hasActiveWorkflow,
     resetActiveWorkflow: resetActiveWorkflow,
@@ -302,12 +295,12 @@ export const useTranslationController = ({
 
     // Text input (selection + manual)
     selectedText,
+    setSelectedText,
     activeSelectedEditor,
     selectedTextLineNumbers,
     manualText,
     inputMode,
     CHARACTER_LIMIT,
-    getCurrentInputText,
     getCurrentLineNumbers,
     setManualText: handleManualTextChange,
     setInputMode,

@@ -1,8 +1,32 @@
+import { isEqual } from "lodash";
 import type Quill from "quill";
 import type React from "react";
-import { createContext, useContext, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
-interface EditorContextType {
+type TextSelectionContextType = {
+  selectedText: string;
+  selectedTextTag: HTMLElement | null;
+  activeSelectedEditor: string | null;
+  selectedTextLineNumbers: Record<string, { from: number; to: number }> | null;
+  setSelectedText: (d: string) => void;
+  setSelectedTextTag: (d: HTMLElement | null) => void;
+  clearSelection: () => void;
+  clearUISelection: () => void;
+  getTranslatedTextForLine: (lineNumber: number) => string | null;
+  getOriginalTextForLine: (lineNumber: number) => string | null;
+  getTextPairsByLineNumbers: () => Array<{
+    original_text: string;
+    translated_text: string;
+  }> | null;
+};
+
+type EditorContextType = {
   activeEditor: string | null;
   setActiveEditor: (id: string) => void;
   activeQuill: Quill | null;
@@ -27,27 +51,7 @@ interface EditorContextType {
   scrollToLineNumber: (line_number: number, quill?: Quill | null) => boolean;
   hoveredLineNumber: number | null;
   setHoveredLineNumber: (lineNumber: number | null) => void;
-}
-
-const EditorContext = createContext<EditorContextType>({
-  activeEditor: null,
-  setActiveEditor: () => {},
-  activeQuill: null,
-  setActiveQuill: () => {},
-  quillEditors: new Map(),
-  registerQuill: (_id: string, _quill: Quill) => {},
-  unregisterQuill: (_id: string) => {},
-  getQuill: () => null,
-  getLineNumber: () => null,
-  getElementWithLinenumber: () => null,
-  getTextByLineNumber: () => null,
-  getSelectionLineNumbers: () => null,
-  scrollToLineNumber: () => false,
-  hoveredLineNumber: null,
-  setHoveredLineNumber: () => {},
-});
-
-export const useEditor = () => useContext(EditorContext);
+} & TextSelectionContextType;
 
 export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -57,32 +61,170 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({
   const [quillEditors, setQuillEditors] = useState<Map<string, Quill>>(
     new Map()
   );
-  const [hoveredLineNumber, setHoveredLineNumber] = useState<number | null>(null);
-  const registerQuill = (id: string, quill: Quill) => {
-    setQuillEditors((prev) => {
-      const next = new Map(prev);
-      next.set(id, quill);
-      return next;
-    });
 
-    // Set up focus tracking - only set active editor on actual user interaction
-    // Set the first editor as active if no editor is currently active
-    setActiveEditor((currentActive) => {
-      if (currentActive === null && quillEditors.size === 0) {
-        return id;
+  const [hoveredLineNumber, setHoveredLineNumber] = useState<number | null>(
+    null
+  );
+
+  const [selectedText, setSelectedText] = useState<string>("");
+  const [selectedTextTag, setSelectedTextTag] = useState<HTMLElement | null>(
+    null
+  );
+  const [activeSelectedEditor, setActiveSelectedEditor] = useState<
+    string | null
+  >(null);
+  const [selectedTextLineNumbers, setSelectedTextLineNumbers] = useState<Record<
+    string,
+    { from: number; to: number }
+  > | null>(null);
+
+  // Function to get selected text from the DOM (only from main editor)
+  const getSelectedText = useCallback(() => {
+    // Find the first instance of .ql-editor in the DOM
+    const EditorElement = document.querySelector(
+      ".ql-editor"
+    ) as HTMLElement | null;
+    const selection = globalThis.getSelection();
+    if (
+      selection &&
+      selection.rangeCount > 0 &&
+      EditorElement &&
+      selection.toString().trim()
+    ) {
+      const range = selection.getRangeAt(0);
+
+      // Only allow selection if both endpoints are inside the EditorElement
+      if (
+        EditorElement.contains(range.startContainer) &&
+        EditorElement.contains(range.endContainer)
+      ) {
+        return selection.toString().trim();
       }
-      return currentActive;
-    });
-    
-    quill.on("selection-change", (range) => {
-      if(activeEditor !== id && range){
-        setActiveEditor(id);
-        setActiveQuill(quill);
+    }
+    return "";
+  }, []);
+
+  // Monitor text selection changes
+  useEffect(() => {
+    const handleSelectionChange = (event: Event) => {
+      const text = getSelectedText();
+      const lineNumbers = getSelectionLineNumbers();
+      // Update state only if text or line numbers have actually changed
+      setSelectedText((prevText) => {
+        if (text !== prevText) {
+          return text;
+        }
+        return prevText;
+      });
+
+      setSelectedTextLineNumbers((prevLineNumbers) => {
+        if (!isEqual(lineNumbers, prevLineNumbers)) {
+          return lineNumbers;
+        }
+        return prevLineNumbers;
+      });
+
+      if (text) {
+        setActiveSelectedEditor(activeEditor);
+      } else {
+        setActiveSelectedEditor(null);
       }
-    });
+    };
+
+    // Add event listener for selection changes
+    document.addEventListener("selectionchange", handleSelectionChange);
+
+    return () => {
+      document.removeEventListener("selectionchange", handleSelectionChange);
+    };
+  }, [selectedText, activeEditor, getSelectedText]); // Add missing dependency array
+  const clearSelection = () => {
+    setSelectedText("");
+    setActiveSelectedEditor(null);
+    setSelectedTextLineNumbers(null);
   };
 
-  const unregisterQuill = (id: string) => {
+  const clearUISelection = () => {
+    // Clear only the visual selection, keep line numbers for replace functionality
+    setSelectedText("");
+    setActiveSelectedEditor(null);
+    // Keep selectedTextLineNumbers intact
+  };
+
+  const getTranslatedTextForLine = (lineNumber: number): string | null => {
+    if (!activeEditor || quillEditors.size < 2) {
+      return null;
+    }
+
+    let otherEditorId: string | null = null;
+    for (const editorId of quillEditors.keys()) {
+      if (editorId !== activeEditor) {
+        otherEditorId = editorId;
+        break;
+      }
+    }
+
+    if (!otherEditorId) {
+      return null;
+    }
+
+    const otherEditorQuill = getQuill(otherEditorId);
+    return getTextByLineNumber(otherEditorQuill, lineNumber);
+  };
+
+  const getOriginalTextForLine = (lineNumber: number): string | null => {
+    if (!activeEditor) {
+      return null;
+    }
+    const quill = getQuill(activeEditor);
+    return getTextByLineNumber(quill, lineNumber);
+  };
+
+  const getTextPairsByLineNumbers = (): Array<{
+    original_text: string;
+    translated_text: string;
+  }> | null => {
+    if (!selectedTextLineNumbers) {
+      return null;
+    }
+    const lineNumbers = Object.keys(selectedTextLineNumbers).map(Number);
+    const textPairs = [];
+    for (const lineNumber of lineNumbers) {
+      const originalText = getOriginalTextForLine(lineNumber);
+      const translatedText = getTranslatedTextForLine(lineNumber);
+      if (originalText && translatedText) {
+        textPairs.push({
+          original_text: originalText,
+          translated_text: translatedText,
+        });
+      }
+    }
+    return textPairs;
+  };
+
+  const registerQuill = useCallback(
+    (id: string, quill: Quill) => {
+      setQuillEditors((prev) => {
+        const next = new Map(prev);
+        next.set(id, quill);
+        // Set the first editor as active if no editor is currently active
+        if (prev.size === 0) {
+          setActiveEditor(id);
+          setActiveQuill(quill);
+        }
+        return next;
+      });
+
+      quill.on("selection-change", (range) => {
+        if (activeEditor !== id && range) {
+          setActiveEditor(id);
+          setActiveQuill(quill);
+        }
+      });
+    },
+    [activeEditor, activeQuill]
+  );
+  const unregisterQuill = useCallback((id: string) => {
     setQuillEditors((prev) => {
       const next = new Map(prev);
       next.delete(id);
@@ -96,11 +238,14 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({
     if (quillEditors.size > 0) {
       setActiveEditor(Array.from(quillEditors.keys())[0]);
     }
-  };
+  }, []);
 
-  const getQuill = (id: string): Quill | null => {
-    return quillEditors.get(id) ?? null;
-  };
+  const getQuill = useCallback(
+    (id: string): Quill | null => {
+      return quillEditors.get(id) ?? null;
+    },
+    [quillEditors]
+  );
 
   const getLineNumber = (quill: Quill | null) => {
     if (!quill) return null;
@@ -209,18 +354,18 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({
     lineNumber: number
   ): string | null => {
     if (!quill || lineNumber < 1) return null;
-  
+
     const fullText = quill.getText();
     const fullTextLines = fullText.split("\n");
-  
+
     let currentLineNumber = 1;
-  
+
     for (let i = 0; i < fullTextLines.length; i++) {
       const lineText = fullTextLines[i];
-  
+
       // Skip counting for leading/trailing empty lines
       if (!lineText.trim()) continue;
-  
+
       if (currentLineNumber === lineNumber) {
         // Count number of consecutive empty lines *after* this line
         let noOfNewLines = 0;
@@ -228,60 +373,70 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({
           if (fullTextLines[j].trim()) break;
           noOfNewLines++;
         }
-  
-        return lineText + '\n'.repeat(noOfNewLines);
+
+        return lineText + "\n".repeat(noOfNewLines);
       }
-  
+
       currentLineNumber++;
     }
-  
+
     return null; // Line number not found
   };
-  
 
-  const getSelectionLineNumbers = (): Record<
+  const getSelectionLineNumbers = useCallback((): Record<
     string,
     { from: number; to: number }
   > | null => {
     const selection = window.getSelection();
-    if (!selection || selection.rangeCount === 0) return null;
-
-    const range = selection.getRangeAt(0);
-    const selectedText = selection.toString().trim();
-    if (!selectedText) return null;
+    const range = selection?.getRangeAt(0);
+    if (!range) return null;
 
     // Find which editor this selection belongs to
     let targetQuill: Quill | null = null;
     let editorContainer: Element | null = null;
 
-    const container = range.commonAncestorContainer;
-    let element =
-      container.nodeType === Node.TEXT_NODE
-        ? container.parentElement
-        : (container as Element);
-
-    while (element) {
-      if (element.classList?.contains("ql-editor")) {
-        editorContainer = element.closest(".editor-container");
-        break;
+    // Handle both DOM Range and Quill Range
+    let container: Node | null = null;
+    if (range instanceof Range) {
+      container = range.commonAncestorContainer;
+    } else {
+      // It's a Quill range object { index, length }
+      // We need to find the container from the Quill instance
+      if (activeQuill) {
+        targetQuill = activeQuill;
+        editorContainer = activeQuill.root.closest(".editor-container");
       }
-      element = element.parentElement;
     }
 
-    if (!editorContainer) return null;
+    if (!targetQuill && container) {
+      let element =
+        container.nodeType === Node.TEXT_NODE
+          ? container.parentElement
+          : (container as Element);
 
-    // Find the corresponding Quill instance
-    for (const [, quill] of quillEditors) {
-      if (quill.root.closest(".editor-container") === editorContainer) {
-        targetQuill = quill;
-        break;
+      while (element) {
+        if (element.classList?.contains("ql-editor")) {
+          editorContainer = element.closest(".editor-container");
+          break;
+        }
+        element = element.parentElement;
+      }
+
+      if (!editorContainer) return null;
+
+      // Find the corresponding Quill instance
+      for (const [, quill] of quillEditors) {
+        if (quill.root.closest(".editor-container") === editorContainer) {
+          targetQuill = quill;
+          break;
+        }
       }
     }
 
     if (!targetQuill) return null;
 
     const sourceLineNumbersContainer =
-      editorContainer.querySelector(".line-numbers");
+      editorContainer?.querySelector(".line-numbers");
     if (!sourceLineNumbersContainer) return null;
 
     const editorElement = targetQuill.root;
@@ -295,30 +450,121 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({
 
     if (lineNumberElements.length === 0) return null;
 
-    // Split the selected text into lines (for future use if needed)
-    // const selectedLines = selectedText.split('\n');
     const result: Record<string, { from: number; to: number }> = {};
 
-    // Get the start and end positions of the selection in the DOM
-    const startRect =
-      range.startContainer.nodeType === Node.TEXT_NODE
-        ? (() => {
-            const tempRange = document.createRange();
-            tempRange.setStart(range.startContainer, range.startOffset);
-            tempRange.setEnd(range.startContainer, range.startOffset);
-            return tempRange.getBoundingClientRect();
-          })()
-        : range.getBoundingClientRect();
+    // Handle Quill range object differently from DOM Range
+    let startRect: DOMRect;
+    let endRect: DOMRect;
 
-    const endRect =
-      range.endContainer.nodeType === Node.TEXT_NODE
-        ? (() => {
-            const tempRange = document.createRange();
-            tempRange.setStart(range.endContainer, range.endOffset);
-            tempRange.setEnd(range.endContainer, range.endOffset);
-            return tempRange.getBoundingClientRect();
-          })()
-        : range.getBoundingClientRect();
+    if (range instanceof Range) {
+      // DOM Range - existing logic
+      startRect =
+        range.startContainer.nodeType === Node.TEXT_NODE
+          ? (() => {
+              const tempRange = document.createRange();
+              tempRange.setStart(range.startContainer, range.startOffset);
+              tempRange.setEnd(range.startContainer, range.startOffset);
+              return tempRange.getBoundingClientRect();
+            })()
+          : range.getBoundingClientRect();
+
+      endRect =
+        range.endContainer.nodeType === Node.TEXT_NODE
+          ? (() => {
+              const tempRange = document.createRange();
+              tempRange.setStart(range.endContainer, range.endOffset);
+              tempRange.setEnd(range.endContainer, range.endOffset);
+              return tempRange.getBoundingClientRect();
+            })()
+          : range.getBoundingClientRect();
+    } else {
+      // Quill range object { index, length }
+      // Convert to DOM positions
+      const quillRange = range;
+      const [line, offset] = targetQuill.getLine(quillRange.index);
+
+      if (!line) return null;
+
+      // Create DOM ranges for start and end positions
+      const startDomRange = document.createRange();
+      const endDomRange = document.createRange();
+
+      // Get the DOM node for the line
+      const lineDom = line.domNode;
+      if (!lineDom) return null;
+
+      // Set start position
+      if (lineDom.nodeType === Node.TEXT_NODE) {
+        startDomRange.setStart(
+          lineDom,
+          Math.min(offset, lineDom.textContent?.length || 0)
+        );
+        startDomRange.setEnd(
+          lineDom,
+          Math.min(offset, lineDom.textContent?.length || 0)
+        );
+      } else {
+        const textNode = lineDom.firstChild;
+        if (textNode && textNode.nodeType === Node.TEXT_NODE) {
+          startDomRange.setStart(
+            textNode,
+            Math.min(offset, textNode.textContent?.length || 0)
+          );
+          startDomRange.setEnd(
+            textNode,
+            Math.min(offset, textNode.textContent?.length || 0)
+          );
+        } else {
+          startDomRange.setStart(lineDom, 0);
+          startDomRange.setEnd(lineDom, 0);
+        }
+      }
+
+      // Set end position (same as start if length is 0, otherwise calculate)
+      if (quillRange.length === 0) {
+        endDomRange.setStart(
+          startDomRange.startContainer,
+          startDomRange.startOffset
+        );
+        endDomRange.setEnd(startDomRange.endContainer, startDomRange.endOffset);
+      } else {
+        const endIndex = quillRange.index + quillRange.length;
+        const [endLine, endOffset] = targetQuill.getLine(endIndex);
+        if (endLine) {
+          const endLineDom = endLine.domNode;
+          if (endLineDom) {
+            if (endLineDom.nodeType === Node.TEXT_NODE) {
+              endDomRange.setStart(
+                endLineDom,
+                Math.min(endOffset, endLineDom.textContent?.length || 0)
+              );
+              endDomRange.setEnd(
+                endLineDom,
+                Math.min(endOffset, endLineDom.textContent?.length || 0)
+              );
+            } else {
+              const textNode = endLineDom.firstChild;
+              if (textNode && textNode.nodeType === Node.TEXT_NODE) {
+                endDomRange.setStart(
+                  textNode,
+                  Math.min(endOffset, textNode.textContent?.length || 0)
+                );
+                endDomRange.setEnd(
+                  textNode,
+                  Math.min(endOffset, textNode.textContent?.length || 0)
+                );
+              } else {
+                endDomRange.setStart(endLineDom, 0);
+                endDomRange.setEnd(endLineDom, 0);
+              }
+            }
+          }
+        }
+      }
+
+      startRect = startDomRange.getBoundingClientRect();
+      endRect = endDomRange.getBoundingClientRect();
+    }
 
     const startRelativePosition =
       startRect.top - editorRect.top + editorScrollTop;
@@ -346,9 +592,14 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({
 
     if (!startLineNumber || !endLineNumber) return null;
 
-    // We need to calculate character positions within each line, not cumulative
-    // First, let's get the actual selection range within the Quill editor
-    const quillRange = targetQuill.getSelection();
+    // Get the actual selection range within the Quill editor
+    let quillRange;
+    if (range instanceof Range) {
+      quillRange = targetQuill.getSelection();
+    } else {
+      quillRange = range;
+    }
+
     if (!quillRange) return null;
 
     // Get the full text of the editor to work with line positions
@@ -387,6 +638,16 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({
             from: selectionStartInLine,
             to: selectionEndInLine,
           };
+        } else if (
+          quillRange.length === 0 &&
+          lineStart <= selectionStart &&
+          selectionStart <= lineEnd
+        ) {
+          // Handle cursor position (no selection) - return the entire line
+          result[currentLineNumber.toString()] = {
+            from: 0,
+            to: lineText.length,
+          };
         }
       }
 
@@ -398,26 +659,26 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({
     }
 
     return Object.keys(result).length > 0 ? result : null;
-  };
+  }, [activeQuill, quillEditors]);
 
-  const scrollToLineNumber = (
-    line_number: number,
-    quill?: Quill | null
-  ): boolean => {
-    // If specific quill provided, only scroll that one
-    if (quill) {
-      return scrollSingleEditor(quill, line_number);
-    }
-
-    // Otherwise scroll all editors
-    let success = false;
-    quillEditors.forEach((editor) => {
-      if (scrollSingleEditor(editor, line_number)) {
-        success = true;
+  const scrollToLineNumber = useCallback(
+    (line_number: number, quill?: Quill | null): boolean => {
+      // If specific quill provided, only scroll that one
+      if (quill) {
+        return scrollSingleEditor(quill, line_number);
       }
-    });
-    return success;
-  };
+
+      // Otherwise scroll all editors
+      let success = false;
+      quillEditors.forEach((editor) => {
+        if (scrollSingleEditor(editor, line_number)) {
+          success = true;
+        }
+      });
+      return success;
+    },
+    [quillEditors]
+  );
 
   // Helper function to scroll a single editor
   const scrollSingleEditor = (quill: Quill, line_number: number): boolean => {
@@ -509,29 +770,98 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({
     }, 200);
   };
 
+  const value = useMemo(
+    () => ({
+      activeEditor,
+      setActiveEditor,
+      activeQuill,
+      setActiveQuill,
+      quillEditors,
+      registerQuill,
+      unregisterQuill,
+      getQuill,
+      getLineNumber,
+      getElementWithLinenumber,
+      getTextByLineNumber,
+      getSelectionLineNumbers,
+      scrollToLineNumber,
+      hoveredLineNumber,
+      setHoveredLineNumber,
+
+      // selection context
+      selectedText,
+      activeSelectedEditor,
+      setSelectedTextTag,
+      selectedTextTag,
+      selectedTextLineNumbers,
+      setSelectedText: (d: string) => {
+        if (d === "") return;
+        setSelectedText(d);
+      },
+      clearSelection,
+      clearUISelection,
+      getTranslatedTextForLine,
+      getOriginalTextForLine,
+      getTextPairsByLineNumbers,
+    }),
+    [
+      activeEditor,
+      activeQuill,
+      quillEditors,
+      registerQuill,
+      unregisterQuill,
+      getQuill,
+      getLineNumber,
+      getElementWithLinenumber,
+      getTextByLineNumber,
+      getSelectionLineNumbers,
+      scrollToLineNumber,
+      hoveredLineNumber,
+      selectedText,
+      activeSelectedEditor,
+      setSelectedTextTag,
+      selectedTextTag,
+      selectedTextLineNumbers,
+      setSelectedText,
+      clearSelection,
+      clearUISelection,
+      getTranslatedTextForLine,
+      getOriginalTextForLine,
+      getTextPairsByLineNumbers,
+    ]
+  );
   return (
-    <EditorContext.Provider
-      value={{
-        activeEditor,
-        setActiveEditor,
-        activeQuill,
-        setActiveQuill,
-        quillEditors,
-        registerQuill,
-        unregisterQuill,
-        getQuill,
-        getLineNumber,
-        getElementWithLinenumber,
-        getTextByLineNumber,
-        getSelectionLineNumbers,
-        scrollToLineNumber,
-        hoveredLineNumber,
-        setHoveredLineNumber,
-      }}
-    >
-      {children}
-    </EditorContext.Provider>
+    <EditorContext.Provider value={value}>{children}</EditorContext.Provider>
   );
 };
+
+const EditorContext = createContext<EditorContextType>({
+  activeEditor: null,
+  setActiveEditor: () => {},
+  activeQuill: null,
+  setActiveQuill: () => {},
+  quillEditors: new Map(),
+  registerQuill: () => {},
+  unregisterQuill: () => {},
+  getQuill: () => null,
+  getLineNumber: () => null,
+  getElementWithLinenumber: () => null,
+  getTextByLineNumber: () => null,
+  getSelectionLineNumbers: () => ({}),
+  scrollToLineNumber: () => false,
+  hoveredLineNumber: null,
+  setHoveredLineNumber: () => {},
+  selectedText: "",
+  activeSelectedEditor: null,
+  setSelectedTextTag: () => {},
+  selectedTextTag: null,
+  selectedTextLineNumbers: null,
+  setSelectedText: () => {},
+  clearSelection: () => {},
+  clearUISelection: () => {},
+  getTranslatedTextForLine: () => null,
+  getOriginalTextForLine: () => null,
+  getTextPairsByLineNumbers: () => null,
+});
 
 export default EditorContext;

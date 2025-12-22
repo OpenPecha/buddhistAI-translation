@@ -1,5 +1,5 @@
 import { deleteComment } from "@/api/comment";
-import { useEditor } from "@/contexts/EditorContext";
+import { useEditor } from "@/hooks/useEditor";
 import { BiTrash } from "react-icons/bi";
 import { useParams } from "react-router-dom";
 import { useState } from "react";
@@ -60,15 +60,22 @@ function Comments() {
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
 
   // Fetch threads instead of comments
-  const { data: threads = [], isLoading, error } = useQuery({
+  const {
+    data: threads = [],
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["threads", id],
     queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/threads/document/${id}`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/threads/document/${id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
       if (!response.ok) throw new Error("Failed to fetch threads");
       return response.json() as Promise<Thread[]>;
     },
@@ -87,10 +94,8 @@ function Comments() {
       queryClient.invalidateQueries({ queryKey: ["threads"] });
 
       // Find the thread that contains this comment
-      const thread = threads?.find(t => 
-        t.comments?.some(c => c.id === id)
-      );
-      
+      const thread = threads?.find((t) => t.comments?.some((c) => c.id === id));
+
       // If this was the only comment, remove the highlight
       if (thread && thread.comments?.length === 1) {
         const suggestionSpan = document.querySelector<HTMLSpanElement>(
@@ -191,7 +196,8 @@ function Comments() {
                   {thread.selectedText || "Unknown text"}"
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {thread.comments?.length || 0} {thread.comments?.length === 1 ? 'reply' : 'replies'}
+                  {thread.comments?.length || 0}{" "}
+                  {thread.comments?.length === 1 ? "reply" : "replies"}
                 </p>
               </div>
 

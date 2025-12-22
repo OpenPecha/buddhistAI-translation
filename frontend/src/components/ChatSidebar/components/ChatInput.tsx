@@ -10,8 +10,9 @@ import { useTranslation as useTranslationI18next } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { ModelSelector } from "@/components/ui/ModelSelector";
 import { useTranslation } from "@/components/ChatSidebar/contexts/TranslationContext";
-import { useTextSelection } from "../hooks";
+
 import { type ModelName } from "@/api/translate";
+import { useEditor } from "@/hooks/useEditor";
 
 interface ChatInputProps {
   isProcessing?: boolean;
@@ -28,7 +29,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
   const [input, setInput] = useState("");
   const [shouldStartTranslation, setShouldStartTranslation] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { getTextPairsByLineNumbers } = useTextSelection();
+  const { getTextPairsByLineNumbers } = useEditor();
 
   const defaultPlaceholder =
     placeholder || t("translation.typePasteTextPlaceholder");

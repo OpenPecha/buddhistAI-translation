@@ -134,6 +134,10 @@ app.use("/upload-file", uploadFileRoutes);
 app.use("/temp_annotation", tempAnnotationRoutes);
 app.use("/webuddhist", webuddhistRoutes);
 
+// Error handling middleware (must be last)
+const errorHandler = require("./middleware/errorHandler");
+app.use(errorHandler);
+
 const PORT = process.env.PORT || 9000;
 server.listen(PORT, () => {
   console.info(`Server running on http://localhost:${PORT}`);

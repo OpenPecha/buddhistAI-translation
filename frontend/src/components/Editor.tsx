@@ -11,7 +11,7 @@ import { QuillBinding } from "y-quill";
 import type * as Y from "yjs";
 import { updateContentDocument } from "@/api/document";
 import { useAuth } from "@/auth/use-auth-hook";
-import { useEditor } from "@/contexts/EditorContext";
+import { useEditor } from "@/hooks/useEditor";
 import type { Document } from "@/hooks/useCurrentDoc";
 import { useDisplaySettings } from "@/hooks/useDisplaySettings";
 import { checkIsTibetan } from "@/lib/isTibetan";
@@ -29,7 +29,7 @@ import AnnotationList from "./Annotation/AnnotationList";
 import { handleAnnotationVote } from "./quill_func";
 import DocumentSidebar from "./DocumentSidebar";
 import { useEditorSidebarStore } from "@/stores/editorSidebarStore";
-import { useCommentStore, type Thread } from "@/stores/commentStore";
+import { useCommentStore } from "@/stores/commentStore";
 import { useQuillSelection } from "@/hooks/useQuillSelection";
 import {
   useSelectionStore,
@@ -73,14 +73,16 @@ const Editor = ({
     "counter-container" + "-" + Math.random().toString(36).slice(2, 6);
   const [currentRange, setCurrentRange] = useState<CustomRange | null>(null);
   const [isSynced, setIsSynced] = useState(false);
-  const { registerQuill, transitionPhase } = useQuillVersion();
+  const { registerQuillVersion, transitionPhase } = useQuillVersion();
   const [isTibetan, setIsTibetan] = useState(false);
   const {
-    registerQuill: registerQuill2,
-    unregisterQuill: unregisterQuill2,
+    registerQuill,
+    unregisterQuill,
     getLineNumber,
     quillEditors,
     getElementWithLinenumber,
+    setSelectedText,
+    setSelectedTextTag,
   } = useEditor();
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const quillRef = useRef<Quill | null>(null);
@@ -88,7 +90,6 @@ const Editor = ({
   const hasContentLoadedRef = useRef<boolean>(false);
   const quillEditorsRef = useRef(quillEditors);
   const getElementWithLinenumberRef = useRef(getElementWithLinenumber);
-
   // Keep refs up to date
   useEffect(() => {
     quillEditorsRef.current = quillEditors;
@@ -303,9 +304,9 @@ const Editor = ({
       // className is not a valid Quill option, apply these styles to the container instead
     });
 
-    registerQuill(quill);
     quillRef.current = quill;
-    registerQuill2(editorId as string, quill);
+    registerQuillVersion(quill);
+    registerQuill(editorId as string, quill);
     isInitializedRef.current = true;
     if (yText && provider) {
       binding = new QuillBinding(yText, quill, provider.awareness);
@@ -366,9 +367,11 @@ const Editor = ({
         });
         // Add selected_text class to the clicked p element
         clickedP.classList.add("selected_text_segment");
-
+        setSelectedTextTag(clickedP);
         // Get current selection
         const currentRange = quillRef.current.getSelection();
+        const textSelected = clickedP.textContent || "";
+        setSelectedText(textSelected || "");
 
         // If selection length is 0, use the paragraph's content
         if (!currentRange || currentRange.length === 0) {
@@ -387,13 +390,6 @@ const Editor = ({
           const paragraphText = quillRef.current.getText(
             paragraphIndex,
             paragraphLength
-          );
-
-          // Set selection to the paragraph
-          quillRef.current.setSelection(
-            paragraphIndex,
-            paragraphLength,
-            "user"
           );
 
           // Get line number for the paragraph
@@ -488,6 +484,7 @@ const Editor = ({
         debouncedSave(currentContent as any);
       }
     });
+    quill.on("selection-change", () => {});
 
     function handleFormatChange(type: string) {
       const range = quill.getSelection();
@@ -515,7 +512,7 @@ const Editor = ({
         updateDocumentMutation.mutate(currentContent as any);
       }
       if (editorId) {
-        unregisterQuill2(editorId);
+        unregisterQuill(editorId);
       }
       queryClient.removeQueries({
         queryKey: [`document-${documentId}`],
@@ -564,135 +561,6 @@ const Editor = ({
       }
     };
   }, [currentDoc, yText, provider]);
-
-  // Hover synchronization between source and target editors
-  // useEffect(() => {
-  //   if (!editorRef.current || !quillRef.current) return;
-
-  //   const editorElement = editorRef.current.querySelector(".ql-editor");
-  //   if (!editorElement) return;
-
-  //   const calculateLineNumber = (element: HTMLElement): number | null => {
-  //     const editorContainer = editorElement.closest(".editor-container");
-  //     const lineNumbersContainer = editorContainer?.querySelector(".line-numbers");
-  //     if (!lineNumbersContainer) return null;
-
-  //     const rect = element.getBoundingClientRect();
-  //     const editorRect = editorElement.getBoundingClientRect();
-  //     const editorScrollTop = editorElement.scrollTop;
-  //     const relativeTop = rect.top - editorRect.top + editorScrollTop;
-
-  //     // Find the closest line number
-  //     const lineNumberElements = Array.from(
-  //       lineNumbersContainer.querySelectorAll(".line-number")
-  //     );
-
-  //     let closestLineNumber: number | null = null;
-  //     let minDistance = Number.MAX_VALUE;
-
-  //     for (const lineEl of lineNumberElements) {
-  //       const lineTop = parseFloat((lineEl as HTMLElement).style.top);
-  //       const distance = Math.abs(lineTop - relativeTop);
-
-  //       if (distance < minDistance) {
-  //         minDistance = distance;
-  //         const spanElement = lineEl.querySelector("span");
-  //         closestLineNumber = spanElement ? parseInt(spanElement.textContent || "0") : null;
-  //       }
-  //     }
-
-  //     return closestLineNumber;
-  //   };
-
-  //   const handleMouseEnter = (e: Event) => {
-  //     const target = e.target as HTMLElement;
-  //     if (target && target.textContent?.trim()) {
-  //       const lineNumber = calculateLineNumber(target);
-  //       if (lineNumber !== null) {
-  //         setHoveredLineNumber(lineNumber);
-
-  //         // Apply hover class to all editors' text elements with the same line number
-  //         const allEditorContainers = document.querySelectorAll(".editor-container");
-  //         allEditorContainers.forEach((container) => {
-  //           const lineNumberElement = container.querySelector(
-  //             `.line-number[id$="-line-${lineNumber}"]`
-  //           ) as HTMLElement;
-
-  //           if (lineNumberElement) {
-  //             const lineTop = parseFloat(lineNumberElement.style.top);
-  //             const editorElement = container.querySelector(".ql-editor");
-
-  //             if (editorElement) {
-  //               const contentElements = editorElement.querySelectorAll(
-  //                 "p, h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12, h13, h14, h15, h16, h17, h18, h19, h20"
-  //               );
-
-  //               contentElements.forEach((element) => {
-  //                 const rect = element.getBoundingClientRect();
-  //                 const editorRect = editorElement.getBoundingClientRect();
-  //                 const editorScrollTop = editorElement.scrollTop;
-  //                 const elementTop = rect.top - editorRect.top + editorScrollTop;
-
-  //                 // Check if this element is at the same line number position
-  //                 if (Math.abs(elementTop - lineTop) < 5) {
-  //                   element.classList.add("editor-line-synced-hover");
-  //                 }
-  //               });
-  //             }
-  //           }
-  //         });
-  //       }
-  //     }
-  //   };
-
-  //   const handleMouseLeave = () => {
-  //     setHoveredLineNumber(null);
-
-  //     // Remove hover class from all editors' text elements
-  //     const allEditorContainers = document.querySelectorAll(".editor-container");
-  //     allEditorContainers.forEach((container) => {
-  //       const editorElement = container.querySelector(".ql-editor");
-  //       if (editorElement) {
-  //         const hoveredElements = editorElement.querySelectorAll(".editor-line-synced-hover");
-  //         hoveredElements.forEach((element) => {
-  //           element.classList.remove("editor-line-synced-hover");
-  //         });
-  //       }
-  //     });
-  //   };
-
-  //   // Add event listeners to all content elements
-  //   const contentElements = editorElement.querySelectorAll("p, h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12, h13, h14, h15, h16, h17, h18, h19, h20");
-  //   contentElements.forEach((element) => {
-  //     element.addEventListener("mouseenter", handleMouseEnter);
-  //     element.addEventListener("mouseleave", handleMouseLeave);
-  //   });
-
-  //   // Use MutationObserver to handle dynamically added content
-  //   const observer = new MutationObserver(() => {
-  //     const newElements = editorElement.querySelectorAll("p, h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12, h13, h14, h15, h16, h17, h18, h19, h20");
-  //     newElements.forEach((element) => {
-  //       element.removeEventListener("mouseenter", handleMouseEnter);
-  //       element.removeEventListener("mouseleave", handleMouseLeave);
-  //       element.addEventListener("mouseenter", handleMouseEnter);
-  //       element.addEventListener("mouseleave", handleMouseLeave);
-  //     });
-  //   });
-
-  //   observer.observe(editorElement, {
-  //     childList: true,
-  //     subtree: true,
-  //   });
-
-  //   return () => {
-  //     contentElements.forEach((element) => {
-  //       element.removeEventListener("mouseenter", handleMouseEnter);
-  //       element.removeEventListener("mouseleave", handleMouseLeave);
-  //     });
-  //     observer.disconnect();
-  //     setHoveredLineNumber(null);
-  //   };
-  // }, [documentId, setHoveredLineNumber]);
 
   function addComment() {
     if (!selection) return;

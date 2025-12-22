@@ -3,7 +3,7 @@ import { diffWords } from "diff";
 import { Save, X } from "lucide-react";
 import type React from "react";
 import { Button } from "@/components/ui/button";
-import { useEditor } from "@/contexts/EditorContext";
+import { useEditor } from "@/hooks/useEditor";
 import { useTranslation } from "../../contexts/TranslationContext";
 import ActionMenu from "./ActionMenu";
 import DiffText from "./DiffText";

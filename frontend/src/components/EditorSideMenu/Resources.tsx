@@ -3,7 +3,7 @@ import { BookOpen, AlertCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import useRelatedSegments from "@/hooks/useRelatedSegments";
-import { useEditor } from "@/contexts/EditorContext";
+import { useEditor } from "@/hooks/useEditor";
 import { useSelectionStore } from "@/stores/selectionStore";
 import { RelatedSegmentResult } from "@/api/resources";
 

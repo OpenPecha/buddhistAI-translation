@@ -38,6 +38,7 @@ const useFetchPublicDocuments = ({
         search: searchQuery,
       }),
     staleTime: 60 * 60 * 1000, // 1 hour
+    select: (data) => data.data,
   });
 };
 

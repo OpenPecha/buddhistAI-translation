@@ -45,7 +45,7 @@ interface QuillVersionContextType {
   isCreatingVersion: boolean;
   createVersionError: string | null;
   createVersionSuccess: boolean;
-  registerQuill: (quill: Quill) => void;
+  registerQuillVersion: (quill: Quill) => void;
   saveVersion: (label?: string) => Promise<Version | null>;
   updateCurrentVersion: () => Promise<Version | null>;
   loadVersion: (versionId: string) => Promise<boolean>;
@@ -193,7 +193,7 @@ export const QuillVersionProvider = ({
   }, [refetchVersions, queryClient, docId]);
 
   // Register Quill instance
-  const registerQuill = useCallback(
+  const registerQuillVersion = useCallback(
     (quill: Quill) => {
       setQuillInstance(quill);
       if (quill && versions.length > 0) {
@@ -391,7 +391,7 @@ export const QuillVersionProvider = ({
       isCreatingVersion: createVersionMutation.isPending,
       createVersionError: createVersionMutation.error?.message || null,
       createVersionSuccess,
-      registerQuill,
+      registerQuillVersion,
       saveVersion,
       updateCurrentVersion,
       loadVersion,
@@ -414,7 +414,7 @@ export const QuillVersionProvider = ({
       createVersionMutation.isPending,
       createVersionMutation.error?.message,
       createVersionSuccess,
-      registerQuill,
+      registerQuillVersion,
       saveVersion,
       updateCurrentVersion,
       loadVersion,
