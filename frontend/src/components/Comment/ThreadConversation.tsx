@@ -272,7 +272,6 @@ const ThreadConversation = ({
                 comment.user.id === currentUser?.id &&
                 !comment.isSystemGenerated;
               const isSystem = comment.isSystemGenerated;
-              console.log("comment", comment);
               const hasError = comment.hasError;
               return (
                 <div
