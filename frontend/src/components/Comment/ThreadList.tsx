@@ -109,7 +109,18 @@ const ThreadList = ({ documentId }: { documentId: string }) => {
         : undefined,
   });
 
-  // Find the thread that matches the current selection
+  // Extracted from sonarqube warning on ternary nest
+  let selectionStartOffset: number | undefined = undefined;
+  let selectionEndOffset: number | undefined = undefined;
+  if (
+    debouncedSelection?.range?.index !== undefined &&
+    debouncedSelection?.range?.length !== undefined
+  ) {
+    selectionStartOffset = debouncedSelection.range.index;
+    selectionEndOffset =
+      debouncedSelection.range.index + debouncedSelection.range.length;
+  }
+
   const matchingThread = useMemo(() => {
     if (!debouncedSelection?.range || threadsInSelection.length === 0) {
       return null;
@@ -224,15 +235,16 @@ const ThreadList = ({ documentId }: { documentId: string }) => {
     <>
       <div className="flex flex-col gap-y-1 p-2 pb-10">
         {/* Threads Section */}
-        {threadsLoading ? (
-          <ThreadLoadingSkeleton />
-        ) : threadsError ? (
+
+        {threadsLoading && <ThreadLoadingSkeleton />}
+        {threadsError && (
           <ErrorState
             message="Failed to load comments. Please try again."
             onRetry={() => refetchThreads()}
             icon={MessageSquare}
           />
-        ) : allThreads.length > 0 ? (
+        )}
+        {allThreads.length > 0 ? (
           <>
             <div className="px-2 py-1 text-xs font-medium text-neutral-500 uppercase tracking-wide">
               Comments ({allThreads.length})
@@ -240,41 +252,61 @@ const ThreadList = ({ documentId }: { documentId: string }) => {
             {allThreads.map((thread: Thread) => {
               const isActive = activeThreadId === thread.id;
               const isMatching = matchingThread?.id === thread.id;
+              // Moved ternary logic to statement for SonarQube warning
+              let threadClass = "";
+              if (isActive) {
+                threadClass = "border-blue-500 bg-blue-50 hover:bg-blue-100";
+              } else if (isMatching) {
+                threadClass =
+                  "border-blue-300 bg-blue-50/50 hover:border-blue-400 hover:bg-blue-50";
+              } else {
+                threadClass =
+                  "border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50";
+              }
               return (
-                <div key={thread.id} className="relative group">
-                  <Button
-                    variant="ghost"
-                    data-thread-id={thread.id}
-                    className={`cursor-pointer w-full flex items-center justify-between border rounded-lg p-2 transition-all ${
-                      isActive
-                        ? "border-blue-500 bg-blue-50 hover:bg-blue-100"
-                        : isMatching
-                        ? "border-blue-300 bg-blue-50/50 hover:border-blue-400 hover:bg-blue-50"
-                        : "border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50"
-                    }`}
-                    onClick={() => handleThreadClick(thread.id)}
+                <div
+                  key={thread.id}
+                  className="relative flex flex-1 items-center justify-between group max-w-full overflow-visible"
+                  // Make sure group has overflow
+                >
+                  {/* Animated Delete Button (slides in from the left, visible on hover/focus) */}
+                  <button
+                    type="button"
+                    className={`absolute left-[-44px] top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 focus:opacity-100 pointer-events-none group-hover:pointer-events-auto group-focus:pointer-events-auto transition-all duration-300
+                      bg-red-500 text-white rounded-md p-1 shadow-lg 
+                      hover:bg-red-600
+                    `}
+                    style={{
+                      // left value corresponds to button size + margin
+                      minWidth: 36,
+                    }}
+                    aria-label="Delete thread"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setThreadPendingDelete(thread);
+                    }}
+                    tabIndex={0}
                   >
-                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <Trash2 size={18} />
+                  </button>
+
+                  <button
+                    type="button"
+                    data-thread-id={thread.id}
+                    className={`cursor-pointer w-full flex-1 border rounded-lg p-2 transition-all ${threadClass}`}
+                    onClick={() => handleThreadClick(thread.id)}
+                    onKeyDown={() => {}}
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
                       <MessageSquare
                         size={16}
                         className={`flex-shrink-0 text-blue-500`}
                       />
-                      <p className="truncate text-left font-monlam-2">
+                      <p className="truncate text-left font-monlam-2 ">
                         {thread.selectedText}
                       </p>
                     </div>
-                    <div
-                      className="cursor-pointer rounded-md p-1 text-neutral-400 transition hover:bg-neutral-100 hover:text-red-500 flex-shrink-0 ml-2"
-                      role="button"
-                      aria-label="Delete thread"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        setThreadPendingDelete(thread);
-                      }}
-                    >
-                      <Trash2 size={16} />
-                    </div>
-                  </Button>
+                  </button>
                 </div>
               );
             })}
