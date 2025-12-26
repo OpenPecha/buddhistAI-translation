@@ -45,8 +45,8 @@ router.get("/texts", async (req, res) => {
 });
 
 router.get("/texts/:id", async (req, res) => {
-  const textId = req.params.id;
-  const text = await getText(textId);
+  const id = encodeURIComponent(req.params.id);
+  const text = await getText(id);
   res.json(text);
 });
 
@@ -240,7 +240,7 @@ router.post(
     const missingField = requiredFields.find((field) => !req.body[field]);
     if (missingField) {
       return res.status(400).json({
-        error: `${missingField.replace(/_/g, " ")} is required`,
+        error: `${missingField.replaceAll(_, " ")} is required`,
         instance_id,
         details: `Missing required field: ${missingField}`,
       });
@@ -305,11 +305,11 @@ router.get("/instances/:instanceId/segment-related", async (req, res) => {
   }
 
   try {
-    const spanStart = parseInt(span_start, 10);
-    const spanEnd = parseInt(span_end, 10);
+    const spanStart = Number.parseInt(span_start);
+    const spanEnd = Number.parseInt(span_end);
     const transferFlag = transfer === "true" || transfer === true;
 
-    if (isNaN(spanStart) || isNaN(spanEnd)) {
+    if (Number.isNaN(spanStart) || Number.isNaN(spanEnd)) {
       return res.status(400).json({
         error: "span_start and span_end must be valid numbers",
       });
@@ -404,10 +404,10 @@ router.post("/linked_resources", async (req, res) => {
     });
   }
 
-  const spanStart = parseInt(span_start, 10);
-  const spanEnd = parseInt(span_end, 10);
+  const spanStart = Number.parseInt(span_start);
+  const spanEnd = Number.parseInt(span_end);
 
-  if (isNaN(spanStart) || isNaN(spanEnd)) {
+  if (Number.isNaN(spanStart) || Number.isNaN(spanEnd)) {
     return res.status(400).json({
       error: "span_start and span_end must be valid numbers",
     });
