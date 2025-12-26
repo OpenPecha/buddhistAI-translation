@@ -26,7 +26,7 @@ const CreateTranslationModal: React.FC<CreateTranslationModalProps> = ({
   refetchTranslations,
 }) => {
   const [language, setLanguage] = useState<string>("");
-  const [uploadMethod, setUploadMethod] = useState<UploadMethod>("empty");
+  const [uploadMethod, setUploadMethod] = useState<UploadMethod>("file");
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [fileContent, setFileContent] = useState<string>("");
   const [showPreview, setShowPreview] = useState(false);
@@ -36,7 +36,7 @@ const CreateTranslationModal: React.FC<CreateTranslationModalProps> = ({
 
   const resetModalState = () => {
     setLanguage("");
-    setUploadMethod("empty");
+    setUploadMethod("file");
     setUploadedFile(null);
     setFileContent("");
     setShowPreview(false);
@@ -89,7 +89,6 @@ const CreateTranslationModal: React.FC<CreateTranslationModalProps> = ({
     onClose();
   };
   const availableMethods = [
-    { type: "empty", label: t("common.emptyText"), isDisabled: false },
     { type: "file", label: t("common.file"), isDisabled: false },
     { type: "openpecha", label: t("common.openpecha"), isDisabled: false },
   ];
@@ -122,18 +121,6 @@ const CreateTranslationModal: React.FC<CreateTranslationModalProps> = ({
                   </div>
                 )}
 
-                <TabContentWrapper value="empty">
-                  <EmptyDocumentCreator
-                    language={language}
-                    rootId={rootId}
-                    onSuccess={() => {
-                      setIsCreationComplete(true);
-                      onClose();
-                    }}
-                    refetchTranslations={refetchTranslations}
-                  />
-                </TabContentWrapper>
-
                 <TabContentWrapper value="file">
                   <TextUploader
                     isRoot={false}
@@ -144,6 +131,15 @@ const CreateTranslationModal: React.FC<CreateTranslationModalProps> = ({
                     onFileLoaded={handleFileLoaded}
                     disable={!language || language === ""}
                     setNewDocumentId={setNewDocumentId}
+                  />
+                  <EmptyDocumentCreator
+                    language={language}
+                    rootId={rootId}
+                    onSuccess={() => {
+                      setIsCreationComplete(true);
+                      onClose();
+                    }}
+                    refetchTranslations={refetchTranslations}
                   />
                 </TabContentWrapper>
 
@@ -250,16 +246,6 @@ const EmptyDocumentCreator = ({
       )}
 
       <div className="flex flex-col items-center justify-center py-8 text-center">
-        <div className="w-12 h-12 bg-neutral-50 dark:bg-neutral-700 rounded-lg flex items-center justify-center mb-4">
-          <span className="text-xl">📄</span>
-        </div>
-        <h3 className="text-base font-medium text-neutral-900 dark:text-neutral-300 mb-2">
-          {t("translation.createEmptyTranslation")}
-        </h3>
-        <p className="text-neutral-500 dark:text-neutral-400 text-sm max-w-sm mb-6">
-          {t("translation.startWithBlankDocument")}
-        </p>
-
         <Button
           onClick={handleCreateEmptyDocument}
           disabled={isDisabled}
@@ -274,12 +260,6 @@ const EmptyDocumentCreator = ({
             t("translation.createEmptyDocument")
           )}
         </Button>
-
-        {!language && (
-          <p className="text-xs text-neutral-600 mt-2">
-            {t("translation.selectLanguageAboveToContinue")}
-          </p>
-        )}
       </div>
     </div>
   );

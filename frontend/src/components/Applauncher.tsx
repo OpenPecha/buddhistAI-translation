@@ -6,6 +6,7 @@ import {
 } from "@/components/ui/popover";
 import { BsFillGrid3X3GapFill } from "react-icons/bs";
 import { useFetchTools } from "@/api/queries/other";
+import { Button } from "./ui/button";
 
 interface Tool {
   name: string;
@@ -25,14 +26,18 @@ const AppLauncher: React.FC = () => {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <button
-          className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+        <Button
+          variant="ghost"
+          className="p-2 cursor-pointer rounded-full hover:bg-gray-100 dark:hover:bg-neutral-900/40 transition-colors"
           aria-label="Open Apps"
         >
           <BsFillGrid3X3GapFill size={20} />
-        </button>
+        </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-72 p-2" align="end">
+      <PopoverContent
+        className="w-72 p-2 bg-white dark:bg-[var(--background)] rounded-xl shadow-xl border border-neutral-200 dark:border-neutral-700"
+        align="end"
+      >
         <div className="grid grid-cols-3 gap-2">
           {isLoading && <div>Loading...</div>}
           {toolList?.map((app: Tool) => (

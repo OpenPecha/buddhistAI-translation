@@ -6,7 +6,7 @@ import { StepRenderer } from "./StepRenderer";
 import { ModalNavigation } from "./ModalNavigation";
 import {
   DocumentCreateModalProvider,
-  useDocumentCreateModalContext
+  useDocumentCreateModalContext,
 } from "@/contexts/DocumentCreateModalContext";
 
 function DocumentCreateModalContent() {
@@ -22,15 +22,15 @@ function DocumentCreateModalContent() {
       <div className="space-y-2">
         <button
           type="button"
-          className="border-2 bg-white border-dashed border-border hover:border-primary/60 transition-all duration-300 h-[180px] hover:shadow-lg rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-secondary-500"
+          className="border-2 bg-white dark:bg-[var(--background)] border-dashed border-border hover:border-primary/60 transition-all duration-300 h-[180px] hover:shadow-lg rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-secondary-500"
           onClick={handleCreateButtonClick}
         >
           <div className="p-0 flex flex-col items-center justify-center h-full">
             <div
-              className="w-12 h-12 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform"
+              className="w-[90px] h-[90px] rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform"
               style={{ background: "var(--gradient-primary)" }}
             >
-              <img src={PlusIcon} width={50} height={50} alt="Create project" />
+              <img src={PlusIcon} width={90} height={90} alt="Create project" />
             </div>
             <p className="text-sm font-medium text-foreground">
               {t("project.blank")}
@@ -60,7 +60,10 @@ function DocumentCreateModalContent() {
     >
       <div className="flex flex-col h-full">
         <div className="flex-1 overflow-y-auto">
-          <StepIndicator currentStep={state.currentStep} totalSteps={totalSteps} />
+          <StepIndicator
+            currentStep={state.currentStep}
+            totalSteps={totalSteps}
+          />
           <StepRenderer />
         </div>
         <ModalNavigation />

@@ -8,6 +8,7 @@ import SettingsButton from "./setting/SettingsButton";
 import { Button } from "./ui/button";
 import { useTranslation } from "react-i18next";
 import { useAuth0 } from "@auth0/auth0-react";
+import { useParams } from "react-router-dom";
 
 function ProfileArea() {
   const [isOpen, setIsOpen] = useState(false);
@@ -51,7 +52,8 @@ function ProfileArea() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
+  const params = useParams();
+  const showSettings = !!params.id;
   return (
     <div className={`relative `} ref={dropdownRef}>
       {/* Profile Button */}
@@ -86,14 +88,14 @@ function ProfileArea() {
         style={{ display: isOpen ? "block" : "none" }}
         className={` ${
           currentLanguage === "bo" && "font-monlam-2 !text-xs"
-        } absolute right-0 w-80 bg-white dark:bg-neutral-800 rounded-xl shadow-xl border border-neutral-200 dark:border-neutral-700 py-2 z-50`}
+        } absolute right-0 w-80 bg-white dark:bg-[var(--background)] rounded-xl shadow-xl border border-neutral-200 dark:border-neutral-700 py-2 z-50`}
       >
         {/* Settings and Logout */}
         <div className="px-4 pt-2 flex flex-col gap-3">
           <LanguageSwitcher />
           <ThemeToggle />
           <div className="flex items-center gap-2 justify-between">
-            <SettingsButton />
+            {showSettings && <SettingsButton />}
             <Button
               onClick={onLogout}
               variant="ghost"

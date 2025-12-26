@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 export default function Footer() {
   const { t } = useTranslation();
   return (
-    <div className="bg-neutral-100 dark:bg-neutral-700 p-4">
+    <div className="bg-neutral-100 dark:bg-transparent p-4">
       <div className="flex items-center justify-between gap-4">
         <p className="text-center text-sm text-neutral-500 dark:text-neutral-400">
           {t("common.poweredBy")}{" "}

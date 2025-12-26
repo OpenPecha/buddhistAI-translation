@@ -48,7 +48,7 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
 }) => {
   if (view === "list") {
     return (
-      <div className="flex items-center py-2 px-1 border-b border-gray-200 dark:border-neutral-500 hover:bg-secondary-50 hover:dark:bg-neutral-700 transition-all rounded-md">
+      <div className="flex items-center py-2 px-1 border-b border-gray-200 dark:border-neutral-700 hover:bg-secondary-50 hover:dark:bg-neutral-900/40 transition-all rounded-md">
         <div className="flex-shrink-0 mr-4 w-[26px] flex justify-center">
           <img alt="icon" src={DocIcon} width={26} className="object-contain" />
         </div>

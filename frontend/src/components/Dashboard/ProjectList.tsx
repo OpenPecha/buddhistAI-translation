@@ -18,7 +18,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ArrowUpDownIcon, ChevronDown } from "lucide-react";
+import { ArrowUpDownIcon, ChevronDown, Grid, List } from "lucide-react";
 import PublicProjects from "./PublicProjects";
 import { useSearchParams } from "react-router-dom";
 import {
@@ -51,7 +51,7 @@ const ProjectList = () => {
   return (
     <div className="flex flex-1 flex-col h-[100vh] overflow-y-scroll">
       <div
-        className="pt-10 px-6  bg-neutral-400/10 "
+        className="pt-10 px-6  bg-neutral-400/10 mx-auto w-full"
         style={{ minHeight: ftv ? "fit-content" : "auto" }}
       >
         <div className="max-w-5xl  mx-auto ">
@@ -96,14 +96,10 @@ interface ProjectsSectionProps {
   selectedOwner: string | null;
   onOwnerChange: (ownerId: string | null) => void;
   isLoading: boolean;
-  view: "grid" | "list";
-  setView: (view: "grid" | "list") => void;
 }
 
 const ProjectsListSection = () => {
-  const { t } = useTranslation();
   const [page, setPage] = useState(1);
-  const [view, setView] = useState<"grid" | "list">("list");
   const [selectedOwner, setSelectedOwner] = useState<string | null>(
     "ownedByAnyone"
   );
@@ -146,9 +142,7 @@ const ProjectsListSection = () => {
     return filtered;
   }, [projects, selectedOwner, currentUser?.id]);
 
-  const categorizedProjects = useMemo(() => {
-    return categorizeProjectsByTime(filteredProjects);
-  }, [filteredProjects]);
+  const categorizedProjects = categorizeProjectsByTime(filteredProjects);
 
   // Pagination handlers
   const goToPage = (newPage: number) => {
@@ -195,21 +189,18 @@ const ProjectsListSection = () => {
         </div>
       )}
       <div className="max-w-5xl mx-auto mb-2">
-        {filteredProjects?.length === 0 && !showLoader && (
-          <div className="text-center py-8">
-            <p>You don't have any projects yet. Create one to get started!</p>
-          </div>
-        )}
-
         <ProjectsSection
           categorizedProjects={categorizedProjects}
           uniqueOwners={uniqueOwners}
           selectedOwner={selectedOwner}
           onOwnerChange={setSelectedOwner}
           isLoading={showLoader}
-          view={view}
-          setView={setView}
         />
+        {filteredProjects?.length === 0 && !showLoader && (
+          <div className="text-center py-8">
+            <p>You don't have any projects yet. Create one to get started!</p>
+          </div>
+        )}
 
         {/* Shadcn UI Pagination */}
         {totalPages > 1 && (
@@ -286,21 +277,26 @@ const ProjectsSection = ({
   selectedOwner,
   onOwnerChange,
   isLoading,
-  view,
-  setView,
 }: ProjectsSectionProps) => {
   const { t } = useTranslation();
+  const [view, setView] = useState<"grid" | "list">("list");
+
   const selectedOwnerName = selectedOwner
     ? uniqueOwners.find((owner) => owner === selectedOwner)
     : "All";
   const firstCategoryTitle = categorizedProjects[0]?.category;
+
+  function toggleList() {
+    setView((prev) => (prev === "list" ? "grid" : "list"));
+  }
+
   return (
     <div className="mb-8">
       {/* Header Section */}
       <div className="flex items-center py-2 px-1 mb-2 gap-4">
         <div className="flex-grow min-w-0">
           <span className=" text-sm capitalize text-neutral-600 dark:text-neutral-300 mb-3 px-1">
-            {firstCategoryTitle}
+            {t(`${getCategoryTitle(firstCategoryTitle)}`)}
           </span>
         </div>
 
@@ -329,108 +325,24 @@ const ProjectsSection = ({
           </DropdownMenu>
         </div>
 
-        <div className="hidden sm:flex flex-shrink-0 w-36 items-center gap-2">
-          <span className="text-sm text-neutral-600 dark:text-neutral-300">
-            {t(`project.lastModified`)}
-          </span>
-        </div>
+        {view === "list" && (
+          <div className="hidden sm:flex flex-shrink-0 w-36 items-center gap-2">
+            <span className="text-sm text-neutral-600 dark:text-neutral-300">
+              {t(`project.lastModified`)}
+            </span>
+          </div>
+        )}
 
         <div className="flex-shrink-0 ml-2 w-[52px] flex justify-center">
           <div className="flex gap-1">
-            {view === "list" ? (
-              <button
-                title="grid view"
-                className="rounded-full cursor-pointer h-8 w-8 flex justify-center items-center hover:bg-neutral-200 dark:hover:bg-neutral-700"
-                onClick={() => setView("grid")}
-              >
-                <span className="sr-only">Grid view</span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  height="24px"
-                  viewBox="0 -960 960 960"
-                  fill="gray"
-                >
-                  <path d="M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H160Zm0-360h160v-200H160v200Zm240 0h160v-200H400v200Zm240 0h160v-200H640v200ZM320-240v-200H160v200h160Zm80 0h160v-200H400v200Zm240 0h160v-200H640v200Z" />
-                </svg>
-              </button>
-            ) : (
-              <button
-                onClick={() => setView("list")}
-                className="rounded-full cursor-pointer h-8 w-8 flex justify-center items-center hover:bg-neutral-200 dark:hover:bg-neutral-700"
-              >
-                <span className="sr-only">List view</span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  height="24px"
-                  viewBox="0 -960 960 960"
-                  width="24px"
-                  fill="gray"
-                >
-                  <path d="M80-160v-160h160v160H80Zm240 0v-160h560v160H320ZM80-400v-160h160v160H80Zm240 0v-160h560v160H320ZM80-640v-160h160v160H80Zm240 0v-160h560v160H320Z" />
-                </svg>
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Mobile version */}
-        <div className="sm:hidden flex items-center gap-2 ml-auto">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 text-sm gap-2 w-fit"
-              >
-                {selectedOwnerName}
-                <ChevronDown size={16} />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
-              {uniqueOwners.map((owner) => (
-                <DropdownMenuItem
-                  key={owner}
-                  onClick={() => onOwnerChange(owner)}
-                >
-                  {owner}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <div className="flex gap-1">
-            {view === "list" ? (
-              <button
-                title="grid view"
-                className="rounded-full cursor-pointer h-8 w-8 flex justify-center items-center hover:bg-neutral-200 dark:hover:bg-neutral-700"
-                onClick={() => setView("grid")}
-              >
-                <span className="sr-only">Grid view</span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  height="24px"
-                  viewBox="0 -960 960 960"
-                  fill="gray"
-                >
-                  <path d="M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H160Zm0-360h160v-200H160v200Zm240 0h160v-200H400v200Zm240 0h160v-200H640v200ZM320-240v-200H160v200h160Zm80 0h160v-200H400v200Zm240 0h160v-200H640v200Z" />
-                </svg>
-              </button>
-            ) : (
-              <button
-                onClick={() => setView("list")}
-                className="rounded-full cursor-pointer h-8 w-8 flex justify-center items-center hover:bg-neutral-200 dark:hover:bg-neutral-700"
-              >
-                <span className="sr-only">List view</span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  height="24px"
-                  viewBox="0 -960 960 960"
-                  width="24px"
-                  fill="gray"
-                >
-                  <path d="M80-160v-160h160v160H80Zm240 0v-160h560v160H320ZM80-400v-160h160v160H80Zm240 0v-160h560v160H320ZM80-640v-160h160v160H80Zm240 0v-160h560v160H320Z" />
-                </svg>
-              </button>
-            )}
+            <button
+              title={view === "list" ? "Grid view" : "List view"}
+              className="rounded-full cursor-pointer h-8 w-8 flex justify-center items-center hover:bg-neutral-200 dark:hover:bg-neutral-700"
+              onClick={toggleList}
+            >
+              <span className="sr-only">Grid view</span>
+              {view === "list" ? <List /> : <Grid />}
+            </button>
           </div>
         </div>
       </div>

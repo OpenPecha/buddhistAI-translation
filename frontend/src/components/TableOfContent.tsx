@@ -399,7 +399,9 @@ const Toc = React.memo(function Toc({
                 </button>
               )}
               {/* {!hasChildren && <div className="mr-2 w-5 h-5" />} */}
-              <span className={cn(" truncate flex-1 font-monlam pt-1")}>
+              <span
+                className={cn(" truncate flex-1 pt-1 font-monlam-2 text-sm")}
+              >
                 {heading.text}
               </span>
             </div>

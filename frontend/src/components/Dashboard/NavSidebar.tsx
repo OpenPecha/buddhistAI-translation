@@ -56,12 +56,6 @@ const NavSidebar = () => {
 
   return (
     <>
-      <button
-        className="p-2 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 h-fit transition-colors"
-        onClick={openSidebar}
-      >
-        <Menu size={20} />
-      </button>
       {/* Backdrop overlay */}
       <div
         className={cn(
