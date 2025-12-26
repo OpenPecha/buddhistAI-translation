@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { useEditor } from "@/hooks/useEditor";
 import { useSelectionStore } from "@/stores/selectionStore";
-import { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import useDebounce from "@/hooks/useDebounce";
 import { Thread } from "@/api/thread";
 import { useFetchThreads } from "./hooks/useFetchThreads";
@@ -71,17 +71,19 @@ const ThreadList = ({ documentId }: { documentId: string }) => {
     getActiveThreadId,
     getSidebarView,
   } = useCommentStore();
+
   const deleteThreadMutation = useDeleteThread();
   const [threadPendingDelete, setThreadPendingDelete] = useState<Thread | null>(
     null
   );
   const isDeletingThread = deleteThreadMutation.isPending;
+
   const { getQuill } = useEditor();
   const quill = getQuill(documentId);
-  const selection = useSelectionStore((state) => {
-    return state.selections[documentId];
-  });
+
+  const selection = useSelectionStore((state) => state.selections[documentId]);
   const debouncedSelection = useDebounce(selection, 300);
+
   const activeThreadId = getActiveThreadId(documentId);
   const sidebarView = getSidebarView(documentId);
   const previousSelectionRef = useRef<string | null>(null);
@@ -109,18 +111,7 @@ const ThreadList = ({ documentId }: { documentId: string }) => {
         : undefined,
   });
 
-  // Extracted from sonarqube warning on ternary nest
-  let selectionStartOffset: number | undefined = undefined;
-  let selectionEndOffset: number | undefined = undefined;
-  if (
-    debouncedSelection?.range?.index !== undefined &&
-    debouncedSelection?.range?.length !== undefined
-  ) {
-    selectionStartOffset = debouncedSelection.range.index;
-    selectionEndOffset =
-      debouncedSelection.range.index + debouncedSelection.range.length;
-  }
-
+  // Find the thread that matches the current selection
   const matchingThread = useMemo(() => {
     if (!debouncedSelection?.range || threadsInSelection.length === 0) {
       return null;
@@ -133,7 +124,6 @@ const ThreadList = ({ documentId }: { documentId: string }) => {
       threadsInSelection.find((thread: Thread) => {
         const threadStart = thread.initialStartOffset;
         const threadEnd = thread.initialEndOffset;
-        // Check if selection overlaps with thread range
         return (
           (index >= threadStart && index <= threadEnd) ||
           (endOffset >= threadStart && endOffset <= threadEnd) ||
@@ -144,17 +134,11 @@ const ThreadList = ({ documentId }: { documentId: string }) => {
   }, [debouncedSelection, threadsInSelection]);
 
   // Auto-select thread when text is selected and a matching thread is found
-  // Only auto-select if selection actually changed (not when user manually navigated back)
   useEffect(() => {
     const currentSelectionKey = debouncedSelection?.range
       ? `${debouncedSelection.range.index}-${debouncedSelection.range.length}`
       : null;
 
-    // Only auto-select if:
-    // 1. There's a matching thread
-    // 2. It's not already selected
-    // 3. We're in list view
-    // 4. The selection actually changed (not just the active thread was cleared)
     if (
       matchingThread &&
       matchingThread.id !== activeThreadId &&
@@ -166,7 +150,6 @@ const ThreadList = ({ documentId }: { documentId: string }) => {
       setActiveThreadId(documentId, matchingThread.id);
     }
 
-    // Update the previous selection ref
     previousSelectionRef.current = currentSelectionKey;
   }, [
     matchingThread,
@@ -181,6 +164,7 @@ const ThreadList = ({ documentId }: { documentId: string }) => {
   const handleThreadClick = (threadId: string) => {
     setSidebarView(documentId, "thread");
     setActiveThreadId(documentId, threadId);
+
     const editor = quill?.root;
     const targetElement = editor?.querySelector(
       `[data-thread-id="${threadId}"]`
@@ -197,14 +181,10 @@ const ThreadList = ({ documentId }: { documentId: string }) => {
   };
 
   const handleConfirmDelete = () => {
-    if (!threadPendingDelete || isDeletingThread) {
-      return;
-    }
+    if (!threadPendingDelete || isDeletingThread) return;
 
     deleteThreadMutation.mutate(threadPendingDelete, {
-      onSuccess: () => {
-        setThreadPendingDelete(null);
-      },
+      onSuccess: () => setThreadPendingDelete(null),
     });
   };
 
@@ -212,7 +192,6 @@ const ThreadList = ({ documentId }: { documentId: string }) => {
   const isLoading = threadsLoading;
   const hasError = threadsError;
 
-  // Show empty state only when not loading and no errors
   if (hasNoData && !isLoading && !hasError) {
     return (
       <div className="p-6 text-center space-y-3">
@@ -234,9 +213,8 @@ const ThreadList = ({ documentId }: { documentId: string }) => {
   return (
     <>
       <div className="flex flex-col gap-y-1 p-2 pb-10">
-        {/* Threads Section */}
-
         {threadsLoading && <ThreadLoadingSkeleton />}
+
         {threadsError && (
           <ErrorState
             message="Failed to load comments. Please try again."
@@ -244,15 +222,17 @@ const ThreadList = ({ documentId }: { documentId: string }) => {
             icon={MessageSquare}
           />
         )}
+
         {allThreads.length > 0 ? (
           <>
             <div className="px-2 py-1 text-xs font-medium text-neutral-500 uppercase tracking-wide">
               Comments ({allThreads.length})
             </div>
+
             {allThreads.map((thread: Thread) => {
               const isActive = activeThreadId === thread.id;
               const isMatching = matchingThread?.id === thread.id;
-              // Moved ternary logic to statement for SonarQube warning
+
               let threadClass = "";
               if (isActive) {
                 threadClass = "border-blue-500 bg-blue-50 hover:bg-blue-100";
@@ -263,23 +243,24 @@ const ThreadList = ({ documentId }: { documentId: string }) => {
                 threadClass =
                   "border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50";
               }
+
               return (
                 <div
                   key={thread.id}
-                  className="relative flex flex-1 items-center justify-between group max-w-full overflow-visible"
-                  // Make sure group has overflow
+                  // ✅ Reserve space so the delete button can slide in INSIDE the row
+                  className="relative flex items-center group/thread max-w-full "
                 >
-                  {/* Animated Delete Button (slides in from the left, visible on hover/focus) */}
+                  {/* ✅ Sliding Delete Button (comes in from the right inside the row) */}
                   <button
                     type="button"
-                    className={`absolute left-[-44px] top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 focus:opacity-100 pointer-events-none group-hover:pointer-events-auto group-focus:pointer-events-auto transition-all duration-300
+                    className={`absolute right-2 top-1/2 -translate-y-1/2 z-10 w-fit
+                      opacity-0 
+                      group-hover/thread:opacity-100 group-hover/thread:translate-x-0
+                      group-focus-within/thread:opacity-100 group-focus-within/thread:translate-x-0
+                      transition-all duration-200
                       bg-red-500 text-white rounded-md p-1 shadow-lg 
-                      hover:bg-red-600
+                      hover:bg-red-600 cursor-pointer
                     `}
-                    style={{
-                      // left value corresponds to button size + margin
-                      minWidth: 36,
-                    }}
                     aria-label="Delete thread"
                     onClick={(event) => {
                       event.stopPropagation();
@@ -293,16 +274,16 @@ const ThreadList = ({ documentId }: { documentId: string }) => {
                   <button
                     type="button"
                     data-thread-id={thread.id}
-                    className={`cursor-pointer w-full flex-1 border rounded-lg p-2 transition-all ${threadClass}`}
+                    className={`cursor-pointer w-full border rounded-lg p-2 transition-all ${threadClass}`}
                     onClick={() => handleThreadClick(thread.id)}
                     onKeyDown={() => {}}
                   >
                     <div className="flex items-center gap-2 min-w-0">
                       <MessageSquare
                         size={16}
-                        className={`flex-shrink-0 text-blue-500`}
+                        className="flex-shrink-0 text-blue-500"
                       />
-                      <p className="truncate text-left font-monlam-2 ">
+                      <p className="truncate text-left font-monlam-2">
                         {thread.selectedText}
                       </p>
                     </div>
@@ -321,9 +302,7 @@ const ThreadList = ({ documentId }: { documentId: string }) => {
       <Dialog
         open={!!threadPendingDelete}
         onOpenChange={(isOpen) => {
-          if (!isOpen && !isDeletingThread) {
-            setThreadPendingDelete(null);
-          }
+          if (!isOpen && !isDeletingThread) setThreadPendingDelete(null);
         }}
       >
         <DialogContent className="max-w-sm space-y-5">
