@@ -77,382 +77,249 @@ const router = express.Router();
  *
  * data: {"timestamp":"2025-01-10T10:30:06.000Z","type":"completion","total_completed":1,"message":"Standardization application completed!"}
  */
+// Utility validators
+function validateArray(arr, name, res) {
+  if (!arr || !Array.isArray(arr) || arr.length === 0)
+    return res
+      .status(400)
+      .json({ error: `${name} array is required and cannot be empty` });
+}
+
+function validateItems(items, res) {
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
+    if (!item.original_text || !item.translated_text || !item.glossary)
+      return res.status(400).json({
+        error: `Item at index ${i} is missing required fields: original_text, translated_text, and glossary are required`,
+      });
+    if (!Array.isArray(item.glossary))
+      return res.status(400).json({
+        error: `Item at index ${i} has invalid glossary field: must be an array`,
+      });
+    for (let j = 0; j < item.glossary.length; j++) {
+      const term = item.glossary[j];
+      if (!term.source_term || !term.translated_term)
+        return res.status(400).json({
+          error: `Item at index ${i}, glossary term at index ${j} is missing required fields: source_term and translated_term are required`,
+        });
+    }
+  }
+}
+
+function validatePairs(standardization_pairs, res) {
+  for (let i = 0; i < standardization_pairs.length; i++) {
+    const pair = standardization_pairs[i];
+    if (!pair.source_word || !pair.standardized_translation)
+      return res.status(400).json({
+        error: `Standardization pair at index ${i} is missing required fields: source_word and standardized_translation are required`,
+      });
+  }
+}
+
+// Transform event mapping
+const transformEvent = (parsedEvent, itemsLen) => {
+  const info = {
+    timestamp: parsedEvent.timestamp || new Date().toISOString(),
+    type: parsedEvent.type,
+    message: parsedEvent.message,
+  };
+  switch (parsedEvent.type) {
+    case "initialization":
+      info.total_items = parsedEvent.total_items;
+      break;
+    case "planning":
+      info.total_batches = parsedEvent.total_batches;
+      info.batch_size = parsedEvent.batch_size;
+      break;
+    case "retranslation_start":
+      info.index = parsedEvent.index;
+      info.status = "processing";
+      break;
+    case "retranslation_completed":
+      info.status = "item_updated";
+      info.index = parsedEvent.index;
+      info.updated_item = parsedEvent.updated_item;
+      break;
+    case "completion":
+      info.total_completed = parsedEvent.total_completed || itemsLen;
+      info.status = "completed";
+      break;
+    case "error":
+      info.status = "failed";
+      info.error = parsedEvent.error;
+      break;
+  }
+  return info;
+};
+
+async function handleSSEStream(externalStream, itemsLen, sendEvent) {
+  const reader = externalStream.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      let lines = buffer.split("\n");
+      buffer = lines.pop() || "";
+      for (const line of lines) {
+        const trimmedLine = line.trim();
+        if (!trimmedLine) continue;
+        let eventData = trimmedLine.replace(/^data:\s*/, "");
+        if (!eventData) continue;
+        try {
+          let cleaned = eventData.replace(/data:\s*/g, "");
+          if (cleaned.startsWith("{")) {
+            const parsed = JSON.parse(cleaned);
+            sendEvent(transformEvent(parsed, itemsLen));
+          }
+        } catch (parseErr) {
+          console.error("Error parsing SSE event:", parseErr, line, eventData);
+        }
+      }
+    }
+  } finally {
+    reader.releaseLock();
+  }
+}
+
 router.post("/apply/stream", authenticate, async (req, res) => {
-	try {
-		const { items, standardization_pairs, model_name, user_rules } = req.body;
+  try {
+    const { items, standardization_pairs, model_name, user_rules } = req.body;
+    if (validateArray(items, "items", res)) return;
+    if (validateArray(standardization_pairs, "standardization_pairs", res))
+      return;
+    if (!model_name || typeof model_name !== "string")
+      return res
+        .status(400)
+        .json({ error: "model_name is required and must be a string" });
+    if (validateItems(items, res)) return;
+    if (validatePairs(standardization_pairs, res)) return;
 
-		// Validate required fields
-		if (!items || !Array.isArray(items) || items.length === 0) {
-			return res
-				.status(400)
-				.json({ error: "items array is required and cannot be empty" });
-		}
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Headers", "Cache-Control");
 
-		if (
-			!standardization_pairs ||
-			!Array.isArray(standardization_pairs) ||
-			standardization_pairs.length === 0
-		) {
-			return res.status(400).json({
-				error: "standardization_pairs array is required and cannot be empty",
-			});
-		}
+    const sendEvent = (d) => res.write(`data: ${JSON.stringify(d)}\n\n`);
+    sendEvent({
+      timestamp: new Date().toISOString(),
+      type: "initialization",
+      total_items: items.length,
+      message: `Starting standardization application for ${items.length} items...`,
+    });
 
-		if (!model_name || typeof model_name !== "string") {
-			return res
-				.status(400)
-				.json({ error: "model_name is required and must be a string" });
-		}
+    const requestPayload = {
+      items,
+      standardization_pairs,
+      model_name,
+      user_rules:
+        user_rules ||
+        "Apply standardization consistently while maintaining natural translation flow",
+    };
 
-		// Validate items structure
-		for (let i = 0; i < items.length; i++) {
-			const item = items[i];
-			if (!item.original_text || !item.translated_text || !item.glossary) {
-				return res.status(400).json({
-					error: `Item at index ${i} is missing required fields: original_text, translated_text, and glossary are required`,
-				});
-			}
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 120000);
+      const response = await fetch(
+        process.env.TRANSLATE_API_URL + "/standardize/apply/stream",
+        {
+          method: "POST",
+          headers: {
+            accept: "text/event-stream",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestPayload),
+          signal: controller.signal,
+        }
+      );
+      clearTimeout(timeoutId);
 
-			if (!Array.isArray(item.glossary)) {
-				return res.status(400).json({
-					error: `Item at index ${i} has invalid glossary field: must be an array`,
-				});
-			}
+      if (!response.ok) {
+        console.error(
+          "External Standardization Apply API error:",
+          response.status,
+          response.statusText
+        );
+        sendEvent({
+          timestamp: new Date().toISOString(),
+          type: "error",
+          message: `External standardization API error: ${response.statusText}`,
+          status: "failed",
+        });
+        return res.end();
+      }
 
-			// Validate glossary terms
-			for (let j = 0; j < item.glossary.length; j++) {
-				const term = item.glossary[j];
-				if (!term.source_term || !term.translated_term) {
-					return res.status(400).json({
-						error: `Item at index ${i}, glossary term at index ${j} is missing required fields: source_term and translated_term are required`,
-					});
-				}
-			}
-		}
+      if (!response.body) {
+        console.error("No response body received from standardization API");
+        sendEvent({
+          timestamp: new Date().toISOString(),
+          type: "error",
+          message: "No response received from standardization service",
+          status: "failed",
+        });
+        return res.end();
+      }
 
-		// Validate standardization pairs structure
-		for (let i = 0; i < standardization_pairs.length; i++) {
-			const pair = standardization_pairs[i];
-			if (!pair.source_word || !pair.standardized_translation) {
-				return res.status(400).json({
-					error: `Standardization pair at index ${i} is missing required fields: source_word and standardized_translation are required`,
-				});
-			}
-		}
+      await handleSSEStream(response.body, items.length, sendEvent);
 
-		// Set up Server-Sent Events
-		res.setHeader("Content-Type", "text/event-stream");
-		res.setHeader("Cache-Control", "no-cache");
-		res.setHeader("Connection", "keep-alive");
-		res.setHeader("Access-Control-Allow-Origin", "*");
-		res.setHeader("Access-Control-Allow-Headers", "Cache-Control");
-
-		// Helper function to send SSE events
-		const sendEvent = (data) => {
-			res.write(`data: ${JSON.stringify(data)}\n\n`);
-		};
-
-		// Send initialization event
-		sendEvent({
-			timestamp: new Date().toISOString(),
-			type: "initialization",
-			total_items: items.length,
-			message: `Starting standardization application for ${items.length} items...`,
-		});
-
-		// Prepare the request payload for the external API
-		const requestPayload = {
-			items,
-			standardization_pairs,
-			model_name,
-			user_rules:
-				user_rules ||
-				"Apply standardization consistently while maintaining natural translation flow",
-		};
-
-		try {
-			// Set up timeout for the entire request
-			const controller = new AbortController();
-			const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
-
-			const response = await fetch(
-				process.env.TRANSLATE_API_URL + "/standardize/apply/stream",
-				{
-					method: "POST",
-					headers: {
-						accept: "text/event-stream",
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify(requestPayload),
-					signal: controller.signal,
-				},
-			);
-
-			clearTimeout(timeoutId);
-
-			if (!response.ok) {
-				console.error(
-					"External Standardization Apply API error:",
-					response.status,
-					response.statusText,
-				);
-
-				sendEvent({
-					timestamp: new Date().toISOString(),
-					type: "error",
-					message: `External standardization API error: ${response.statusText}`,
-					status: "failed",
-				});
-
-				return res.end();
-			}
-
-			if (!response.body) {
-				console.error("No response body received from standardization API");
-
-				sendEvent({
-					timestamp: new Date().toISOString(),
-					type: "error",
-					message: "No response received from standardization service",
-					status: "failed",
-				});
-
-				return res.end();
-			}
-
-			// Process the streaming response
-			const reader = response.body.getReader();
-			const decoder = new TextDecoder();
-			let buffer = "";
-
-			try {
-				while (true) {
-					const { done, value } = await reader.read();
-
-					if (done) {
-						break;
-					}
-
-					// Decode chunk and add to buffer
-					buffer += decoder.decode(value, { stream: true });
-
-					// Process complete lines
-					const lines = buffer.split("\n");
-					buffer = lines.pop() || ""; // Keep the last incomplete line in buffer
-
-					for (const line of lines) {
-						const trimmedLine = line.trim();
-						if (!trimmedLine) continue;
-
-						// Extract event data from SSE format
-						let eventData = "";
-						if (trimmedLine.startsWith("data: ")) {
-							eventData = trimmedLine.substring(6).trim();
-						} else if (trimmedLine.startsWith("data:")) {
-							eventData = trimmedLine.substring(5).trim();
-						}
-
-						if (!eventData) continue;
-
-						// Handle multiple JSON objects or fragments in eventData
-						if (eventData.startsWith("{") && eventData.endsWith("}")) {
-							try {
-								// Single complete JSON object
-								const parsedEvent = JSON.parse(eventData);
-
-								// Transform external API events to our internal format
-								let transformedEvent = {
-									timestamp: parsedEvent.timestamp || new Date().toISOString(),
-									type: parsedEvent.type,
-									message: parsedEvent.message,
-								};
-
-								// Add specific fields based on event type
-								switch (parsedEvent.type) {
-									case "initialization":
-										transformedEvent.total_items = parsedEvent.total_items;
-										break;
-
-									case "planning":
-										transformedEvent.total_batches = parsedEvent.total_batches;
-										transformedEvent.batch_size = parsedEvent.batch_size;
-										break;
-
-									case "retranslation_start":
-										transformedEvent.index = parsedEvent.index;
-										transformedEvent.status = "processing";
-										break;
-
-									case "retranslation_completed":
-										transformedEvent.status = "item_updated";
-										transformedEvent.index = parsedEvent.index;
-										transformedEvent.updated_item = parsedEvent.updated_item;
-										break;
-
-									case "completion":
-										transformedEvent.total_completed =
-											parsedEvent.total_completed || items.length;
-										transformedEvent.status = "completed";
-										break;
-
-									case "error":
-										transformedEvent.status = "failed";
-										transformedEvent.error = parsedEvent.error;
-										break;
-								}
-
-								// Send the transformed event to the client
-								sendEvent(transformedEvent);
-							} catch (parseError) {
-								console.error(
-									"Error parsing complete JSON event:",
-									parseError,
-									"Raw eventData:",
-									eventData,
-								);
-							}
-						} else {
-							// Handle partial or malformed JSON using a more robust approach
-							try {
-								// Try to fix common SSE formatting issues
-								let cleanedData = eventData;
-
-								// Remove duplicate "data: " prefixes that sometimes occur
-								if (cleanedData.includes("data: ")) {
-									cleanedData = cleanedData.replace(/data:\s*/g, "");
-								}
-
-								// Try to parse after cleaning
-								if (cleanedData.startsWith("{")) {
-									const parsedEvent = JSON.parse(cleanedData);
-
-									// Transform external API events to our internal format
-									let transformedEvent = {
-										timestamp:
-											parsedEvent.timestamp || new Date().toISOString(),
-										type: parsedEvent.type,
-										message: parsedEvent.message,
-									};
-
-									// Add specific fields based on event type
-									switch (parsedEvent.type) {
-										case "initialization":
-											transformedEvent.total_items = parsedEvent.total_items;
-											break;
-
-										case "planning":
-											transformedEvent.total_batches =
-												parsedEvent.total_batches;
-											transformedEvent.batch_size = parsedEvent.batch_size;
-											break;
-
-										case "retranslation_start":
-											transformedEvent.index = parsedEvent.index;
-											transformedEvent.status = "processing";
-											break;
-
-										case "retranslation_completed":
-											transformedEvent.status = "item_updated";
-											transformedEvent.index = parsedEvent.index;
-											transformedEvent.updated_item = parsedEvent.updated_item;
-											break;
-
-										case "completion":
-											transformedEvent.total_completed =
-												parsedEvent.total_completed || items.length;
-											transformedEvent.status = "completed";
-											break;
-
-										case "error":
-											transformedEvent.status = "failed";
-											transformedEvent.error = parsedEvent.error;
-											break;
-									}
-
-									// Send the transformed event to the client
-									sendEvent(transformedEvent);
-								} else {
-									console.warn("Skipping non-JSON event data:", eventData);
-								}
-							} catch (parseError) {
-								console.error(
-									"Error parsing SSE event:",
-									parseError,
-									"Raw line:",
-									line,
-									"Extracted eventData:",
-									eventData,
-								);
-								// Continue processing other lines
-							}
-						}
-					}
-				}
-			} finally {
-				reader.releaseLock();
-			}
-
-			// Send final completion event if not already sent
-			sendEvent({
-				timestamp: new Date().toISOString(),
-				type: "completion",
-				total_completed: items.length,
-				message: "Standardization application stream completed!",
-				status: "completed",
-			});
-		} catch (fetchError) {
-			console.error(
-				"Error connecting to standardization apply API:",
-				fetchError,
-			);
-
-			let errorMessage = "Standardization service unavailable";
-			let errorDetails =
-				"Unable to connect to the external standardization API";
-
-			if (fetchError.name === "AbortError") {
-				errorMessage = "Standardization API request timed out";
-				errorDetails =
-					"The external standardization service did not respond in time";
-			}
-
-			sendEvent({
-				timestamp: new Date().toISOString(),
-				type: "error",
-				message: errorMessage,
-				details: errorDetails,
-				status: "failed",
-			});
-		}
-
-		res.end();
-	} catch (error) {
-		console.error("Error in standardization application:", error);
-
-		// If headers haven't been sent yet, send JSON error
-		if (!res.headersSent) {
-			res.status(500).json({
-				error: "Internal server error during standardization application",
-				details: error.message,
-			});
-		} else {
-			// If SSE has started, send error event
-			try {
-				res.write(
-					`data: ${JSON.stringify({
-						timestamp: new Date().toISOString(),
-						type: "error",
-						message: "Internal server error during standardization application",
-						details: error.message,
-						status: "failed",
-					})}\n\n`,
-				);
-			} catch (writeError) {
-				console.error("Error writing error event:", writeError);
-			}
-			res.end();
-		}
-	}
+      sendEvent({
+        timestamp: new Date().toISOString(),
+        type: "completion",
+        total_completed: items.length,
+        message: "Standardization application stream completed!",
+        status: "completed",
+      });
+    } catch (fetchError) {
+      console.error(
+        "Error connecting to standardization apply API:",
+        fetchError
+      );
+      let [message, details] =
+        fetchError.name === "AbortError"
+          ? [
+              "Standardization API request timed out",
+              "The external standardization service did not respond in time",
+            ]
+          : [
+              "Standardization service unavailable",
+              "Unable to connect to the external standardization API",
+            ];
+      sendEvent({
+        timestamp: new Date().toISOString(),
+        type: "error",
+        message,
+        details,
+        status: "failed",
+      });
+    }
+    res.end();
+  } catch (error) {
+    console.error("Error in standardization application:", error);
+    if (!res.headersSent) {
+      res.status(500).json({
+        error: "Internal server error during standardization application",
+        details: error.message,
+      });
+    } else {
+      try {
+        res.write(
+          `data: ${JSON.stringify({
+            timestamp: new Date().toISOString(),
+            type: "error",
+            message: "Internal server error during standardization application",
+            details: error.message,
+            status: "failed",
+          })}\n\n`
+        );
+      } catch (writeError) {
+        console.error("Error writing error event:", writeError);
+      }
+      res.end();
+    }
+  }
 });
 
 module.exports = router;

@@ -76,21 +76,76 @@ async function getAIComment(
   content,
   references
 ) {
+  // -- Helpers to flatten complexity --
+  function handleErrorWrite(message) {
+    res.write(
+      `data: ${JSON.stringify({
+        type: "error",
+        message,
+      })}\n\n`
+    );
+  }
+
+  function parseAndHandleLine(line, finalCommentTextRef) {
+    if (!line.startsWith("data:")) return false;
+
+    const jsonStartIndex = line.indexOf("{");
+    if (jsonStartIndex === -1) return false;
+
+    const jsonString = line.substring(jsonStartIndex);
+    try {
+      const parsed = JSON.parse(jsonString);
+      handleParsedEvent(parsed, finalCommentTextRef);
+
+      // Prepare and write event to the response stream
+      const responseData = {
+        type: parsed?.type,
+        text: parsed?.text || parsed?.comment_text || parsed?.message,
+      };
+      res.write(`data: ${JSON.stringify(responseData)}\n\n`);
+      if (res.flush) res.flush();
+      return true;
+    } catch (e) {
+      logger.error("Failed to parse stream data", e);
+      return false;
+    }
+  }
+
+  function handleParsedEvent(parsed, finalCommentTextRef) {
+    if (parsed.type === "comment_delta") {
+      finalCommentTextRef.value += parsed.text || "";
+    } else if (parsed.type === "completion") {
+      finalCommentTextRef.value = parsed.comment_text || parsed.text || "";
+      // Trim "@Comment " prefix if present
+      if (
+        finalCommentTextRef.value &&
+        finalCommentTextRef.value.startsWith("@Comment ")
+      ) {
+        finalCommentTextRef.value = finalCommentTextRef.value.substring(9);
+      }
+    } else if (parsed.type === "error") {
+      logger.error(
+        "AI comment API error",
+        parsed.message || "An unknown error occurred"
+      );
+    }
+  }
+  // -- End helpers --
+
   try {
-    // Generate messages from thread history
     const messages = await generateMessagesFromThread(threadId, selectedText);
 
     if (content) {
       messages.push({
         role: "user",
-        content: content.replace(/@ai/g, "@Comment").trim(),
+        content: content.replaceAll("@ai", "@Comment").trim(),
       });
     }
+
     const requestBody = {
       messages,
       references,
       options: {
-        // model_name,
         require_full_justification: true,
         mention_scope: "last",
         max_mentions: 5,
@@ -113,7 +168,7 @@ async function getAIComment(
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let buffer = "";
-    let finalCommentText = "";
+    let finalCommentTextRef = { value: "" };
 
     while (true) {
       const { done, value } = await reader.read();
@@ -121,58 +176,17 @@ async function getAIComment(
 
       buffer += decoder.decode(value, { stream: true });
       const lines = buffer.split("\n");
-      buffer = lines.pop();
+      buffer = lines.pop() || "";
+
       for (const line of lines) {
-        if (line.startsWith("data:")) {
-          const jsonStartIndex = line.indexOf("{");
-          if (jsonStartIndex !== -1) {
-            const jsonString = line.substring(jsonStartIndex);
-            try {
-              const parsed = JSON.parse(jsonString);
-              if (parsed.type === "comment_delta") {
-                finalCommentText += parsed.text || "";
-              } else if (parsed.type === "completion") {
-                finalCommentText = parsed.comment_text || parsed.text;
-                // Trim "@Comment " prefix if present
-                if (
-                  finalCommentText &&
-                  finalCommentText.startsWith("@Comment ")
-                ) {
-                  finalCommentText = finalCommentText.substring(9); // Remove "@Comment " (9 characters)
-                }
-              } else if (parsed.type === "error") {
-                logger.error(
-                  "AI comment API error",
-                  parsed.message || "An unknown error occurred"
-                );
-              }
-              // Properly serialize JSON to avoid escaping issues with special characters
-              const responseData = {
-                type: parsed?.type,
-                text: parsed?.text || parsed?.comment_text || parsed?.message,
-              };
-              const dataString = `data: ${JSON.stringify(responseData)}\n\n`;
-              res.write(dataString);
-              // Force flush to ensure immediate delivery
-              if (res.flush) res.flush();
-            } catch (e) {
-              logger.error("Failed to parse stream data", e);
-            }
-          }
-        }
+        parseAndHandleLine(line, finalCommentTextRef);
       }
     }
 
-    // Return the final comment text for database storage
-    return finalCommentText;
+    return finalCommentTextRef.value;
   } catch (error) {
     logger.error("Error calling AI comment API", error);
-    res.write(
-      `data: ${JSON.stringify({
-        type: "error",
-        message: error.message || "Failed to get AI comment",
-      })}\n\n`
-    );
+    handleErrorWrite(error.message || "Failed to get AI comment");
     throw error;
   }
 }

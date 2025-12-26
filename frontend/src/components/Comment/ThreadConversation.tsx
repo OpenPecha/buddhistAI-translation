@@ -2,7 +2,7 @@ import { useCommentStore } from "@/stores/commentStore";
 import { useAuth } from "@/auth/use-auth-hook";
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { UserRound } from "lucide-react";
+import { User2Icon, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Send } from "lucide-react";
 import { MentionsInput, Mention } from "react-mentions";
@@ -272,6 +272,7 @@ const ThreadConversation = ({
                 comment.user.id === currentUser?.id &&
                 !comment.isSystemGenerated;
               const isSystem = comment.isSystemGenerated;
+              console.log("comment", comment);
               const hasError = comment.hasError;
               return (
                 <div
@@ -282,7 +283,13 @@ const ThreadConversation = ({
                 >
                   {!isCurrentUser && (
                     <Avatar className="w-5 h-5">
-                      {isSystem && <AvatarImage src={comment.user.picture} />}
+                      {isSystem ? (
+                        <span className="bg-gray-100 rounded-full ">
+                          <User2Icon size={16} />
+                        </span>
+                      ) : (
+                        <AvatarImage src={comment.user.picture} />
+                      )}
                       <AvatarFallback className="text-sm">
                         {isSystem ? "AI" : <UserRound size={16} />}
                       </AvatarFallback>
