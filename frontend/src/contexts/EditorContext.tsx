@@ -8,6 +8,7 @@ import {
   useMemo,
   useState,
 } from "react";
+import { useParams } from "react-router-dom";
 
 type TextSelectionContextType = {
   selectedText: string;
@@ -61,6 +62,7 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({
   const [quillEditors, setQuillEditors] = useState<Map<string, Quill>>(
     new Map()
   );
+  const { id } = useParams<{ id: string }>();
 
   const [hoveredLineNumber, setHoveredLineNumber] = useState<number | null>(
     null
@@ -107,6 +109,15 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({
   // Monitor text selection changes
   useEffect(() => {
     const handleSelectionChange = (event: Event) => {
+      const editorElements = document.querySelectorAll(
+        ".ql-editor"
+      ) as HTMLElement;
+      const editorElement = editorElements[0];
+      const isActiveSourceEditor =
+        editorElement === event.srcElement?.activeElement;
+
+      if (!isActiveSourceEditor) return;
+      // Check if the active element is the first ql-editor in the DOM
       const text = getSelectedText();
       const lineNumbers = getSelectionLineNumbers();
       // Update state only if text or line numbers have actually changed

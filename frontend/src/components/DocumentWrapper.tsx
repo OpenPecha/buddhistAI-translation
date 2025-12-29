@@ -132,7 +132,7 @@ function DocumentsWrapperContent() {
         >
           {/* Pane 1: Main Editor (always mounted) */}
           <div className="h-full w-full flex">
-            <div className="flex-1 h-full relative">
+            <div className="flex-1 h-full relative" id="source-content">
               {currentDoc && (
                 <LiveBlockProvider roomId={id} enabled={isLiveEnabled}>
                   <DocumentEditor

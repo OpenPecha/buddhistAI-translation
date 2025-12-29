@@ -74,27 +74,6 @@ const ChatSidebarContent: React.FC = () => {
     };
   };
 
-  // Helper function to create truncated preview text
-  const createTruncatedPreview = (
-    text: string,
-    lineRange: { startLine: number; endLine: number } | null
-  ): string => {
-    if (!text || !lineRange) return "";
-
-    const words = text.trim().split(/\s+/);
-    const firstWords = words.slice(0, 4).join(" "); // Get first 4 words
-    const lineRangeText =
-      lineRange.startLine === lineRange.endLine
-        ? `(${lineRange.startLine})`
-        : `(${lineRange.startLine}-${lineRange.endLine})`;
-
-    if (words.length > 4) {
-      return `${firstWords}...${lineRangeText}`;
-    } else {
-      return `${firstWords}${lineRangeText}`;
-    }
-  };
-
   const handleClearChat = useCallback(() => {
     if (
       globalThis.confirm(
@@ -124,6 +103,14 @@ const ChatSidebarContent: React.FC = () => {
       </div>
     );
   }
+
+  const selectedLines =
+    getLineRange(selectedTextLineNumbers)?.startLine ===
+    getLineRange(selectedTextLineNumbers)?.endLine
+      ? `(${getLineRange(selectedTextLineNumbers)?.startLine})`
+      : `(${getLineRange(selectedTextLineNumbers)?.startLine} - ${
+          getLineRange(selectedTextLineNumbers)?.endLine
+        })`;
   return (
     <div className="h-full w-full flex flex-col bg-white dark:bg-gray-900">
       {/* Header */}
@@ -162,15 +149,12 @@ const ChatSidebarContent: React.FC = () => {
                 <MapPin className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
                 <div className="min-w-0 flex-1">
                   <div className="text-xs text-blue-700 dark:text-blue-300 font-medium mb-1">
-                    {t("translation.selectedText")}
+                    {t("translation.selectedText")} {selectedLines}
                   </div>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div className="text-sm text-blue-800 dark:text-blue-200 truncate">
-                        {createTruncatedPreview(
-                          selectedText,
-                          getLineRange(selectedTextLineNumbers)
-                        )}
+                        {selectedText.trim().substring(0, 100)}...
                       </div>
                     </TooltipTrigger>
                     <TooltipContent

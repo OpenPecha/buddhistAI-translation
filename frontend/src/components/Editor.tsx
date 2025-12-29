@@ -368,10 +368,19 @@ const Editor = ({
         // Add selected_text class to the clicked p element
         clickedP.classList.add("selected_text_segment");
         setSelectedTextTag(clickedP);
+
+        // Set selectedText from the first .ql-editor instance
+        const firstQLEditor = document.querySelector(
+          ".ql-editor"
+        ) as HTMLElement | null;
+        let textSelected = "";
+        if (firstQLEditor && firstQLEditor.contains(clickedP)) {
+          textSelected = clickedP.textContent || "";
+        }
+        setSelectedText(textSelected || "");
+
         // Get current selection
         const currentRange = quillRef.current.getSelection();
-        const textSelected = clickedP.textContent || "";
-        setSelectedText(textSelected || "");
 
         // If selection length is 0, use the paragraph's content
         if (!currentRange || currentRange.length === 0) {
