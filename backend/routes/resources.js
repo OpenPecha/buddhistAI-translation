@@ -123,17 +123,24 @@ router.post("/", async (req, res) => {
 });
 
 async function getMetadataByDocumentId(documentId) {
-  const metadata = await prisma.docMetadata.findUnique({
-    where: { docId: documentId },
-    select: { instanceId: true },
-  });
-  return metadata;
+  try {
+    const metadata = await prisma.docMetadata.findUnique({
+      where: { docId: documentId },
+      select: { instanceId: true },
+    });
+    return metadata;
+  } catch (error) {
+    console.error("Error getting metadata by document id:", error);
+    throw new Error("Metadata not found");
+  }
 }
 
 router.post("/related", async (req, res) => {
   try {
     const { documentId, span_start, span_end } = req.body;
-    const { instanceId } = await getMetadataByDocumentId(documentId);
+    const metadata = await getMetadataByDocumentId(documentId);
+
+    const instanceId = metadata?.instanceId;
     const relatedInstances = await getSegmentRelated(
       instanceId,
       span_start,
@@ -183,7 +190,7 @@ router.post("/related", async (req, res) => {
     res.json(commentariesWithContent);
   } catch (error) {
     console.error("Error searching related instances:", error);
-    res.status(500).json({ error: error.message });
+    res.status(404).json({ error: error.message });
   }
 });
 

@@ -37,6 +37,7 @@ const useRelatedSegments = (
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
+    retry: false,
   });
 };
 
