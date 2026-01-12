@@ -543,7 +543,6 @@ const Editor = ({
         requestIdleCallback(() => {
           const Delta = Quill.import("delta");
           const delta = new Delta(content);
-          console.log("delta", delta);
           quillRef.current?.setContents(delta || []);
 
           setIsTibetan(checkIsTibetan(quillRef.current?.getText() || ""));
