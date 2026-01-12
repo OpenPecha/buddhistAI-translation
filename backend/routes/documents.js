@@ -23,9 +23,16 @@ const {
   sendForbidden,
   sendBadRequest,
 } = require("../utils/response");
-
+const {
+  getText,
+  getTextInstances,
+  getAnnotations,
+  getInstanceContent,
+} = require("../apis/openpecha_api");
 const router = express.Router();
 const { docxToText } = require("../utils/docxToText");
+const { default: applySegmentation } = require("../utils/applySegmentation");
+const { createProject } = require("../utils/model");
 
 const upload = multer({
   storage: multer.memoryStorage(), // Use memory storage to keep files as buffers
@@ -333,6 +340,180 @@ router.post("/content", authenticate, async (req, res, next) => {
     return sendSuccess(res, document, null, 201);
   } catch (error) {
     logger.error("Error creating document with content", error);
+    next(error);
+  }
+});
+
+// create document with openpecha textId
+
+// create document with openpecha textId
+
+/**
+ * @typedef {object} OpenPechaDocumentRequest
+ * @property {string} textId.required - OpenPecha text identifier
+ * @property {string} rootId - Root document ID (optional)
+ */
+
+/**
+ * POST /documents/openpecha
+ * @summary Create a new document from an OpenPecha text
+ * @tags Documents - Document management operations
+ * @security BearerAuth
+ *
+ * @param {OpenPechaDocumentRequest} request.body.required - Input payload
+ *
+ * @example request - Example request body
+ * {
+ *   "textId": "bdr:V123456",
+ *   "rootId": "bdr:V123456"
+ * }
+ *
+ * @return {object} 201 - Document created successfully
+ * @return {object} 400 - Invalid request body
+ * @return {object} 401 - Unauthorized
+ * @return {object} 500 - Internal server error
+ */
+
+router.post("/openpecha", authenticate, async (req, res, next) => {
+  try {
+    const { textId, rootId } = req.body;
+    //get text from openpecha
+    const [text, instances] = await Promise.all([
+      getText(textId),
+      getTextInstances(textId, "critical"),
+    ]);
+    if (!text || !instances) {
+      return sendBadRequest(
+        res,
+        "Failed to get text or instances from openpecha"
+      );
+    }
+    const criticalInstance = instances.find(
+      (instance) => instance.type === "critical"
+    );
+    if (!criticalInstance) {
+      return sendBadRequest(
+        res,
+        "Failed to get critical instance from openpecha"
+      );
+    }
+    const instanceWithContent = await getInstanceContent(criticalInstance.id);
+    const segmentationAnnotation = instanceWithContent.annotations.find(
+      (annotation) => annotation.type === "segmentation"
+    );
+    const segmentationAnnotationContent = await getAnnotations(
+      segmentationAnnotation.annotation_id
+    );
+    const segmentedContent = applySegmentation(
+      instanceWithContent.content,
+      segmentationAnnotationContent.data
+    );
+    const title =
+      text.title.bo ??
+      text.title.en ??
+      text.title[Object.keys(text.title)[0]] ??
+      text.id;
+    const identifier = title.replaceAll(" ", "-") + Date.now();
+    const doc = new WSSharedDoc(identifier, req.user.id);
+    const prosemirrorText = doc.getText(identifier);
+    if (segmentedContent) {
+      // applySegmentation returns an array of strings, join with newlines
+      const textContent = Array.isArray(segmentedContent)
+        ? segmentedContent.join("\n")
+        : segmentedContent;
+      if (textContent) {
+        prosemirrorText.delete(0, prosemirrorText.length);
+        prosemirrorText.insert(0, textContent);
+      }
+    }
+    const document = await prisma.$transaction(async (tx) => {
+      let rootProjectId = null;
+      if (rootId) {
+        const rootDoc = await prisma.doc.findUnique({
+          where: { id: rootId },
+          select: { rootProjectId: true },
+        });
+        rootProjectId = rootDoc?.rootProjectId;
+      }
+      const isRoot = !!rootId;
+      // Handle isRoot - accept both boolean and string
+      const isRootBool =
+        typeof isRoot === "boolean" ? isRoot : isRoot === "true";
+
+      const delta = prosemirrorText.toDelta();
+      const doc = await tx.doc.create({
+        data: {
+          id: identifier,
+          identifier,
+          name: title,
+          ownerId: req.user.id,
+          isRoot: isRootBool,
+          rootId: rootId ?? null,
+          language: text.language,
+          rootProjectId: rootProjectId,
+        },
+        select: {
+          id: true,
+          name: true,
+          rootProjectId: true,
+          rootId: true,
+        },
+      });
+      await tx.docMetadata.create({
+        data: {
+          docId: doc.id,
+          textId: textId,
+          instanceId: criticalInstance.id,
+        },
+      });
+      await tx.permission.create({
+        data: {
+          docId: doc.id,
+          userId: req.user.id,
+          canRead: true,
+          canWrite: true,
+        },
+      });
+      const version = await tx.version.create({
+        data: {
+          content: { ops: delta },
+          docId: doc.id,
+          label: "initial Auto-save",
+        },
+      });
+
+      await tx.doc.update({
+        where: { id: doc.id },
+        data: {
+          currentVersionId: version.id,
+        },
+      });
+
+      return doc;
+    });
+
+    // If rootId is provided, create a document that belongs to an existing project
+    // If rootId is not provided, create a new project with this document as root
+    if (rootId) {
+      // Document belongs to existing project (rootProjectId was set during creation)
+      return sendSuccess(res, document);
+    } else {
+      // Create a new project with this document as root
+      const project = await createProject(
+        title,
+        identifier,
+        {
+          source: "openpecha",
+          text_id: textId,
+          instance_id: criticalInstance.id,
+        },
+        document.id, // Use the newly created document as root
+        req.user.id
+      );
+      return sendSuccess(res, project);
+    }
+  } catch (error) {
+    logger.error("Error creating document with openpecha textId", error);
     next(error);
   }
 });

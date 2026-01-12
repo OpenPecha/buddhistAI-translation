@@ -1,5 +1,5 @@
 import Quill from "quill";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Toolbar from "./Toolbar/Toolbar";
 import "quill/dist/quill.snow.css";
 import "quill-footnote/dist/quill-footnote.css";
@@ -36,7 +36,7 @@ import {
   type Selection,
   type EditorId,
 } from "@/stores/selectionStore";
-
+import { useDebouncedCallback } from "@tanstack/react-pacer";
 quill_import();
 
 interface CustomRange {
@@ -84,7 +84,6 @@ const Editor = ({
     setSelectedText,
     setSelectedTextTag,
   } = useEditor();
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const quillRef = useRef<Quill | null>(null);
   const isInitializedRef = useRef<boolean>(false);
   const hasContentLoadedRef = useRef<boolean>(false);
@@ -206,21 +205,15 @@ const Editor = ({
   });
   const isSaving = updateDocumentMutation.isPending;
   const queryClient = useQueryClient();
-
-  const debouncedSave = useCallback(
+  const debouncedSave = useDebouncedCallback(
     (content: Record<string, unknown>) => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-      saveTimeoutRef.current = setTimeout(() => {
-        if (!documentId || !hasContentLoadedRef.current) return;
-        // Extra safety: Don't save if content is empty or nearly empty
-        const contentOps = content?.ops as any[];
-        if (!contentOps || contentOps.length === 0) return;
-        updateDocumentMutation.mutate(content);
-      }, 3000); // 3 second debounce
+      if (!documentId || !hasContentLoadedRef.current) return;
+      // Extra safety: Don't save if content is empty or nearly empty
+      const contentOps = content?.ops as any[];
+      if (!contentOps || contentOps.length === 0) return;
+      updateDocumentMutation.mutate(content);
     },
-    [documentId, updateDocumentMutation]
+    { wait: 4000 }
   );
 
   useEffect(() => {
@@ -518,15 +511,12 @@ const Editor = ({
     return () => {
       // Only save on unmount if content has been loaded and editor has actual content
       // This prevents saving empty content during hot reload
-      if (quill.root)
-        quill.root.removeEventListener("click", handleClick as EventListener);
+      quill?.root?.removeEventListener("click", handleClick as EventListener);
       if (hasContentLoadedRef.current && quill.getLength() > 1) {
         const currentContent = quill.getContents();
         updateDocumentMutation.mutate(currentContent as any);
       }
-      if (editorId) {
-        unregisterQuill(editorId);
-      }
+      unregisterQuill(editorId as string);
       queryClient.removeQueries({
         queryKey: [`document-${documentId}`],
       });
@@ -542,7 +532,7 @@ const Editor = ({
   //for non-realtime editor only
 
   useEffect(() => {
-    const content = currentDoc?.currentVersion?.content?.ops || [];
+    const content = currentDoc?.currentVersion?.content.ops || [];
     if (yText || provider) return () => {};
     if (
       quillRef.current &&
@@ -551,14 +541,20 @@ const Editor = ({
     ) {
       if ("requestIdleCallback" in window) {
         requestIdleCallback(() => {
-          quillRef.current?.setContents(content || []);
+          const Delta = Quill.import("delta");
+          const delta = new Delta(content);
+          console.log("delta", delta);
+          quillRef.current?.setContents(delta || []);
+
           setIsTibetan(checkIsTibetan(quillRef.current?.getText() || ""));
           // Mark content as loaded after setting initial content
           hasContentLoadedRef.current = true;
         });
       } else {
         setTimeout(() => {
-          quillRef.current?.setContents(content || []);
+          const Delta = Quill.import("delta");
+          const delta = new Delta(content);
+          quillRef.current?.setContents(delta || []);
           setIsTibetan(checkIsTibetan(quillRef.current?.getText() || ""));
           // Mark content as loaded after setting initial content
           hasContentLoadedRef.current = true;
@@ -568,11 +564,6 @@ const Editor = ({
       // If editor already has content, mark it as loaded
       hasContentLoadedRef.current = true;
     }
-    return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-    };
   }, [currentDoc, yText, provider]);
 
   function addComment() {

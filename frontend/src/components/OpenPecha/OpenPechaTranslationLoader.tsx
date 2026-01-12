@@ -1,18 +1,12 @@
 import React, { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, QueryObserverResult } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { createDocumentWithContent } from "@/api/document";
+import { createDocumentFromOpenPecha } from "@/api/document";
 import { ErrorDisplay } from "@/components/shared/modals";
 import { Button } from "@/components/ui/button";
-import { QueryObserverResult } from "@tanstack/react-query";
 import { useBdrcSearch, BdrcSearchResult } from "@/hooks/uesBDRC";
 import { Search, AlertCircle, ExternalLink } from "lucide-react";
-import {
-  fetchInstances,
-  fetchText,
-  fetchTextContent,
-  fetchAnnotations,
-} from "@/api/openpecha";
+import { fetchText } from "@/api/openpecha";
 import { useFetchTexts } from "@/api/queries/openpecha_api";
 
 export function OpenPechaTranslationLoader({
@@ -28,7 +22,6 @@ export function OpenPechaTranslationLoader({
 }) {
   const navigate = useNavigate();
   const [error, setError] = useState("");
-  const [isCreating, setIsCreating] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showBdrcResults, setShowBdrcResults] = useState(false);
   const [showTitleResults, setShowTitleResults] = useState(false);
@@ -38,8 +31,6 @@ export function OpenPechaTranslationLoader({
   const [isCheckingTitleText, setIsCheckingTitleText] = useState(false);
   const [bdrcTextNotFound, setBdrcTextNotFound] = useState(false);
   const [selectedTextId, setSelectedTextId] = useState("");
-  const [selectedInstanceId, setSelectedInstanceId] = useState("");
-  const [processedText, setProcessedText] = useState("");
   const [selectedText, setSelectedText] = useState<{
     id: string;
     title:
@@ -54,43 +45,25 @@ export function OpenPechaTranslationLoader({
     error: bdrcError,
   } = useBdrcSearch(searchQuery, "Instance", 1000);
 
-  const { 
-    data: titleSearchResults, 
-    isLoading: isLoadingTitleSearch, 
-    error: titleSearchError 
-  } = useFetchTexts({title: searchQuery, limit: 100});
-
-  // Apply segmentation to text content
-  const applySegmentation = (
-    text: string,
-    segments: Array<{ span: { start: number; end: number } }>
-  ): string[] => {
-    if (typeof text !== "string" || !Array.isArray(segments)) {
-      throw new Error(
-        "Invalid arguments: expected text (string) and segments (array)."
-      );
-    }
-    return segments.map((segment) => {
-      const { start, end } = segment.span;
-
-      if (start < 0 || end > text.length || start >= end) {
-        throw new Error(`Invalid span range: start=${start}, end=${end}`);
-      }
-
-      return text.slice(start, end);
-    });
-  };
+  const {
+    data: titleSearchResults,
+    isLoading: isLoadingTitleSearch,
+    error: titleSearchError,
+  } = useFetchTexts({ title: searchQuery, limit: 100 });
 
   // Handle title search result selection
   const handleTitleResultSelect = React.useCallback(
-    async (result: { id: string; title: { [key: string]: string | undefined } }) => {
+    async (result: {
+      id: string;
+      title: { [key: string]: string | undefined };
+    }) => {
       setShowTitleResults(false);
       setShowBdrcResults(false);
       setBdrcTextNotFound(false);
       setIsCheckingTitleText(true);
 
       try {
-        // Fetch text details first
+        // Verify text exists in OpenPecha
         const text = await fetchText(result.id);
 
         if (!text?.id) {
@@ -99,60 +72,9 @@ export function OpenPechaTranslationLoader({
           return;
         }
 
-        // Set the text
+        // Set the text - backend will handle fetching content and segmentation
         setSelectedText(text);
         setSelectedTextId(text.id);
-
-        // Fetch text details
-        const instance = await fetchInstances(result.id, "critical");
-
-        if (!instance[0]?.id) {
-          setIsCheckingTitleText(false);
-          setBdrcTextNotFound(true);
-          return;
-        }
-
-        setSelectedInstanceId(instance[0].id);
-
-        // Fetch text content with annotations
-        const textContent = await fetchTextContent(instance[0].id);
-
-        if (!textContent?.content) {
-          setIsCheckingTitleText(false);
-          setBdrcTextNotFound(true);
-          return;
-        }
-
-        // Find segmentation annotation
-        let annotationId: string | null = null;
-        if (textContent.annotations && textContent.annotations.length > 0) {
-          const segmentation = textContent.annotations.find(
-            (anno: { type?: string }) => anno.type === "segmentation"
-          );
-          if (segmentation?.annotation_id) {
-            annotationId = segmentation.annotation_id;
-          }
-        }
-
-        // If segmentation annotation exists, fetch and apply it
-        if (annotationId) {
-          const annotations = await fetchAnnotations(annotationId);
-
-          if (annotations?.data && Array.isArray(annotations.data)) {
-            const segmentedText = applySegmentation(
-              textContent.content,
-              annotations.data
-            );
-            setProcessedText(segmentedText.join("\n"));
-          } else {
-            // No segmentation, use raw content
-            setProcessedText(textContent.content);
-          }
-        } else {
-          // No segmentation annotation, use raw content
-          setProcessedText(textContent.content);
-        }
-
         setIsCheckingTitleText(false);
       } catch (err) {
         console.error("Error fetching text from OpenPecha:", err);
@@ -178,7 +100,7 @@ export function OpenPechaTranslationLoader({
       }
 
       try {
-        // Fetch text from openpecha using workId
+        // Verify text exists in OpenPecha using workId
         const text = await fetchText(result.workId);
 
         if (!text?.id) {
@@ -187,93 +109,9 @@ export function OpenPechaTranslationLoader({
           return;
         }
 
-        // Set the text
+        // Set the text - backend will handle fetching content and segmentation
         setSelectedText(text);
         setSelectedTextId(text.id);
-
-        // Fetch instances for this text
-        const instances = await fetchInstances(text.id);
-
-        if (!instances || instances.length === 0) {
-          setIsCheckingBdrcText(false);
-          setBdrcTextNotFound(true);
-          return;
-        }
-
-        // Find the critical instance or use the instanceId from result
-        let targetInstanceId: string | null = null;
-
-        if (result.instanceId) {
-          // Use the instanceId from BDRC result if provided
-          const foundInstance = instances.find(
-            (inst: { id: string }) => inst.id === result.instanceId
-          );
-          if (foundInstance) {
-            targetInstanceId = result.instanceId;
-          }
-        }
-
-        // If no instanceId from result, find critical instance
-        if (!targetInstanceId) {
-          const criticalInstance = instances.find(
-            (inst: { type?: string }) =>
-              inst.type === "critical" || inst.type === "content"
-          );
-          if (criticalInstance) {
-            targetInstanceId = criticalInstance.id;
-          } else {
-            // Use first instance as fallback
-            targetInstanceId = instances[0].id;
-          }
-        }
-
-        if (!targetInstanceId) {
-          setIsCheckingBdrcText(false);
-          setBdrcTextNotFound(true);
-          return;
-        }
-
-        setSelectedInstanceId(targetInstanceId);
-
-        // Fetch text content with annotations
-        const textContent = await fetchTextContent(targetInstanceId);
-
-        if (!textContent?.content) {
-          setIsCheckingBdrcText(false);
-          setBdrcTextNotFound(true);
-          return;
-        }
-
-        // Find segmentation annotation
-        let annotationId: string | null = null;
-        if (textContent.annotations && textContent.annotations.length > 0) {
-          const segmentation = textContent.annotations.find(
-            (anno: { type?: string }) => anno.type === "segmentation"
-          );
-          if (segmentation?.annotation_id) {
-            annotationId = segmentation.annotation_id;
-          }
-        }
-
-        // If segmentation annotation exists, fetch and apply it
-        if (annotationId) {
-          const annotations = await fetchAnnotations(annotationId);
-
-          if (annotations?.data && Array.isArray(annotations.data)) {
-            const segmentedText = applySegmentation(
-              textContent.content,
-              annotations.data
-            );
-            setProcessedText(segmentedText.join("\n"));
-          } else {
-            // No segmentation, use raw content
-            setProcessedText(textContent.content);
-          }
-        } else {
-          // No segmentation annotation, use raw content
-          setProcessedText(textContent.content);
-        }
-
         setIsCheckingBdrcText(false);
       } catch (err) {
         console.error("Error fetching text from OpenPecha:", err);
@@ -284,89 +122,42 @@ export function OpenPechaTranslationLoader({
     []
   );
 
-  const extractTitle = (
-    title:
-      | string
-      | { bo?: string; en?: string; [key: string]: string | undefined }
-      | undefined,
-    fallback: string = ""
-  ): string => {
-    if (typeof title === "string") return title;
-    if (!title) return fallback;
-    return title.bo ?? title.en ?? title[Object.keys(title)[0]] ?? fallback;
-  };
-
   const createTranslationMutation = useMutation({
     mutationFn: async () => {
-      if (!processedText.trim()) {
-        throw new Error("No text content available");
-      }
       if (!selectedTextId) {
         throw new Error("Please select a text");
       }
-      if (!selectedInstanceId) {
-        throw new Error("Please select a instance");
+      if (!rootId) {
+        throw new Error("Root document ID is required");
       }
 
-      const formData = new FormData();
-      const documentName = extractTitle(
-        selectedText?.title,
-        `OpenPecha-${selectedTextId}`
-      );
-      const uniqueIdentifier = `${documentName}-${Date.now()}`;
-
-      formData.append("name", documentName);
-      formData.append("identifier", uniqueIdentifier);
-      formData.append("isRoot", "false");
-      formData.append("isPublic", "false");
-      formData.append("language", selectedText?.language || "tibetan");
-      formData.append("rootId", rootId);
-      formData.append("content", processedText);
-      formData.append(
-        "metadata",
-        JSON.stringify({
-          text_id: selectedTextId,
-          instance_id: selectedInstanceId,
-        })
-      );
-      return createDocumentWithContent(formData);
+      // Use the backend endpoint to create translation from OpenPecha textId
+      // Backend handles fetching content, segmentation, and creating document with proper connection
+      return createDocumentFromOpenPecha(selectedTextId, rootId);
     },
     onSuccess: (response) => {
-      setIsCreating(false);
-      onSuccess(response.id);
+      // Response structure: { data: { id: string, ... } }
+      const documentId = response.data?.id || response.id;
+      onSuccess(documentId);
       refetchTranslations?.();
-      navigate(`/documents/${rootId}?translation=${response.id}`);
+      navigate(`/documents/${rootId}?translation=${documentId}`);
     },
     onError: (error: Error) => {
       console.error("Error creating OpenPecha translation:", error);
       setError(error.message || "Failed to create OpenPecha translation");
-      setIsCreating(false);
     },
   });
 
   const handleCreateTranslation = () => {
     if (!selectedTextId) {
-      setError("Please select a pecha");
-      return;
-    }
-    if (!selectedInstanceId) {
-      setError("Please select a version");
-      return;
-    }
-    if (!processedText.trim()) {
-      setError("No text content available");
+      setError("Please select a text");
       return;
     }
     setError("");
-    setIsCreating(true);
     createTranslationMutation.mutate();
   };
 
-  const hasValidContent = !!(
-    selectedTextId &&
-    selectedInstanceId &&
-    processedText.trim()
-  );
+  const hasValidContent = !!selectedTextId;
 
   // Cataloger URL
   const CATALOGER_URL =
@@ -376,7 +167,11 @@ export function OpenPechaTranslationLoader({
       ? `create?w_id=${selectedBdrcResult.workId}&i_id=${selectedBdrcResult.instanceId}`
       : "";
     return `${CATALOGER_URL}/${workIdParam}`;
-  }, [CATALOGER_URL, selectedBdrcResult?.workId, selectedBdrcResult?.instanceId]);
+  }, [
+    CATALOGER_URL,
+    selectedBdrcResult?.workId,
+    selectedBdrcResult?.instanceId,
+  ]);
 
   // Render title search results
   const renderTitleSearchResults = () => {
@@ -420,32 +215,46 @@ export function OpenPechaTranslationLoader({
             <h3 className="text-sm font-semibold text-gray-700">OpenPecha</h3>
           </div>
           <p className="text-sm text-red-600">
-            Error searching OpenPecha: {titleSearchError.message || String(titleSearchError)}
+            Error searching OpenPecha:{" "}
+            {titleSearchError.message || String(titleSearchError)}
           </p>
         </div>
       );
     }
 
-    if (titleSearchResults && Array.isArray(titleSearchResults) && titleSearchResults.length > 0) {
+    if (
+      titleSearchResults &&
+      Array.isArray(titleSearchResults) &&
+      titleSearchResults.length > 0
+    ) {
       return (
         <div className="w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
           <div className="px-4 py-2 bg-gray-50 border-b border-gray-200 sticky top-0">
             <h3 className="text-sm font-semibold text-gray-700">OpenPecha</h3>
           </div>
-          {titleSearchResults.map((result: { id: string; title: { bo?: string; en?: string; [key: string]: string | undefined } }) => (
-            <button
-              key={`title-${result.id}`}
-              onClick={() => handleTitleResultSelect(result)}
-              className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0 transition-colors"
-            >
-              <div className="font-medium text-sm text-gray-900">
-                {(result.title?.bo || Object.values(result.title || {})[0])}
-              </div>
-              <div className="text-xs text-gray-500 mt-1">
-                Text ID: {result.id}
-              </div>
-            </button>
-          ))}
+          {titleSearchResults.map(
+            (result: {
+              id: string;
+              title: {
+                bo?: string;
+                en?: string;
+                [key: string]: string | undefined;
+              };
+            }) => (
+              <button
+                key={`title-${result.id}`}
+                onClick={() => handleTitleResultSelect(result)}
+                className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0 transition-colors"
+              >
+                <div className="font-medium text-sm text-gray-900">
+                  {result.title?.bo || Object.values(result.title || {})[0]}
+                </div>
+                <div className="text-xs text-gray-500 mt-1">
+                  Text ID: {result.id}
+                </div>
+              </button>
+            )
+          )}
         </div>
       );
     }
@@ -470,7 +279,9 @@ export function OpenPechaTranslationLoader({
       return (
         <div className="w-full bg-white border border-gray-300 rounded-md shadow-lg p-4">
           <div className="px-4 py-2 bg-gray-50 border-b border-gray-200 -mx-4 -mt-4 mb-4">
-            <h3 className="text-sm font-semibold text-gray-700">BDRC Results</h3>
+            <h3 className="text-sm font-semibold text-gray-700">
+              BDRC Results
+            </h3>
           </div>
           <div className="flex items-center space-x-2 text-sm text-blue-600">
             <svg
@@ -503,7 +314,9 @@ export function OpenPechaTranslationLoader({
       return (
         <div className="w-full bg-white border border-red-300 rounded-md shadow-lg p-4">
           <div className="px-4 py-2 bg-gray-50 border-b border-gray-200 -mx-4 -mt-4 mb-4">
-            <h3 className="text-sm font-semibold text-gray-700">BDRC Results</h3>
+            <h3 className="text-sm font-semibold text-gray-700">
+              BDRC Results
+            </h3>
           </div>
           <p className="text-sm text-red-600">
             Error searching BDRC: {bdrcError}
@@ -516,7 +329,9 @@ export function OpenPechaTranslationLoader({
       return (
         <div className="w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
           <div className="px-4 py-2 bg-gray-50 border-b border-gray-200 sticky top-0">
-            <h3 className="text-sm font-semibold text-gray-700">BDRC Results</h3>
+            <h3 className="text-sm font-semibold text-gray-700">
+              BDRC Results
+            </h3>
           </div>
           {bdrcResults.map((result) => (
             <button
@@ -547,7 +362,9 @@ export function OpenPechaTranslationLoader({
       return (
         <div className="w-full bg-white border border-gray-300 rounded-md shadow-lg p-4">
           <div className="px-4 py-2 bg-gray-50 border-b border-gray-200 -mx-4 -mt-4 mb-4">
-            <h3 className="text-sm font-semibold text-gray-700">BDRC Results</h3>
+            <h3 className="text-sm font-semibold text-gray-700">
+              BDRC Results
+            </h3>
           </div>
           <p className="text-sm text-gray-600">No BDRC texts found</p>
         </div>
@@ -592,7 +409,7 @@ export function OpenPechaTranslationLoader({
           <div className="relative space-y-2">
             {/* Title Search Results - shown first */}
             {showTitleResults && renderTitleSearchResults()}
-            
+
             {/* BDRC Search Results - shown below title results */}
             {showBdrcResults && renderBdrcSearchResults()}
           </div>
@@ -657,18 +474,28 @@ export function OpenPechaTranslationLoader({
       </div>
 
       {/* Selected Text Information */}
-      {selectedTextId && selectedInstanceId && processedText && (
+      {selectedTextId && (
         <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
           <div className="space-y-2">
             <p className="text-sm font-medium text-green-800">
-              Text loaded successfully
+              Text selected successfully
             </p>
             {selectedText && (
               <div className="text-sm text-green-700">
                 <p>
-                  <span className="font-medium">Content length:</span>{" "}
-                  {processedText.length} characters
+                  <span className="font-medium">Text ID:</span>{" "}
+                  {selectedText.id}
                 </p>
+                {selectedText.title && (
+                  <p>
+                    <span className="font-medium">Title:</span>{" "}
+                    {typeof selectedText.title === "string"
+                      ? selectedText.title
+                      : selectedText.title.bo ||
+                        selectedText.title.en ||
+                        Object.values(selectedText.title)[0]}
+                  </p>
+                )}
               </div>
             )}
           </div>
@@ -679,10 +506,10 @@ export function OpenPechaTranslationLoader({
         <div className="flex justify-center pt-4">
           <Button
             onClick={handleCreateTranslation}
-            disabled={isCreating}
+            disabled={createTranslationMutation.isPending}
             className="px-8 py-2 bg-secondary-600 hover:bg-secondary-700 text-white transition-colors"
           >
-            {isCreating ? (
+            {createTranslationMutation.isPending ? (
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 Creating Translation...

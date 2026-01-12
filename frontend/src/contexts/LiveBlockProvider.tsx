@@ -30,6 +30,27 @@ function LiveBlockProvider({
   );
 }
 
+function deltaToPlainText(delta: any) {
+  let text = "";
+  if (!Array.isArray(delta)) return "";
+  for (const op of delta) {
+    // stop if we reach the footnote divider
+    if (typeof op.insert === "object" && op.insert["footnote-divider"]) {
+      break;
+    } else {
+      text += op.insert;
+    }
+
+    if (typeof op.insert === "string") {
+      // append only non-footnote-row text
+      if (!(op.attributes && op.attributes["footnote-row"])) {
+        text += op.insert;
+      }
+    }
+  }
+  return text;
+}
+
 export const useLiveBlockActive = (currentDoc: any) => {
   const [isLiveEnabled, setIsLiveEnabled] = useState(false);
   useEffect(() => {
@@ -37,9 +58,14 @@ export const useLiveBlockActive = (currentDoc: any) => {
       setIsLiveEnabled(false);
       return () => {};
     }
-    if (!currentDoc?.currentVersion?.content) return () => {};
     // Calculate text length from Delta ops
-    const ops = currentDoc.currentVersion.content.ops || [];
+    const ops = currentDoc?.currentVersion?.content.ops || [];
+
+    const text = deltaToPlainText(ops);
+    if (text.length > MAX_TEXT_LENGTH_FOR_REALTIME_COLLABORATION) {
+      setIsLiveEnabled(false);
+      return () => {};
+    }
     const textLength =
       ops.length > 0
         ? ops.reduce((total, op) => {

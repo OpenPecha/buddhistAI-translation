@@ -1,0 +1,181 @@
+[2026-01-12T05:51:12.010Z] [ERROR] Request error
+    Data: {
+  "message": "Unauthorized",
+  "stack": "UnauthorizedError: Unauthorized\n    at getToken (D:\\work\\pecha-translation-editor\\backend\\node_modules\\express-oauth2-jwt-bearer\\dist\\index.js:82:15)\n    at D:\\work\\pecha-translation-editor\\backend\\node_modules\\express-oauth2-jwt-bearer\\dist\\index.js:402:25\n    at Layer.handle [as handle_request] (D:\\work\\pecha-translation-editor\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n    at next (D:\\work\\pecha-translation-editor\\backend\\node_modules\\express\\lib\\router\\route.js:149:13)\n    at Route.dispatch (D:\\work\\pecha-translation-editor\\backend\\node_modules\\express\\lib\\router\\route.js:119:3)\n    at Layer.handle [as handle_request] (D:\\work\\pecha-translation-editor\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n    at D:\\work\\pecha-translation-editor\\backend\\node_modules\\express\\lib\\router\\index.js:284:15\n    at Function.process_params (D:\\work\\pecha-translation-editor\\backend\\node_modules\\express\\lib\\router\\index.js:346:12)\n    at next (D:\\work\\pecha-translation-editor\\backend\\node_modules\\express\\lib\\router\\index.js:280:10)\n    at Function.handle (D:\\work\\pecha-translation-editor\\backend\\node_modules\\express\\lib\\router\\index.js:175:3)\n    at router (D:\\work\\pecha-translation-editor\\backend\\node_modules\\express\\lib\\router\\index.js:47:12)\n    at Layer.handle [as handle_request] (D:\\work\\pecha-translation-editor\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n    at trim_prefix (D:\\work\\pecha-translation-editor\\backend\\node_modules\\express\\lib\\router\\index.js:328:13)\n    at D:\\work\\pecha-translation-editor\\backend\\node_modules\\express\\lib\\router\\index.js:286:9\n    at Function.process_params (D:\\work\\pecha-translation-editor\\backend\\node_modules\\express\\lib\\router\\index.js:346:12)\n    at next (D:\\work\\pecha-translation-editor\\backend\\node_modules\\express\\lib\\router\\index.js:280:10)",
+  "url": "/documents/openpecha",
+  "method": "POST",
+  "status": 401
+}
+[2026-01-12T05:52:00.832Z] [ERROR] Error creating document with openpecha textId
+    Error: getText is not defined
+    Stack: ReferenceError: getText is not defined
+    at D:\work\pecha-translation-editor\backend\routes\documents.js:358:18
+    at Layer.handle [as handle_request] (D:\work\pecha-translation-editor\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (D:\work\pecha-translation-editor\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (D:\work\pecha-translation-editor\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (D:\work\pecha-translation-editor\backend\node_modules\express\lib\router\layer.js:95:5)
+    at D:\work\pecha-translation-editor\backend\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (D:\work\pecha-translation-editor\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (D:\work\pecha-translation-editor\backend\node_modules\express\lib\router\index.js:280:10)
+    at Function.handle (D:\work\pecha-translation-editor\backend\node_modules\express\lib\router\index.js:175:3)
+    at router (D:\work\pecha-translation-editor\backend\node_modules\express\lib\router\index.js:47:12)
+    at Layer.handle [as handle_request] (D:\work\pecha-translation-editor\backend\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (D:\work\pecha-translation-editor\backend\node_modules\express\lib\router\index.js:328:13)
+    at D:\work\pecha-translation-editor\backend\node_modules\express\lib\router\index.js:286:9
+    at Function.process_params (D:\work\pecha-translation-editor\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (D:\work\pecha-translation-editor\backend\node_modules\express\lib\router\index.js:280:10)
+    at urlencodedParser (D:\work\pecha-translation-editor\backend\node_modules\body-parser\lib\types\urlencoded.js:85:7)
+[2026-01-12T05:52:00.835Z] [ERROR] Request error
+    Data: {
+  "message": "getText is not defined",
+  "stack": "ReferenceError: getText is not defined\n    at D:\\work\\pecha-translation-editor\\backend\\routes\\documents.js:358:18\n    at Layer.handle [as handle_request] (D:\\work\\pecha-translation-editor\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n    at next (D:\\work\\pecha-translation-editor\\backend\\node_modules\\express\\lib\\router\\route.js:149:13)\n    at Route.dispatch (D:\\work\\pecha-translation-editor\\backend\\node_modules\\express\\lib\\router\\route.js:119:3)\n    at Layer.handle [as handle_request] (D:\\work\\pecha-translation-editor\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n    at D:\\work\\pecha-translation-editor\\backend\\node_modules\\express\\lib\\router\\index.js:284:15\n    at Function.process_params (D:\\work\\pecha-translation-editor\\backend\\node_modules\\express\\lib\\router\\index.js:346:12)\n    at next (D:\\work\\pecha-translation-editor\\backend\\node_modules\\express\\lib\\router\\index.js:280:10)\n    at Function.handle (D:\\work\\pecha-translation-editor\\backend\\node_modules\\express\\lib\\router\\index.js:175:3)\n    at router (D:\\work\\pecha-translation-editor\\backend\\node_modules\\express\\lib\\router\\index.js:47:12)\n    at Layer.handle [as handle_request] (D:\\work\\pecha-translation-editor\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n    at trim_prefix (D:\\work\\pecha-translation-editor\\backend\\node_modules\\express\\lib\\router\\index.js:328:13)\n    at D:\\work\\pecha-translation-editor\\backend\\node_modules\\express\\lib\\router\\index.js:286:9\n    at Function.process_params (D:\\work\\pecha-translation-editor\\backend\\node_modules\\express\\lib\\router\\index.js:346:12)\n    at next (D:\\work\\pecha-translation-editor\\backend\\node_modules\\express\\lib\\router\\index.js:280:10)\n    at urlencodedParser (D:\\work\\pecha-translation-editor\\backend\\node_modules\\body-parser\\lib\\types\\urlencoded.js:85:7)",
+  "url": "/documents/openpecha",
+  "method": "POST",
+  "status": 500
+}
+[2026-01-12T05:55:54.398Z] [ERROR] Error creating document with openpecha textId
+    Error: Failed to fetch annotations from openpecha: Not Found
+    Stack: Error: Failed to fetch annotations from openpecha: Not Found
+    at getAnnotations (D:\work\pecha-translation-editor\backend\apis\openpecha_api.js:91:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async D:\work\pecha-translation-editor\backend\routes\documents.js:381:24
+[2026-01-12T05:55:54.400Z] [ERROR] Request error
+    Data: {
+  "message": "Failed to fetch annotations from openpecha: Not Found",
+  "stack": "Error: Failed to fetch annotations from openpecha: Not Found\n    at getAnnotations (D:\\work\\pecha-translation-editor\\backend\\apis\\openpecha_api.js:91:11)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async D:\\work\\pecha-translation-editor\\backend\\routes\\documents.js:381:24",
+  "url": "/documents/openpecha",
+  "method": "POST",
+  "status": 500
+}
+[2026-01-12T06:01:14.199Z] [ERROR] Error creating document with openpecha textId
+    Error: Failed to fetch annotations from openpecha: Not Found
+    Stack: Error: Failed to fetch annotations from openpecha: Not Found
+    at getAnnotations (D:\work\pecha-translation-editor\backend\apis\openpecha_api.js:91:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async D:\work\pecha-translation-editor\backend\routes\documents.js:387:43
+[2026-01-12T06:01:14.202Z] [ERROR] Request error
+    Data: {
+  "message": "Failed to fetch annotations from openpecha: Not Found",
+  "stack": "Error: Failed to fetch annotations from openpecha: Not Found\n    at getAnnotations (D:\\work\\pecha-translation-editor\\backend\\apis\\openpecha_api.js:91:11)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async D:\\work\\pecha-translation-editor\\backend\\routes\\documents.js:387:43",
+  "url": "/documents/openpecha",
+  "method": "POST",
+  "status": 500
+}
+[2026-01-12T06:01:57.785Z] [ERROR] Error creating document with openpecha textId
+    Error: Failed to fetch annotations from openpecha: Not Found
+    Stack: Error: Failed to fetch annotations from openpecha: Not Found
+    at getAnnotations (D:\work\pecha-translation-editor\backend\apis\openpecha_api.js:91:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async D:\work\pecha-translation-editor\backend\routes\documents.js:388:43
+[2026-01-12T06:01:57.788Z] [ERROR] Request error
+    Data: {
+  "message": "Failed to fetch annotations from openpecha: Not Found",
+  "stack": "Error: Failed to fetch annotations from openpecha: Not Found\n    at getAnnotations (D:\\work\\pecha-translation-editor\\backend\\apis\\openpecha_api.js:91:11)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async D:\\work\\pecha-translation-editor\\backend\\routes\\documents.js:388:43",
+  "url": "/documents/openpecha",
+  "method": "POST",
+  "status": 500
+}
+[2026-01-12T07:03:49.695Z] [ERROR] Request error
+    Data: {
+  "message": "Invalid Compact JWS",
+  "stack": "InvalidTokenError: Invalid Compact JWS\n    at D:\\work\\pecha-translation-editor\\backend\\node_modules\\express-oauth2-jwt-bearer\\dist\\index.js:300:19\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async D:\\work\\pecha-translation-editor\\backend\\node_modules\\express-oauth2-jwt-bearer\\dist\\index.js:403:24",
+  "url": "/documents/openpecha",
+  "method": "POST",
+  "status": 401
+}
+[2026-01-12T07:04:51.339Z] [ERROR] Error creating document with openpecha textId
+    Error: Invalid arguments: expected text (string) and segments (array).
+    Stack: Error: Invalid arguments: expected text (string) and segments (array).
+    at applySegmentation (file:///D:/work/pecha-translation-editor/backend/utils/applySegmentation.js:3:11)
+    at D:\work\pecha-translation-editor\backend\routes\documents.js:390:30
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+[2026-01-12T07:04:51.340Z] [ERROR] Request error
+    Data: {
+  "message": "Invalid arguments: expected text (string) and segments (array).",
+  "stack": "Error: Invalid arguments: expected text (string) and segments (array).\n    at applySegmentation (file:///D:/work/pecha-translation-editor/backend/utils/applySegmentation.js:3:11)\n    at D:\\work\\pecha-translation-editor\\backend\\routes\\documents.js:390:30\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)",
+  "url": "/documents/openpecha",
+  "method": "POST",
+  "status": 500
+}
+[2026-01-12T07:06:50.364Z] [ERROR] Error creating document with openpecha textId
+    Error: Invalid arguments: expected text (string) and segments (array).
+    Stack: Error: Invalid arguments: expected text (string) and segments (array).
+    at applySegmentation (file:///D:/work/pecha-translation-editor/backend/utils/applySegmentation.js:3:11)
+    at D:\work\pecha-translation-editor\backend\routes\documents.js:390:30
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+[2026-01-12T07:06:50.374Z] [ERROR] Request error
+    Data: {
+  "message": "Invalid arguments: expected text (string) and segments (array).",
+  "stack": "Error: Invalid arguments: expected text (string) and segments (array).\n    at applySegmentation (file:///D:/work/pecha-translation-editor/backend/utils/applySegmentation.js:3:11)\n    at D:\\work\\pecha-translation-editor\\backend\\routes\\documents.js:390:30\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)",
+  "url": "/documents/openpecha",
+  "method": "POST",
+  "status": 500
+}
+[2026-01-12T07:07:32.293Z] [ERROR] Error creating document with openpecha textId
+    Error: text.title.replaceAll is not a function
+    Stack: TypeError: text.title.replaceAll is not a function
+    at D:\work\pecha-translation-editor\backend\routes\documents.js:395:35
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+[2026-01-12T07:07:32.296Z] [ERROR] Request error
+    Data: {
+  "message": "text.title.replaceAll is not a function",
+  "stack": "TypeError: text.title.replaceAll is not a function\n    at D:\\work\\pecha-translation-editor\\backend\\routes\\documents.js:395:35\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)",
+  "url": "/documents/openpecha",
+  "method": "POST",
+  "status": 500
+}
+[2026-01-12T07:08:40.834Z] [ERROR] Error creating document with openpecha textId
+    Error: text.title.replaceAll is not a function
+    Stack: TypeError: text.title.replaceAll is not a function
+    at D:\work\pecha-translation-editor\backend\routes\documents.js:395:35
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+[2026-01-12T07:08:40.837Z] [ERROR] Request error
+    Data: {
+  "message": "text.title.replaceAll is not a function",
+  "stack": "TypeError: text.title.replaceAll is not a function\n    at D:\\work\\pecha-translation-editor\\backend\\routes\\documents.js:395:35\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)",
+  "url": "/documents/openpecha",
+  "method": "POST",
+  "status": 500
+}
+[2026-01-12T07:09:29.252Z] [ERROR] Error creating document with openpecha textId
+    Error: name is not defined
+    Stack: ReferenceError: name is not defined
+    at D:\work\pecha-translation-editor\backend\routes\documents.js:428:11
+    at Proxy._transactionWithCallback (D:\work\pecha-translation-editor\backend\node_modules\@prisma\client\runtime\library.js:130:8126)
+    at async D:\work\pecha-translation-editor\backend\routes\documents.js:409:22
+[2026-01-12T07:09:29.255Z] [ERROR] Request error
+    Data: {
+  "message": "name is not defined",
+  "stack": "ReferenceError: name is not defined\n    at D:\\work\\pecha-translation-editor\\backend\\routes\\documents.js:428:11\n    at Proxy._transactionWithCallback (D:\\work\\pecha-translation-editor\\backend\\node_modules\\@prisma\\client\\runtime\\library.js:130:8126)\n    at async D:\\work\\pecha-translation-editor\\backend\\routes\\documents.js:409:22",
+  "url": "/documents/openpecha",
+  "method": "POST",
+  "status": 500
+}
+[2026-01-12T07:10:00.476Z] [ERROR] Error creating document with openpecha textId
+    Error: language is not defined
+    Stack: ReferenceError: language is not defined
+    at D:\work\pecha-translation-editor\backend\routes\documents.js:432:11
+    at Proxy._transactionWithCallback (D:\work\pecha-translation-editor\backend\node_modules\@prisma\client\runtime\library.js:130:8126)
+    at async D:\work\pecha-translation-editor\backend\routes\documents.js:409:22
+[2026-01-12T07:10:00.480Z] [ERROR] Request error
+    Data: {
+  "message": "language is not defined",
+  "stack": "ReferenceError: language is not defined\n    at D:\\work\\pecha-translation-editor\\backend\\routes\\documents.js:432:11\n    at Proxy._transactionWithCallback (D:\\work\\pecha-translation-editor\\backend\\node_modules\\@prisma\\client\\runtime\\library.js:130:8126)\n    at async D:\\work\\pecha-translation-editor\\backend\\routes\\documents.js:409:22",
+  "url": "/documents/openpecha",
+  "method": "POST",
+  "status": 500
+}
+[2026-01-12T07:10:39.975Z] [ERROR] Error creating document with openpecha textId
+    Error: metadata is not defined
+    Stack: ReferenceError: metadata is not defined
+    at D:\work\pecha-translation-editor\backend\routes\documents.js:442:7
+    at async Proxy._transactionWithCallback (D:\work\pecha-translation-editor\backend\node_modules\@prisma\client\runtime\library.js:130:8120)
+    at async D:\work\pecha-translation-editor\backend\routes\documents.js:409:22
+[2026-01-12T07:10:39.980Z] [ERROR] Request error
+    Data: {
+  "message": "metadata is not defined",
+  "stack": "ReferenceError: metadata is not defined\n    at D:\\work\\pecha-translation-editor\\backend\\routes\\documents.js:442:7\n    at async Proxy._transactionWithCallback (D:\\work\\pecha-translation-editor\\backend\\node_modules\\@prisma\\client\\runtime\\library.js:130:8120)\n    at async D:\\work\\pecha-translation-editor\\backend\\routes\\documents.js:409:22",
+  "url": "/documents/openpecha",
+  "method": "POST",
+  "status": 500
+}

@@ -149,6 +149,7 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({
       document.removeEventListener("selectionchange", handleSelectionChange);
     };
   }, [selectedText, activeEditor, getSelectedText]); // Add missing dependency array
+
   const clearSelection = () => {
     setSelectedText("");
     setActiveSelectedEditor(null);
@@ -236,6 +237,7 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({
     [activeEditor, activeQuill]
   );
   const unregisterQuill = useCallback((id: string) => {
+    if (!id) return;
     setQuillEditors((prev) => {
       const next = new Map(prev);
       next.delete(id);

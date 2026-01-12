@@ -329,3 +329,39 @@ export const deleteTranslationContextFile = async (fileId: string) => {
       "Failed to delete translation context file"
   );
 };
+
+/**
+ * Create a document and project from an OpenPecha text ID
+ * @param textId - OpenPecha text identifier
+ * @param rootId - Optional root document ID (if provided, document will belong to existing project)
+ * @returns A promise that resolves to the created project or document
+ */
+export const createDocumentFromOpenPecha = async (
+  textId: string,
+  rootId?: string | null
+) => {
+  try {
+    const response = await fetch(`${server_url}/documents/openpecha`, {
+      method: "POST",
+      headers: {
+        ...getHeaders(),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ textId, rootId: rootId || null }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.error ||
+          errorData.message ||
+          "Failed to create document from OpenPecha"
+      );
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error creating document from OpenPecha:", error);
+    throw error;
+  }
+};
