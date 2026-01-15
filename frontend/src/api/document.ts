@@ -110,8 +110,8 @@ export const createDocumentWithContent = async (
   if(response.ok) {
   const responseData = await response.json();
   return responseData.data;
+ }
 };
-}
 
 export const updatePermission = async (
   id: string,
