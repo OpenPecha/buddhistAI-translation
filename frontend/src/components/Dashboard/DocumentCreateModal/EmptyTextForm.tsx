@@ -48,7 +48,7 @@ export function EmptyTextForm({
       };
 
       const documentResponse = await createDocumentWithContent(documentData);
-      if (!documentResponse?.id) {
+      if (!documentResponse?.data?.id) {
         throw new Error("Failed to create document");
       }
 
@@ -56,7 +56,7 @@ export function EmptyTextForm({
       return createProject({
         name: projectName,
         identifier: projectName.toLowerCase().replace(/\s+/g, "-"),
-        rootId: documentResponse.id,
+        rootId: documentResponse.data.id,
         metadata: {
           source: "empty",
           language: selectedLanguage,
