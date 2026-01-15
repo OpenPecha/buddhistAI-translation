@@ -107,8 +107,10 @@ export const createDocumentWithContent = async (
     const error = await response.text();
     throw new Error(error ?? "Failed to create document");
   }
-
-  return response.json();
+  if(response.ok) {
+  const responseData = await response.json();
+  return responseData.data;
+ }
 };
 
 export const updatePermission = async (
