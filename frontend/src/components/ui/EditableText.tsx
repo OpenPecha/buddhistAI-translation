@@ -35,7 +35,6 @@ const EditableText: React.FC<EditableTextProps> = ({
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const newValue = e.target.value;
 		if (newValue === initialText) return;
-		if (!allowEmpty && newValue.trim() === "") return;
 		setInputValue(newValue);
 	};
 
