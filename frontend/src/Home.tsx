@@ -1,4 +1,3 @@
-import { ArrowRight, Globe } from 'lucide-react';
 import Window from './components/v2/window/Window';
 import { Button } from './components/ui/button';
 import FeatureCard from './components/v2/ui/molecules/cards/feature-card/FeatureCard';
