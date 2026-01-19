@@ -16,6 +16,7 @@ import "./i18n";
 import { useTranslation } from "react-i18next";
 import { EditorProvider } from "@/contexts/EditorContext";
 import { ThemeProvider } from "./contexts/ThemeProvider";
+import Home from "./Home";
 const ProjectList = lazy(() => import("./components/Dashboard/ProjectList"));
 const QuillVersionProvider = lazy(() =>
   import("./contexts/VersionContext").then((module) => ({
@@ -49,8 +50,9 @@ function AppContent() {
         }`}
     >
       <Routes>
+        <Route path="/" element={<Home />} />
         <Route
-          path="/"
+          path="/dashboard"
           element={
             <Layout>
               <ProjectList />
@@ -92,7 +94,7 @@ function AppContent() {
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="dark" storageKey="theme-preference">
+    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <UserbackProvider>

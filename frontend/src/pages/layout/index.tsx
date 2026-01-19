@@ -4,7 +4,7 @@ import { useAuth } from "@/auth/use-auth-hook";
 import { useTokenExpiration } from "@/hooks/useTokenExpiration";
 import Footer from "./Footbar";
 import Navbar from "./Navbar";
-import Home from "@/Home";
+import { Navigate } from "react-router-dom";
 
 export const LoadingFallback: React.FC = () => (
   <div className="flex items-center justify-center min-h-screen bg-gray-50">
@@ -56,7 +56,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
     }
     return () => { };
   }, []);
-  if (!isAuthenticated) return <Home />;
+
+  if (!isAuthenticated) return <Navigate to="/" />;
 
   return (
     <SuspenceWithLoadingFallback>

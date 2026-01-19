@@ -6,7 +6,7 @@ export type Theme = "light" | "dark" | "system";
 
 export function useTheme() {
 	const [storedTheme, setStoredTheme] = useLocalStorage<Theme>(
-		"theme-preference",
+		"vite-ui-theme",
 		"system",
 	);
 	const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");

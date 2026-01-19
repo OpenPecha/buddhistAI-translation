@@ -5,11 +5,15 @@ import { Button } from './components/ui/button';
 import { ModeToggle } from './components/v2/ui/molecules/mode-toggle/ModeToggle';
 import FeatureCard from './components/v2/ui/molecules/cards/feature-card/FeatureCard';
 import Footer from './pages/layout/Footbar';
-import { Link } from 'react-router-dom';
-import { useAuth0 } from '@auth0/auth0-react';
+import { Link, Navigate } from 'react-router-dom';
+import { useAuth } from '@/auth/use-auth-hook';
 
 const Home = () => {
-    const { loginWithRedirect } = useAuth0();
+    const { isAuthenticated, login } = useAuth();
+
+    if (isAuthenticated) {
+        return <Navigate to="/dashboard" replace />;
+    }
 
     return (
         <div className="min-h-screen dark:bg-[#191919] dark:text-white dark:selection:bg-white/20 overflow-x-hidden font-sans">
@@ -44,7 +48,7 @@ const Home = () => {
                     </p>
                 </div>
                 <div className="flex flex-col sm:flex-row items-center gap-x-4">
-                    <Button variant="secondary" onClick={() => loginWithRedirect()}>
+                    <Button variant="secondary" onClick={() => login()}>
                         Start Translating <ArrowRight className="w-4 h-4" />
                     </Button>
                     <Button variant="outline">
