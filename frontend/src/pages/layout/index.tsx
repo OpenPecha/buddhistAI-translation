@@ -4,7 +4,7 @@ import { useAuth } from "@/auth/use-auth-hook";
 import { useTokenExpiration } from "@/hooks/useTokenExpiration";
 import Footer from "./Footbar";
 import Navbar from "./Navbar";
-import { Welcome } from "@/components/welcome";
+import Home from "@/Home";
 
 export const LoadingFallback: React.FC = () => (
   <div className="flex items-center justify-center min-h-screen bg-gray-50">
@@ -54,9 +54,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
     if (isAuthenticated) {
       getToken();
     }
-    return () => {};
+    return () => { };
   }, []);
-  if (!isAuthenticated) return <Welcome />;
+  if (!isAuthenticated) return <Home />;
 
   return (
     <SuspenceWithLoadingFallback>

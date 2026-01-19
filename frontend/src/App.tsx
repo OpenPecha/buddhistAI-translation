@@ -15,6 +15,7 @@ import { TooltipProvider } from "./components/ui/tooltip";
 import "./i18n";
 import { useTranslation } from "react-i18next";
 import { EditorProvider } from "@/contexts/EditorContext";
+import { ThemeProvider } from "./contexts/ThemeProvider";
 const ProjectList = lazy(() => import("./components/Dashboard/ProjectList"));
 const QuillVersionProvider = lazy(() =>
   import("./contexts/VersionContext").then((module) => ({
@@ -44,9 +45,8 @@ function AppContent() {
   const currentLanguage = i18n.language;
   return (
     <div
-      className={`flex s flex-col h-full ${
-        currentLanguage === "bo" && "font-monlam-2 !text-md"
-      }`}
+      className={`flex flex-col h-full ${currentLanguage === "bo" && "font-monlam-2 !text-md"
+        }`}
     >
       <Routes>
         <Route
@@ -92,16 +92,18 @@ function AppContent() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <UserbackProvider>
-          <TooltipProvider>
-            <AppContent />
-          </TooltipProvider>
-        </UserbackProvider>
-      </AuthProvider>
-      <Toaster />
-    </QueryClientProvider>
+    <ThemeProvider defaultTheme="dark" storageKey="theme-preference">
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <UserbackProvider>
+            <TooltipProvider>
+              <AppContent />
+            </TooltipProvider>
+          </UserbackProvider>
+        </AuthProvider>
+        <Toaster />
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }
 
