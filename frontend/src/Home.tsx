@@ -15,7 +15,7 @@ const Home = () => {
     }
 
     return (
-        <div className="min-h-screen dark:bg-[#191919] dark:text-white dark:selection:bg-white/20 overflow-x-hidden font-sans">
+        <div className="min-h-screen dark:text-white dark:selection:bg-cyan-500/40 overflow-x-hidden font-sans">
             <Navbar />
             <main className="flex flex-col p-10 items-left space-y-10 justify-center text-left">
                 <div>

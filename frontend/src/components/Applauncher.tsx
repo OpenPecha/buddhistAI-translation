@@ -16,36 +16,27 @@ interface Tool {
 
 const AppLauncher: React.FC = () => {
   const [open, setOpen] = useState(false);
-
   const { data: toolList, isLoading } = useFetchTools();
-
-  const handleToolClick = () => {
-    setOpen(false);
-  };
-
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
           variant="ghost"
-          className="p-2 cursor-pointer rounded-full hover:bg-gray-100 dark:hover:bg-neutral-900/40 transition-colors"
-          aria-label="Open Apps"
         >
           <BsFillGrid3X3GapFill size={20} />
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-72 p-2 bg-white dark:bg-[var(--background)] rounded-xl shadow-xl border border-neutral-200 dark:border-neutral-700"
         align="end"
       >
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-3">
           {isLoading && <div>Loading...</div>}
           {toolList?.map((app: Tool) => (
             <a
               key={app.link}
               href={app.link}
-              className="flex flex-col items-center justify-center p-3 rounded-lg hover:bg-gray-100 transition-colors"
-              onClick={handleToolClick}
+              target="_blank"
+              className="flex flex-col dark:hover:bg-zinc-800 hover:bg-zinc-100 p-2 rounded-md items-center justify-center font-sans"
             >
               <img src={app.icon} alt={app.name} className="w-6 h-6" />
               <span className="text-xs text-center">{app.name}</span>

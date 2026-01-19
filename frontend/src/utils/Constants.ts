@@ -55,16 +55,13 @@ export const i18n_languages: LanguageType[] = [
 	{
 		code: "bo",
 		name: "བོད་ཡིག",
-		flag: "🏔️",
 	},
 	{
 		code: "en",
 		name: "English",
-		flag: "🇺🇸",
 	},
 	{
 		code: "zh",
 		name: "中文",
-		flag: "🇨🇳",
 	},
 ];

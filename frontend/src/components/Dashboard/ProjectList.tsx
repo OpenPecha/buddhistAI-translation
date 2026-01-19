@@ -63,9 +63,8 @@ const ProjectList = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                className={`hover:bg-neutral-300/50 capitalize ${
-                  ftv ? "bg-neutral-300/50" : ""
-                }`}
+                className={`hover:bg-neutral-300/50 capitalize ${ftv ? "bg-neutral-300/50" : ""
+                  }`}
                 onClick={handleViewAllPublicProjects}
               >
                 {t(`project.gallery`)} <ArrowUpDownIcon size={16} />
@@ -360,11 +359,10 @@ const ProjectsSection = ({
             </div>
           )}
           <div
-            className={`${
-              view === "grid"
-                ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
-                : "flex flex-col gap-1"
-            }`}
+            className={`${view === "grid"
+              ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+              : "flex flex-col gap-1"
+              }`}
           >
             {category.projects.map((project) => (
               <EachProject
