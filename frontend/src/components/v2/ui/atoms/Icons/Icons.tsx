@@ -1,0 +1,20 @@
+interface ArrowIconProps {
+    className?: string;
+}
+
+export const ArrowUpRight = ({ className = "" }: ArrowIconProps) => {
+    return (
+        <svg
+            stroke="currentColor"
+            fill="currentColor"
+            strokeWidth="0"
+            viewBox="0 0 24 24"
+            className={className}
+            height="1em"
+            width="1em"
+            xmlns="http://www.w3.org/2000/svg"
+        >
+            <path d="M18.25 15.5a.75.75 0 0 1-.75-.75V7.56L7.28 17.78a.749.749 0 0 1-1.275-.326.749.749 0 0 1 .215-.734L16.44 6.5H9.25a.75.75 0 0 1 0-1.5h9a.75.75 0 0 1 .75.75v9a.75.75 0 0 1-.75.75Z"></path>
+        </svg>
+    )
+}
