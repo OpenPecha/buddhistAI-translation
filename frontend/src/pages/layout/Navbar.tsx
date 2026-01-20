@@ -19,8 +19,8 @@ const Navbar = () => {
 							<img src={DocIcon} alt="logo" className='w-8 h-8' />
 						</div>
 						<div className='flex flex-col font-sans'>
-							<span className="font-semibold text-lg tracking-tight leading-none">Buddhist AI Studio</span>
-							<span className='text-xs text-zinc-400 leading-none'>Translation Editor</span>
+							<span className="hidden md:block font-semibold text-lg tracking-tight leading-none">Buddhist AI Studio</span>
+							<span className='hidden md:block text-xs text-zinc-400 leading-none'>Translation Editor</span>
 						</div>
 					</div>
 				</Link>

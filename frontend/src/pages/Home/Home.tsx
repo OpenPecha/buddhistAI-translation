@@ -1,11 +1,11 @@
-import Window from './components/v2/window/Window';
-import { Button } from './components/ui/button';
-import FeatureCard from './components/v2/ui/molecules/cards/feature-card/FeatureCard';
-import Footer from './pages/layout/Footbar';
+import Window from '../../components/v2/window/Window';
+import { Button } from '../../components/ui/button';
+import FeatureCard from '../../components/v2/ui/molecules/cards/feature-card/FeatureCard';
+import Footer from '../layout/Footbar';
 import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '@/auth/use-auth-hook';
-import Navbar from './components/v2/ui/molecules/navbar/Navbar';
-import { ArrowUpRight } from './components/v2/ui/atoms/Icons/Icons';
+import Navbar from '../../components/v2/ui/molecules/navbar/Navbar';
+import { ArrowUpRight } from '../../components/v2/ui/atoms/Icons/Icons';
 
 const Home = () => {
     const { isAuthenticated, login } = useAuth();

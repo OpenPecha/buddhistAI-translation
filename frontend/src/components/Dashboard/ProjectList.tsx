@@ -33,6 +33,15 @@ import {
 import { INITIAL_PROJECT_LIMIT } from "@/config";
 import { useFetchProjects } from "@/api/queries/projects";
 
+
+interface ProjectsSectionProps {
+  categorizedProjects: CategorizedProject[];
+  uniqueOwners: string[];
+  selectedOwner: string | null;
+  onOwnerChange: (ownerId: string | null) => void;
+  isLoading: boolean;
+}
+
 const ProjectList = () => {
   const [showGalleryButton, setShowGalleryButton] = useState(false);
   const { t } = useTranslation();
@@ -50,37 +59,28 @@ const ProjectList = () => {
 
   return (
     <div className="flex flex-1 flex-col h-[100vh] overflow-y-scroll">
-      <div
-        className="pt-10 px-6  bg-neutral-400/10 mx-auto w-full"
-        style={{ minHeight: ftv ? "fit-content" : "auto" }}
-      >
-        <div className="max-w-5xl  mx-auto ">
-          <div className="flex items-center justify-between">
-            <h1 className="text-lg font-medium mb-6">
+      <div className="p-10 bg-neutral-400/10 mx-auto border w-full">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex items-center p-2 justify-between">
+            <h1 className="text-lg font-medium ">
               {t(`projects.startNewProject`)}
             </h1>
             {showGalleryButton && (
               <Button
                 variant="ghost"
                 size="sm"
-                className={`hover:bg-neutral-300/50 capitalize ${ftv ? "bg-neutral-300/50" : ""
-                  }`}
                 onClick={handleViewAllPublicProjects}
               >
                 {t(`project.gallery`)} <ArrowUpDownIcon size={16} />
               </Button>
             )}
           </div>
-
-          <div className={`flex items-stretch gap-6 mb-24 `}>
-            {!ftv && <DocumentCreateModal />}
-            <div className="flex flex-1 gap-6 flex-wrap">
-              {ftv && <DocumentCreateModal />}
-              <PublicProjects
-                showAll={!!ftv}
-                setShowGalleryButton={setShowGalleryButton}
-              />
-            </div>
+          <div className="flex flex-1 gap-2 w-full">
+            <DocumentCreateModal />
+            <PublicProjects
+              showAll={!!ftv}
+              setShowGalleryButton={setShowGalleryButton}
+            />
           </div>
         </div>
       </div>
@@ -88,14 +88,6 @@ const ProjectList = () => {
     </div>
   );
 };
-
-interface ProjectsSectionProps {
-  categorizedProjects: CategorizedProject[];
-  uniqueOwners: string[];
-  selectedOwner: string | null;
-  onOwnerChange: (ownerId: string | null) => void;
-  isLoading: boolean;
-}
 
 const ProjectsListSection = () => {
   const [page, setPage] = useState(1);

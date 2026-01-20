@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import OpenPecha from "@/assets/icon.png";
-import { HelpCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 
