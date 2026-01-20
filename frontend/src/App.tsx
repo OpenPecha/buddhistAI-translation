@@ -17,7 +17,8 @@ import { useTranslation } from "react-i18next";
 import { EditorProvider } from "@/contexts/EditorContext";
 import { ThemeProvider } from "./contexts/ThemeProvider";
 import Home from "./pages/Home/Home";
-const ProjectList = lazy(() => import("./components/Dashboard/ProjectList"));
+const Dashboard = lazy(() => import("./components/Dashboard/Dashboard"));
+
 const QuillVersionProvider = lazy(() =>
   import("./contexts/VersionContext").then((module) => ({
     default: module.QuillVersionProvider,
@@ -55,7 +56,7 @@ function AppContent() {
           path="/dashboard"
           element={
             <Layout>
-              <ProjectList />
+              <Dashboard />
             </Layout>
           }
         />

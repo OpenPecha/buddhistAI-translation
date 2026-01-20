@@ -403,8 +403,9 @@
     "insertTranslationAtLine": "Insert translation at line position"
   },
   "project": {
-    "startFromScratch": "Start from scratch",
+    "startFromScratch": "Start from a blank, Importing from File Document or OpenPecha Repository",
     "blank": "Blank",
+    "CreateDocument": "Create Document",
     "gallery": "Gallery",
     "myProjects": "My Projects",
     "lastModified": "Last modified",

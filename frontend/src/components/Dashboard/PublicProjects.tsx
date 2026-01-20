@@ -1,6 +1,6 @@
 import { AlertCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useFetchPublicDocuments } from "@/api/queries/documents";
 import { ProjectLoader } from "../v2/ui/atoms/Icons/Loaders/ProjectLoader";
 import { SearchBar } from "./Components/SearchBar/SearchBar";
@@ -31,9 +31,11 @@ const PublicProjects = ({ showAll = false, setShowGalleryButton }: PublicProject
 
   const hasData = projects.length > 0;
 
-  if (setShowGalleryButton) {
-    setShowGalleryButton(hasData);
-  }
+  useEffect(() => {
+    if (setShowGalleryButton) {
+      setShowGalleryButton(hasData);
+    }
+  }, [hasData, setShowGalleryButton]);
 
   const handleSearch = (value: string) => {
     setSearchQuery(value);
