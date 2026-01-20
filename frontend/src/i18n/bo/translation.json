@@ -392,6 +392,7 @@
   "translation.generateGlossary": "མིང་ཚིག་ཐོ་བཟོ་བ།",
   "translation.copyToClipboard": "འདྲ་བཤུས་ས་སྟེང་དུ་བཤུས།",
   "translation.insertTranslationAtLine": "སྒྱུར་བ་ཐིག་གི་གནས་སུ་འཇུག",
+  "project.Projects": "ལས་གཞི།",
   "project.startFromScratch": "གསར་པ་ནས་འགོ་ཚུགས།",
   "project.blank": "སྟོང་པའི་ཡིག་ཆ།",
   "project.CreateDocument": "ཡིག་ཆ་བཟོ་བ།",

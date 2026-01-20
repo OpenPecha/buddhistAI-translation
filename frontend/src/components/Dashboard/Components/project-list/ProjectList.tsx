@@ -1,10 +1,5 @@
-import { useState, useMemo, useEffect } from "react";
-import { Project } from "@/api/project";
-import { useAuth } from "@/auth/use-auth-hook";
+import { useState, useEffect } from "react";
 import { useSearchStore } from "@/stores/searchStore";
-import {
-    categorizeProjectsByTime,
-} from "@/lib/dateUtils";
 import { INITIAL_PROJECT_LIMIT } from "@/config";
 import { useFetchProjects } from "@/api/queries/projects";
 import { ProjectsSection } from "../project-section/ProjectSection";
@@ -16,9 +11,7 @@ const ProjectsListSection = () => {
         "ownedByAnyone"
     );
     const { searchQuery } = useSearchStore();
-    const { currentUser } = useAuth();
 
-    const uniqueOwners = ["ownedByMe", "ownedByAnyone", "notOwnedByMe"];
     const itemsPerPage = INITIAL_PROJECT_LIMIT;
 
     useEffect(() => {
@@ -36,21 +29,6 @@ const ProjectsListSection = () => {
 
     const totalPages = pagination?.totalPages || 1;
 
-    const filteredProjects = useMemo(() => {
-        let filtered = projects;
-        if (selectedOwner === "ownedByMe")
-            filtered = projects.filter(
-                (project: Project) => project.owner?.id === currentUser?.id
-            );
-        else if (selectedOwner === "notOwnedByMe")
-            filtered = projects.filter(
-                (project: Project) => project.owner?.id !== currentUser?.id
-            );
-        return filtered;
-    }, [projects, selectedOwner, currentUser?.id]);
-
-    const categorizedProjects = categorizeProjectsByTime(filteredProjects);
-
     const handlePageChange = (newPage: number) => {
         setPage(newPage);
         window.scrollTo({ top: 0, behavior: "smooth" });
@@ -66,13 +44,12 @@ const ProjectsListSection = () => {
             )}
             <div className="max-w-5xl mx-auto mb-2">
                 <ProjectsSection
-                    categorizedProjects={categorizedProjects}
-                    uniqueOwners={uniqueOwners}
+                    projects={projects}
                     selectedOwner={selectedOwner}
                     onOwnerChange={setSelectedOwner}
                     isLoading={showLoader}
                 />
-                {filteredProjects?.length === 0 && !showLoader && (
+                {projects?.length === 0 && !showLoader && (
                     <div className="text-center py-8">
                         <p>You don't have any projects yet. Create one to get started!</p>
                     </div>
