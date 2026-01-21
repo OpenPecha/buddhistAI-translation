@@ -46,9 +46,8 @@ export function BaseModal({
 				{trigger}
 				{open && (
 					<div
-						className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
+						className="fixed inset-0 bg-black/50  flex items-center justify-center p-4"
 						onClick={(e) => {
-							// Only close if clicking the backdrop itself
 							if (e.target === e.currentTarget) {
 								handleClose();
 							}
@@ -56,14 +55,14 @@ export function BaseModal({
 					>
 						<div
 							className={cn(
-								"bg-neutral-50 dark:bg-neutral-800 rounded-xl shadow-2xl w-full border border-gray-200 max-h-[90vh] overflow-hidden",
+								"bg-neutral-50 dark:bg-neutral-900 rounded-sm w-full max-h-[90vh]",
 								sizeClasses[size],
 								className,
 							)}
 							onClick={(e) => e.stopPropagation()}
 						>
-							<div className="flex items-center justify-between p-6 border-b border-gray-100 bg-neutral-50 dark:bg-neutral-800">
-								<h2 className="text-xl font-semibold text-neutral-800 dark:text-neutral-200">
+							<div className="flex items-center justify-between p-4 bg-neutral-100  dark:bg-neutral-800">
+								<h2 className="text-lg font-medium text-neutral-600 dark:text-neutral-200">
 									{title}
 								</h2>
 								<Button
@@ -75,7 +74,7 @@ export function BaseModal({
 									<X className="h-4 w-4 text-neutral-500 dark:text-neutral-400" />
 								</Button>
 							</div>
-							<div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
+							<div className="p-4">
 								{children}
 							</div>
 						</div>
@@ -98,9 +97,9 @@ export function BaseModal({
 					className,
 				)}
 			>
-				<DialogHeader className="pb-4 border-b border-gray-100 bg-gray-50/50 -m-6 p-6">
+				<DialogHeader className="pb-4 border-b border-gray-100 dark:border-neutral-700 bg-gray-50/50 -m-6 p-6">
 					<DialogTitle className="text-xl font-semibold text-gray-800">
-						{title}
+						{title}fdfd
 					</DialogTitle>
 				</DialogHeader>
 				<div className="flex-1 h-[80vh] p-6">{children}</div>

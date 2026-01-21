@@ -3,11 +3,11 @@ import { cn } from "@/lib/utils";
 // Helper function for step indicator styling
 function getStepIndicatorClass(step: number, currentStep: number): string {
   if (step === currentStep) {
-    return "bg-secondary-600 text-white border-secondary-600 shadow-lg dark:shadow-sm shadow-secondary-200";
+    return "bg-green-100 text-green-500 border-green-600 dark:bg-green-900 dark:text-green-400 dark:border-green-600";
   } else if (step < currentStep) {
-    return "bg-green-600 text-white border-green-600 shadow-lg dark:shadow-sm shadow-green-200";
+    return "bg-green-600 text-white border-green-600 dark:bg-green-900 dark:text-green-400 dark:border-green-600";
   } else {
-    return "bg-white text-gray-400 border-gray-300";
+    return "bg-white text-gray-500 border-gray-300 dark:bg-neutral-800 dark:text-neutral-400 dark:border-neutral-700";
   }
 }
 
@@ -20,12 +20,12 @@ export function StepIndicator({
   readonly totalSteps: number;
 }) {
   return (
-    <div className="flex items-center justify-center mb-8">
+    <div className="flex items-center justify-center">
       {Array.from({ length: totalSteps }, (_, index) => (
         <div key={index} className="flex items-center">
           <div
             className={cn(
-              "w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300 border-2",
+              "w-8 h-8 rounded-full flex items-center justify-center text-xs  transition-all duration-300 border-2",
               getStepIndicatorClass(index + 1, currentStep)
             )}
           >
@@ -44,8 +44,8 @@ export function StepIndicator({
           {index < totalSteps - 1 && (
             <div
               className={cn(
-                "w-12 h-0.5 mx-2 transition-colors duration-300",
-                index + 1 < currentStep ? "bg-green-500" : "bg-gray-300"
+                "w-10 h-0.5  transition-colors duration-300",
+                index + 1 < currentStep ? "bg-green-500" : "bg-gray-300 dark:bg-neutral-700 dark:border-neutral-600"
               )}
             />
           )}
