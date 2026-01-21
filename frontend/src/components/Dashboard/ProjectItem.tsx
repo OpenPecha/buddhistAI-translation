@@ -12,40 +12,28 @@ import { BiRename } from "react-icons/bi";
 import { useTranslation } from "react-i18next";
 import { MdPublic } from "react-icons/md";
 
-interface ProjectItemProps {
-  title: string;
-  subtitle?: string;
-  date: string;
-  owner?: string;
-  hasDocument?: boolean;
-  hasSharedUsers?: boolean;
-  hasPermission?: boolean;
-  updateDocument: (e: React.MouseEvent) => void;
-  deleteDocument: (e: React.MouseEvent) => void;
-  shareDocument: (e: React.MouseEvent) => void;
-  view: "grid" | "list";
-  status?: string;
-  documentCount?: number;
-  url?: string;
-  isPublic?: boolean;
-}
-
-const ProjectItem: React.FC<ProjectItemProps> = ({
-  title,
-  subtitle,
-  date,
-  owner,
-  hasDocument = false,
-  hasSharedUsers = false,
-  hasPermission = false,
-  updateDocument,
-  deleteDocument,
-  shareDocument,
-  view,
-  documentCount = 0,
+const ProjectItem = ({
+  project,
+  currentUserId,
+  formattedDate,
   url,
-  isPublic = false,
-}) => {
+  view,
+  onUpdate,
+  onDelete,
+  onShare,
+}: any) => {
+  const { t } = useTranslation();
+  const owner =
+    project.ownerId === currentUserId
+      ? t("projects.me")
+      : project.owner?.username ?? "";
+
+  const hasSharedUsers = false;
+  const hasPermission = project.ownerId === currentUserId;
+  const isPublic = project.isPublic;
+  const updateDocument = onUpdate;
+  const deleteDocument = onDelete;
+  const shareDocument = onShare;
   if (view === "list") {
     return (
       <div className="flex items-center py-2 px-1 border-b border-gray-200 dark:border-neutral-700 hover:bg-secondary-50 hover:dark:bg-neutral-900/40 transition-all rounded-md">
@@ -56,17 +44,15 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
         <div className="flex-grow  w-fit md:w-auto">
           <div className="flex items-center">
             <span className="inline-block text-sm text-foreground capitalize min-w-0 max-w-xs overflow-hidden truncate">
-              {title}
+              {project.name}
             </span>
 
-            {hasDocument && (
+            {project.roots.length > 0 && (
               <span className="ml-2 p-1 flex items-center">
                 <FileText size={16} className="text-gray-500" />
-                {documentCount > 0 && (
-                  <span className="ml-1 text-xs text-gray-500">
-                    {documentCount}
-                  </span>
-                )}
+                <span className="ml-1 text-xs text-gray-500">
+                  {project.roots.length}
+                </span>
               </span>
             )}
             {hasSharedUsers && (
@@ -75,16 +61,16 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
               </span>
             )}
           </div>
-          {subtitle && (
+          {project.roots.length > 0 && (
             <p className="text-xs text-neutral-500 dark:text-neutral-400 truncate leading-[normal]">
-              {subtitle}
+              {project.roots[0].name}
             </p>
           )}
           {/* Mobile: Show owner and date below title */}
           <div className="flex items-center gap-4 mt-1 text-xs text-neutral-500 dark:text-neutral-400 sm:hidden">
             <span>{owner ?? "—"}</span>
             <span>•</span>
-            <span>{date}</span>
+            <span>{formattedDate}</span>
           </div>
         </div>
 
@@ -97,7 +83,7 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
         </div>
 
         <div className="hidden sm:flex flex-shrink-0 text-sm text-neutral-500 dark:text-neutral-400 w-36">
-          {date}
+          {formattedDate}
         </div>
 
         <div className="flex-shrink-0 ml-2 w-[52px] flex justify-center">
@@ -118,27 +104,25 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
       <div className="space-y-2">
         <div className="flex items-center">
           <div className="text-large truncate capitalize font-semibold tracking-wider">
-            {title}
+            {project.name}
           </div>
         </div>
-        {subtitle && (
-          <p className="text-xs text-gray-500 truncate">{subtitle}</p>
+        {project.roots.length > 0 && (
+          <p className="text-xs text-gray-500 truncate">{project.roots[0].name}</p>
         )}
 
         <div className="flex items-center mt-2 justify-between">
           <div className="flex item-center">
-            {hasDocument && (
+            {project.roots.length > 0 && (
               <div className="bg-secondary-100 p-2 rounded-full flex gap-1 items-center mx-1">
                 <FileText size={16} className="text-secondary-500" />
-                {documentCount > 0 && (
-                  <span className=" text-xs font-medium text-secondary-700">
-                    {documentCount}
-                  </span>
-                )}
+                <span className=" text-xs font-medium text-secondary-700">
+                  {project.roots.length}
+                </span>
               </div>
             )}
             <div className="flex items-center text-xs text-gray-500">
-              <span className="mr-2">{date}</span>
+              <span className="mr-2">{formattedDate}</span>
               {owner && <span>· {owner}</span>}
               {isPublic && (
                 <MdPublic
@@ -180,6 +164,7 @@ function ProjectItemDropdownMenu({
   readonly shareDocument: (e: React.MouseEvent) => void;
   readonly url?: string;
 }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const handleOpenClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -202,7 +187,7 @@ function ProjectItemDropdownMenu({
     }
     setOpen(false);
   };
-  const { t } = useTranslation();
+
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>

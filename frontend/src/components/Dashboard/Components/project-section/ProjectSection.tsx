@@ -13,7 +13,6 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown, Grid, List } from "lucide-react";
-import { FaSpinner } from "react-icons/fa";
 import { Project } from "@/api/project";
 import { useAuth } from "@/auth/use-auth-hook";
 
@@ -21,14 +20,12 @@ interface ProjectsSectionProps {
     projects: Project[];
     selectedOwner: string | null;
     onOwnerChange: (ownerId: string | null) => void;
-    isLoading: boolean;
 }
 
 export const ProjectsSection = ({
     projects,
     selectedOwner,
     onOwnerChange,
-    isLoading,
 }: ProjectsSectionProps) => {
     const { t } = useTranslation();
     const { currentUser } = useAuth();
@@ -50,10 +47,6 @@ export const ProjectsSection = ({
 
     const categorizedProjects = categorizeProjectsByTime(filteredProjects);
 
-    const selectedOwnerName = selectedOwner
-        ? uniqueOwners.find((owner) => owner === selectedOwner)
-        : "All";
-
     function toggleList() {
         setView((prev) => (prev === "list" ? "grid" : "list"));
     }
@@ -64,7 +57,7 @@ export const ProjectsSection = ({
                 <div className="flex-grow min-w-0">
                     {t(`project.Projects`)}
                 </div>
-                <div className="flex items-center justify-between min-w-sm">
+                <div className="flex items-center gap-x-2">
                     <div className="hidden sm:flex flex-shrink-0  justify-end">
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -73,7 +66,7 @@ export const ProjectsSection = ({
                                     size="sm"
                                     className="h-8 text-sm gap-2 w-fit"
                                 >
-                                    {t(`project.${selectedOwnerName}`)}
+                                    {t(`project.${selectedOwner}`)}
                                     <ChevronDown size={16} />
                                 </Button>
                             </DropdownMenuTrigger>
@@ -89,13 +82,6 @@ export const ProjectsSection = ({
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </div>
-                    {view === "list" && (
-                        <div className="hidden sm:flex flex-shrink-0 items-center gap-2">
-                            <span className="text-sm text-neutral-600 dark:text-neutral-300">
-                                {t(`project.lastModified`)}
-                            </span>
-                        </div>
-                    )}
                     <Button
                         variant="outline"
                         size="sm"
@@ -108,13 +94,8 @@ export const ProjectsSection = ({
                 </div>
             </div>
 
-            {isLoading && (
-                <FaSpinner size="30" className="animate-spin w-full mb-2" />
-            )}
-
             {categorizedProjects.map((category) => (
                 <div key={category.category} className="mb-8">
-
                     <div className=" text-sm text-neutral-600 dark:text-neutral-300 mb-3 px-1">
                         {t(`${getCategoryTitle(category.category)}`)}
                     </div>

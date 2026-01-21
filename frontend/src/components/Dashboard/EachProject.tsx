@@ -33,7 +33,6 @@ export default function EachProject({
   const deleteProjectMutation = useMutation({
     mutationFn: (id: string) => deleteProject(id),
     onSuccess: () => {
-      // Invalidate and refetch projects query
       queryClient.invalidateQueries({ queryKey: ["projects"] });
     },
     onError: (error) => {
@@ -64,7 +63,6 @@ export default function EachProject({
   const updateProjectMutation = useMutation({
     mutationFn: ({ id, data }: UpdateProjectParams) => updateProject(id, data),
     onSuccess: () => {
-      // Invalidate and refetch projects query
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       setShowEditModal(false);
     },
@@ -82,13 +80,7 @@ export default function EachProject({
       },
     });
   };
-  // Check if user has permission to edit the project
-  const hasPermission =
-    project.ownerId === currentUser?.id ||
-    project.permissions?.some(
-      (permission) =>
-        permission.userId === currentUser?.id && permission.canWrite === true
-    );
+
   const editOpen = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -101,44 +93,27 @@ export default function EachProject({
     setShowShareModal(true);
   };
 
-  const documentCount = project.roots?.length || 0;
   const url =
     project.roots && project.roots.length > 0
       ? `/documents/${project.roots[0]?.id}`
       : "#";
 
-  // Format date based on time category or fallback to relative time
   const formattedDate = timeCategory
     ? formatDateByCategory(project.updatedAt, timeCategory)
     : formatTimeAgo(project.updatedAt);
 
   return (
     <>
-      <Link to={url} className=" ">
+      <Link to={url}>
         <ProjectItem
-          title={project.name}
-          subtitle={
-            project.roots && project.roots.length > 0
-              ? project.roots[0].name
-              : t("projects.noRootDocument")
-          }
-          date={formattedDate}
-          hasDocument={project.roots ? project.roots.length > 0 : false}
-          documentCount={documentCount}
-          hasSharedUsers={false}
-          owner={
-            project.ownerId === currentUser?.id
-              ? t("projects.me")
-              : project.owner?.username ?? ""
-          }
-          hasPermission={hasPermission}
-          updateDocument={editOpen}
-          deleteDocument={handleDelete}
-          shareDocument={shareOpen}
-          view={view}
-          status={project.status}
+          project={project}
+          currentUserId={currentUser?.id}
+          formattedDate={formattedDate}
           url={url}
-          isPublic={project.isPublic}
+          view={view}
+          onUpdate={editOpen}
+          onDelete={handleDelete}
+          onShare={shareOpen}
         />
       </Link>
 

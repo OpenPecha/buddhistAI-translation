@@ -47,7 +47,6 @@ const ProjectsListSection = () => {
                     projects={projects}
                     selectedOwner={selectedOwner}
                     onOwnerChange={setSelectedOwner}
-                    isLoading={showLoader}
                 />
                 {projects?.length === 0 && !showLoader && (
                     <div className="text-center py-8">
