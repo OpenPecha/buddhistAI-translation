@@ -113,6 +113,7 @@
   "projects.createNewProject": "创建新项目",
   "projects.createProject": "创建项目",
   "projects.enterProjectName": "输入项目名称",
+  "project.rename": "重命名",
   "projects.failedToCreateProject": "创建项目失败",
   "projects.noProjects": "未找到项目",
   "projects.projectDescription": "项目描述",

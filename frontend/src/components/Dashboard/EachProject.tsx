@@ -33,7 +33,10 @@ export default function EachProject({
   const deleteProjectMutation = useMutation({
     mutationFn: (id: string) => deleteProject(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["projects"] });
+      queryClient.invalidateQueries({
+        queryKey: ["projects"],
+        refetchType: "all"
+      });
     },
     onError: (error) => {
       console.error("Error deleting project:", error);
@@ -63,7 +66,10 @@ export default function EachProject({
   const updateProjectMutation = useMutation({
     mutationFn: ({ id, data }: UpdateProjectParams) => updateProject(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["projects"] });
+      queryClient.invalidateQueries({
+        queryKey: ["projects"],
+        refetchType: "all"
+      });
       setShowEditModal(false);
     },
     onError: (error) => {
@@ -117,14 +123,12 @@ export default function EachProject({
         />
       </Link>
 
-      {showEditModal && (
-        <EditProjectModal
-          project={project}
-          onClose={() => setShowEditModal(false)}
-          onUpdate={(name, identifier) => handleUpdate(name, identifier)}
-        />
-      )}
-
+      <EditProjectModal
+        open={showEditModal}
+        project={project}
+        onOpenChange={setShowEditModal}
+        onUpdate={handleUpdate}
+      />
       {showShareModal && (
         <ShareModal
           projectId={project.id}
