@@ -95,15 +95,15 @@ export const ProjectsSection = ({
             </div>
 
             {categorizedProjects.map((category) => (
-                <div key={category.category} className="mb-8">
+                <div key={category.category} className="mb-4">
                     <div className=" text-sm text-neutral-600 dark:text-neutral-300 mb-3 px-1">
                         {t(`${getCategoryTitle(category.category)}`)}
                     </div>
 
                     <div
                         className={`${view === "grid"
-                            ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
-                            : "flex flex-col gap-1"
+                            ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2"
+                            : "flex flex-col"
                             }`}
                     >
                         {category.projects.map((project) => (
