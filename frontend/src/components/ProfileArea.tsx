@@ -1,25 +1,60 @@
+import React from "react";
 import AvatarWrapper from "./ui/custom-avatar";
 import { useAuth } from "@/auth/use-auth-hook";
 
-function ProfileArea() {
-  const { currentUser } = useAuth();
-  return (
-    <div className="flex items-center gap-2 font-sans p-2">
-      <AvatarWrapper
-        imageUrl={currentUser?.picture}
-        name={currentUser?.name}
-        size={36}
-      />
-      <div className="hidden sm:flex flex-col items-start">
-        <span className="text-sm font-medium text-neutral-900 dark:text-zinc-100">
-          {currentUser?.name}
-        </span>
-        <span className="text-xs text-neutral-500 dark:text-zinc-400">
-          {currentUser?.email}
-        </span>
-      </div>
-    </div>
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
+import { IoIosLogOut } from "react-icons/io";
+
+function ProfileArea() {
+  const { currentUser, logout } = useAuth();
+
+  function handleLogout(e: React.MouseEvent<HTMLButtonElement>) {
+    e.preventDefault();
+    logout();
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          className="flex w-full items-center font-sans rounded-md transition"
+        >
+          <AvatarWrapper
+            imageUrl={currentUser?.picture}
+            name={currentUser?.name}
+            size={36}
+          />
+        </button>
+      </DropdownMenuTrigger>
+
+      <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuLabel className="flex flex-col">
+          <span className="text-sm font-medium">{currentUser?.name}</span>
+          <span className="text-xs text-neutral-500">{currentUser?.email}</span>
+        </DropdownMenuLabel>
+
+        <DropdownMenuSeparator />
+
+        <DropdownMenuItem asChild>
+          <button
+            className="flex w-full items-center gap-2"
+            onClick={handleLogout}
+          >
+            <IoIosLogOut className="h-4 w-4" />
+            Logout
+          </button>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 

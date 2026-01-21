@@ -36,7 +36,7 @@ const AppLauncher: React.FC = () => {
               key={app.link}
               href={app.link}
               target="_blank"
-              className="flex flex-col dark:hover:bg-zinc-800 hover:bg-zinc-100 p-2 rounded-md items-center justify-center font-sans"
+              className="flex flex-col dark:hover:bg-zinc-800 hover:bg-zinc-100 p-1 rounded-md items-center justify-center font-sans"
             >
               <img src={app.icon} alt={app.name} className="w-6 h-6" />
               <span className="text-xs text-center">{app.name}</span>

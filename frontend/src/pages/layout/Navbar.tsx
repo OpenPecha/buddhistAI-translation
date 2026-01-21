@@ -5,7 +5,6 @@ import DocIcon from "@/assets/logo.svg";
 import ProfileArea from "@/components/ProfileArea";
 import { ModeToggle } from "@/components/v2/ui/molecules/mode-toggle/ModeToggle";
 import { LanguageToggle } from "@/components/v2/ui/molecules/language-toggle/LanguageToggle";
-import AuthLogout from "@/components/v2/ui/molecules/auth-logout/Logout";
 
 const Navbar = () => {
 	return (
@@ -28,10 +27,9 @@ const Navbar = () => {
 			<SearchInput />
 			<div className="flex items-center gap-2">
 				<AppLauncher />
-				<ProfileArea />
 				<LanguageToggle />
 				<ModeToggle />
-				<AuthLogout />
+				<ProfileArea />
 			</div>
 		</nav>
 	);
