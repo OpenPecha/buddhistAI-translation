@@ -2,7 +2,7 @@ import { Button } from "./ui/button";
 import { useMutation } from "@tanstack/react-query";
 import { downloadProjectDocuments, server_url } from "@/api/project";
 import { useState, useEffect } from "react";
-import { BookOpen, Download, HelpCircle } from "lucide-react";
+import { Download, HelpCircle } from "lucide-react";
 import { Label } from "./ui/label";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import {
@@ -64,46 +64,46 @@ function ExportButton({
       description: string;
     }[];
   }[] = [
-    {
-      label: t("export.single"),
-      value: "single",
-      formatOptions: [
-        {
-          label: t("export.pageView"),
-          value: "page-view",
-          description: t("export.viewInPageView"),
-        },
-        {
-          label: t("export.pechaTemplate"),
-          value: "single-pecha-templates",
-          description: t("export.useMicrosoftWordToOpenTemplate"),
-        },
-      ],
-    },
-    {
-      label: t("export.withTranslation"),
-      value: "with_translation",
-      formatOptions: [
-        {
-          label: t("export.sideBySide"),
-          value: "side-by-side",
-          img: "/previews/side-by-side.png",
-          description: t("export.sourceAndTranslationInColumns"),
-        },
-        {
-          label: t("export.lineByLine"),
-          value: "line-by-line",
-          img: "/previews/line-by-line.png",
-          description: t("export.alternatingSourceAndTranslationLines"),
-        },
-        {
-          label: t("export.pechaTemplate"),
-          value: "pecha-template",
-          description: t("export.useMicrosoftWordToOpenTemplate"),
-        },
-      ],
-    },
-  ];
+      {
+        label: t("export.single"),
+        value: "single",
+        formatOptions: [
+          {
+            label: t("export.pageView"),
+            value: "page-view",
+            description: t("export.viewInPageView"),
+          },
+          {
+            label: t("export.pechaTemplate"),
+            value: "single-pecha-templates",
+            description: t("export.useMicrosoftWordToOpenTemplate"),
+          },
+        ],
+      },
+      {
+        label: t("export.withTranslation"),
+        value: "with_translation",
+        formatOptions: [
+          {
+            label: t("export.sideBySide"),
+            value: "side-by-side",
+            img: "/previews/side-by-side.png",
+            description: t("export.sourceAndTranslationInColumns"),
+          },
+          {
+            label: t("export.lineByLine"),
+            value: "line-by-line",
+            img: "/previews/line-by-line.png",
+            description: t("export.alternatingSourceAndTranslationLines"),
+          },
+          {
+            label: t("export.pechaTemplate"),
+            value: "pecha-template",
+            description: t("export.useMicrosoftWordToOpenTemplate"),
+          },
+        ],
+      },
+    ];
   // Handle translation selection logic
   useEffect(() => {
     if (translations && translations.length > 0) {
@@ -348,7 +348,7 @@ function ExportButton({
 
   return (
     <TooltipProvider>
-      <div className="flex flex-col w-full gap-2 ">
+      <div className="flex flex-col w-full gap-y-2 ">
         {/* Export Mode Selection */}
         <div className="space-y-2">
           <div className="text-sm font-medium text-neutral-800 dark:text-neutral-100">
@@ -359,10 +359,10 @@ function ExportButton({
             onValueChange={(value) =>
               handleExportModeChange(value as ExportMode)
             }
-            className="space-y-1 gap-2"
+            className="gap-2"
           >
             {ExportModeOptions.map((mode) => (
-              <div key={mode.label} className="flex items-start space-x-3">
+              <div key={mode.label} className="flex space-x-2 items-start">
                 <RadioGroupItem
                   value={mode.value}
                   id={mode.value}
@@ -397,11 +397,10 @@ function ExportButton({
                             }
                           >
                             <SelectTrigger
-                              className={`h-6 text-sm min-w-[250px] max-w-[300px] transition-all duration-200 ${
-                                showTranslationError
-                                  ? "border-red-500 animate-pulse shadow-md shadow-red-200"
-                                  : ""
-                              }`}
+                              className={`h-6 text-sm min-w-[250px] max-w-[300px] transition-all duration-200 ${showTranslationError
+                                ? "border-red-500 animate-pulse shadow-md shadow-red-200"
+                                : ""
+                                }`}
                             >
                               <SelectValue
                                 placeholder={t("export.selectTranslation")}
@@ -515,27 +514,25 @@ function ExportButton({
         {/* MS Word Compatibility Message for Pecha Templates */}
         {(exportFormat === "pecha-template" ||
           exportFormat === "single-pecha-templates") && (
-          <Card className="bg-secondary-50 dark:bg-neutral-800 border-secondary-200 dark:border-neutral-400 !p-3">
-            <CardContent>
-              <div className="flex items-start space-x-2 text-sm text-secondary-800">
-                <HelpCircle className="w-4 h-4 mt-0.5 text-secondary-600" />
-                <div>
-                  <div className="text-secondary-700">
-                    {t(
-                      "export.pechaTemplateExportsAreCompatibleWithMicrosoftWordOnly"
-                    )}
+            <Card className="bg-secondary-50 dark:bg-neutral-800 border-secondary-200 dark:border-neutral-400 !p-3">
+              <CardContent>
+                <div className="flex items-start space-x-2 text-sm text-secondary-800">
+                  <HelpCircle className="w-4 h-4 mt-0.5 text-secondary-600" />
+                  <div>
+                    <div className="text-secondary-700">
+                      {t(
+                        "export.pechaTemplateExportsAreCompatibleWithMicrosoftWordOnly"
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+              </CardContent>
+            </Card>
+          )}
 
-        {/* Preview Card */}
-        <Card className="bg-neutral-50 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-400 !p-2">
-          <CardContent className="capitalize">
+        <div>
+          <div className="capitalize">
             <div className="flex items-center space-x-2 text-sm text-neutral-800 dark:text-neutral-100">
-              <BookOpen className="w-4 h-4" />
               <span>
                 {t("export.selected")}:{" "}
                 {
@@ -552,8 +549,8 @@ function ExportButton({
                 }
               </span>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         <Button
           onClick={exportZip}
