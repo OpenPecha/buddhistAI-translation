@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Dialog,
   DialogContent,
@@ -46,7 +45,7 @@ export function ConfirmationModal({
         </DialogHeader>
         <DialogFooter className="flex gap-2 mt-4">
           <Button
-            variant="outline"
+            variant="ghost"
             onClick={onClose}
             disabled={loading}
             className="flex-1"
@@ -54,7 +53,7 @@ export function ConfirmationModal({
             {cancelText}
           </Button>
           <Button
-            variant="destructive"
+            variant="outline"
             onClick={handleConfirm}
             disabled={loading}
             className="flex-1 cursor-pointer"
