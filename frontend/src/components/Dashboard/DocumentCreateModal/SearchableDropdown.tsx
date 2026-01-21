@@ -78,11 +78,9 @@ export function SearchableDropdown({
 				<Button
 					type="button"
 					variant="outline"
-					className={`w-full justify-between text-left font-normal border-gray-200 hover:border-gray-300 transition-colors ${
-						!selectedOption
-							? "text-neutral-500 dark:text-neutral-400"
-							: "text-neutral-900 dark:text-neutral-300"
-					} ${error ? "border-red-500" : ""} ${isOpen ? "border-neutral-400 dark:border-neutral-700 ring-1 ring-neutral-100 dark:ring-neutral-600" : ""}`}
+					className={`w-full justify-between text-left font-normal border-gray-200 hover:border-gray-300 transition-colors ${!selectedOption
+						? "text-neutral-500 dark:text-neutral-400"
+						: "text-neutral-900 dark:text-neutral-300"}`}
 					onClick={() => !disabled && !loading && setIsOpen(!isOpen)}
 					disabled={disabled || loading}
 				>
@@ -94,22 +92,21 @@ export function SearchableDropdown({
 								: placeholder}
 					</span>
 					<ChevronDown
-						className={`h-4 w-4 transition-transform duration-200 ${
-							isOpen ? "rotate-180" : ""
-						} text-neutral-400`}
+						className={`h-4 w-4 transition-transform duration-200 ${isOpen ? "rotate-180" : ""
+							} text-neutral-400`}
 					/>
 				</Button>
 
 				{isOpen && !disabled && !loading && (
-					<div className="absolute z-50 w-full mt-2 bg-neutral-50 dark:bg-neutral-800 border border-gray-200 rounded-lg shadow-xl max-h-60 overflow-hidden">
-						<div className="p-3 border-b border-neutral-100">
+					<div className="absolute z-50 w-full mt-2 bg-neutral-50 dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-lg max-h-60 overflow-hidden">
+						<div className="p-3 border-b border-neutral-100 dark:border-neutral-700">
 							<div className="relative">
 								<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-neutral-400" />
 								<Input
 									placeholder={`Search ${label}...`}
 									value={searchTerm}
 									onChange={(e) => setSearchTerm(e.target.value)}
-									className="pl-9 text-sm border-neutral-200 focus:border-neutral-400 focus:ring-2 focus:ring-neutral-100"
+									className="pl-9 text-sm"
 									autoFocus
 								/>
 							</div>
@@ -125,11 +122,10 @@ export function SearchableDropdown({
 									<button
 										key={option.value}
 										type="button"
-										className={`w-full text-left px-3 py-2.5 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors border-none bg-transparent ${
-											option.value === value
-												? "text-neutral-800 dark:text-neutral-500"
-												: "text-neutral-800 dark:text-neutral-300"
-										}`}
+										className={`w-full text-left px-3 py-2.5 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors border-none bg-transparent ${option.value === value
+											? "text-neutral-800 dark:text-neutral-500"
+											: "text-neutral-800 dark:text-neutral-300"
+											}`}
 										onClick={() => handleSelect(option.value)}
 									>
 										<div className="truncate font-medium text-sm">

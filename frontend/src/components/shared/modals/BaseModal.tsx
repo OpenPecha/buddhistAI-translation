@@ -46,7 +46,7 @@ export function BaseModal({
 				{trigger}
 				{open && (
 					<div
-						className="fixed inset-0 bg-black/50  flex items-center justify-center p-4"
+						className="fixed inset-0 bg-black/50  flex items-center justify-center"
 						onClick={(e) => {
 							if (e.target === e.currentTarget) {
 								handleClose();
@@ -55,7 +55,7 @@ export function BaseModal({
 					>
 						<div
 							className={cn(
-								"bg-neutral-50 dark:bg-neutral-900 rounded-sm w-full max-h-[90vh]",
+								"bg-neutral-50 dark:bg-neutral-900 rounded-sm w-full",
 								sizeClasses[size],
 								className,
 							)}

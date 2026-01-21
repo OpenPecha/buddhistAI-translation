@@ -42,7 +42,7 @@ export const ModalNavigation = React.memo(() => {
           <Button
             onClick={handleCreateProject}
             disabled={!isFormValid || isCreating}
-            className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400"
+            className="flex items-center space-x-2 bg-green-600 dark:bg-green-700 dark:text-green-100 hover:bg-green-700 disabled:bg-gray-400"
           >
             {isCreating ? (
               <>

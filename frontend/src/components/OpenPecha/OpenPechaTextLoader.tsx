@@ -6,6 +6,7 @@ import { useBdrcSearch, BdrcSearchResult } from "@/hooks/uesBDRC";
 import { Search, AlertCircle, ExternalLink } from "lucide-react";
 import { fetchText } from "@/api/openpecha";
 import { useFetchTexts } from "@/api/queries/openpecha_api";
+import OpenPecha from "@/assets/icon.png";
 
 export function OpenPechaTextLoader({
   projectName,
@@ -32,8 +33,8 @@ export function OpenPechaTextLoader({
   const [selectedText, setSelectedText] = useState<{
     id: string;
     title:
-      | string
-      | { bo?: string; en?: string; [key: string]: string | undefined };
+    | string
+    | { bo?: string; en?: string;[key: string]: string | undefined };
     language: string;
   } | null>(null);
 
@@ -191,11 +192,8 @@ export function OpenPechaTextLoader({
   const renderTitleSearchResults = () => {
     if (isLoadingTitleSearch) {
       return (
-        <div className="w-full bg-white border border-gray-300 rounded-md shadow-lg p-4">
-          <div className="px-4 py-2 bg-gray-50 border-b border-gray-200 -mx-4 -mt-4 mb-4">
-            <h3 className="text-sm font-semibold text-gray-700">OpenPecha</h3>
-          </div>
-          <div className="flex items-center space-x-2 text-sm text-blue-600">
+        <div className="w-full bg-white border border-gray-300 dark:border-neutral-700 dark:bg-neutral-800 rounded-md shadow-lg p-4">
+          <div className="flex items-center gap-2 text-sm">
             <svg
               className="animate-spin h-4 w-4 text-blue-500"
               xmlns="http://www.w3.org/2000/svg"
@@ -242,9 +240,10 @@ export function OpenPechaTextLoader({
       titleSearchResults.length > 0
     ) {
       return (
-        <div className="w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
-          <div className="px-4 py-2 bg-gray-50 border-b border-gray-200 sticky top-0">
-            <h3 className="text-sm font-semibold text-gray-700">OpenPecha</h3>
+        <div className="w-full bg-white border border-gray-300 dark:border-neutral-700 dark:bg-neutral-800 rounded-md shadow-lg max-h-60 overflow-y-auto">
+          <div className="px-4 py-2 flex items-center gap-2 bg-neutral-50 dark:bg-neutral-800 border-b sticky top-0">
+            <img src={OpenPecha} alt="OpenPecha" className="w-5 h-5" />
+            <p className="text-sm font-semibold">OpenPecha</p>
           </div>
           {titleSearchResults.map(
             (result: {
@@ -258,13 +257,13 @@ export function OpenPechaTextLoader({
               <button
                 key={`title-${result.id}`}
                 onClick={() => handleTitleResultSelect(result)}
-                className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0 transition-colors"
+                className="w-full cursor-pointer px-4 py-3 text-left border-b border-gray-100 dark:border-neutral-700 last:border-b-0 transition-colors"
               >
-                <div className="font-medium text-sm text-gray-900">
+                <div className="font-medium text-sm">
                   {result.title?.bo || Object.values(result.title || {})[0]}
                 </div>
-                <div className="text-xs text-gray-500 mt-1">
-                  Text ID: {result.id}
+                <div className="text-xs text-gray-500 dark:text-neutral-400 mt-1">
+                  Text ID: {result.id}fd
                 </div>
               </button>
             )
@@ -275,11 +274,8 @@ export function OpenPechaTextLoader({
 
     if (searchQuery.trim() && !isLoadingTitleSearch) {
       return (
-        <div className="w-full bg-white border border-gray-300 rounded-md shadow-lg p-4">
-          <div className="px-4 py-2 bg-gray-50 border-b border-gray-200 -mx-4 -mt-4 mb-4">
-            <h3 className="text-sm font-semibold text-gray-700">OpenPecha</h3>
-          </div>
-          <p className="text-sm text-gray-600">No OpenPecha texts found</p>
+        <div className="w-full bg-white border border-gray-300 dark:border-neutral-700 dark:bg-neutral-800 rounded-md shadow-lg p-4">
+          <p className="text-sm">No OpenPecha texts found</p>
         </div>
       );
     }
@@ -291,13 +287,8 @@ export function OpenPechaTextLoader({
   const renderBdrcSearchResults = () => {
     if (isLoadingBdrc) {
       return (
-        <div className="w-full bg-white border border-gray-300 rounded-md shadow-lg p-4">
-          <div className="px-4 py-2 bg-gray-50 border-b border-gray-200 -mx-4 -mt-4 mb-4">
-            <h3 className="text-sm font-semibold text-gray-700">
-              BDRC Results
-            </h3>
-          </div>
-          <div className="flex items-center space-x-2 text-sm text-blue-600">
+        <div className="w-full bg-white border border-gray-300 dark:border-neutral-700 dark:bg-neutral-800 rounded-md shadow-lg p-4">
+          <div className="flex items-center gap-2 text-sm">
             <svg
               className="animate-spin h-4 w-4 text-blue-500"
               xmlns="http://www.w3.org/2000/svg"
@@ -328,41 +319,45 @@ export function OpenPechaTextLoader({
       return (
         <div className="w-full bg-white border border-red-300 rounded-md shadow-lg p-4">
           <div className="px-4 py-2 bg-gray-50 border-b border-gray-200 -mx-4 -mt-4 mb-4">
-            <h3 className="text-sm font-semibold text-gray-700">
-              BDRC Results
-            </h3>
+            <h3 className="text-sm font-semibold text-gray-700">BDRC</h3>
           </div>
+
           <p className="text-sm text-red-600">
-            Error searching BDRC: {bdrcError}
+            Error searching BDRC:{" "}
+            {(bdrcError as any)?.message || String(bdrcError)}
           </p>
         </div>
       );
     }
 
-    if (bdrcResults.length > 0) {
+    if (bdrcResults && Array.isArray(bdrcResults) && bdrcResults.length > 0) {
       return (
-        <div className="w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
-          <div className="px-4 py-2 bg-gray-50 border-b border-gray-200 sticky top-0">
-            <h3 className="text-sm font-semibold text-gray-700">
-              BDRC Results
-            </h3>
+        <div className="w-full bg-white border border-gray-300 dark:border-neutral-700 dark:bg-neutral-800 rounded-md shadow-lg max-h-60 overflow-y-auto">
+          <div className="px-4 py-2 flex items-center gap-2 bg-neutral-50 dark:bg-neutral-800 border-b sticky top-0">
+
+            <img src="https://www.bdrc.io/wp-content/uploads/2020/02/android-chrome-512x512-1.png" alt="BDRC" className="w-5 h-5 dark:invert" />
+
+            <p className="text-sm font-semibold">BDRC</p>
           </div>
+
           {bdrcResults.map((result) => (
             <button
               key={result.workId || result.instanceId || `bdrc-${result.title}`}
               onClick={() => handleBdrcResultSelect(result)}
-              className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0 transition-colors"
+              className="w-full cursor-pointer px-4 py-3 text-left border-b border-gray-100 dark:border-neutral-700 last:border-b-0 transition-colors"
             >
-              <div className="font-medium text-sm text-gray-900">
+              <div className="font-medium text-sm text-neutral-900 dark:text-neutral-100">
                 {result.title || result.workId || "Untitled"}
               </div>
-              {result.workId && (
-                <div className="text-xs text-gray-500 mt-1">
-                  BDRC ID: {result.workId}
+
+              {(result.workId || result.instanceId) && (
+                <div className="text-xs text-gray-500 dark:text-neutral-400 mt-1">
+                  Text ID: {result.workId || result.instanceId}
                 </div>
               )}
+
               {result.language && (
-                <div className="text-xs text-gray-500">
+                <div className="text-xs text-gray-500 dark:text-neutral-400">
                   Language: {result.language}
                 </div>
               )}
@@ -374,19 +369,15 @@ export function OpenPechaTextLoader({
 
     if (searchQuery.trim() && !isLoadingBdrc) {
       return (
-        <div className="w-full bg-white border border-gray-300 rounded-md shadow-lg p-4">
-          <div className="px-4 py-2 bg-gray-50 border-b border-gray-200 -mx-4 -mt-4 mb-4">
-            <h3 className="text-sm font-semibold text-gray-700">
-              BDRC Results
-            </h3>
-          </div>
-          <p className="text-sm text-gray-600">No BDRC texts found</p>
+        <div className="w-full bg-white border border-gray-300 dark:border-neutral-700 dark:bg-neutral-800 rounded-md shadow-lg p-4">
+          <p className="text-sm">No BDRC texts found</p>
         </div>
       );
     }
 
     return null;
   };
+
 
   return (
     <div className="space-y-8">
@@ -396,7 +387,7 @@ export function OpenPechaTextLoader({
       <div className="space-y-4">
         <label
           htmlFor="bdrc-search"
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm font-medium text-gray-700 dark:text-neutral-300"
         >
           Search BDRC by Title or ID
         </label>
@@ -414,25 +405,21 @@ export function OpenPechaTextLoader({
               setShowTitleResults(true);
             }}
             placeholder="Search texts..."
-            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-neutral-700 rounded-md text-sm bg-white dark:bg-neutral-800 focus:outline-none ring-0"
           />
         </div>
 
-        {/* Search Results */}
         {(showTitleResults || showBdrcResults) && searchQuery && (
           <div className="relative space-y-2">
-            {/* Title Search Results - shown first */}
             {showTitleResults && renderTitleSearchResults()}
 
-            {/* BDRC Search Results - shown below title results */}
             {showBdrcResults && renderBdrcSearchResults()}
           </div>
         )}
 
-        {/* Checking Text Status */}
         {(isCheckingBdrcText || isCheckingTitleText) && (
-          <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
-            <div className="flex items-center space-x-2 text-sm text-blue-600">
+          <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-md">
+            <div className="flex items-center space-x-2 text-sm text-blue-600 dark:text-blue-400">
               <svg
                 className="animate-spin h-5 w-5 text-blue-500"
                 xmlns="http://www.w3.org/2000/svg"
@@ -460,11 +447,11 @@ export function OpenPechaTextLoader({
 
         {/* BDRC Text Not Found Message */}
         {bdrcTextNotFound && selectedBdrcResult && !isCheckingBdrcText && (
-          <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+          <div className="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-md">
             <div className="flex items-start">
               <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5 mr-3 shrink-0" />
               <div className="flex-1">
-                <p className="text-sm font-medium text-yellow-800 mb-2">
+                <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200 mb-2">
                   Text not found in catalog
                 </p>
                 <p className="text-sm text-yellow-700 mb-3">
@@ -489,13 +476,13 @@ export function OpenPechaTextLoader({
 
       {/* Selected Text Information */}
       {selectedTextId && (
-        <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
+        <div className="mt-4 p-4 bg-green-50 border border-green-200 dark:border-green-700 dark:bg-green-900/20 rounded-md">
           <div className="space-y-2">
-            <p className="text-sm font-medium text-green-800">
+            <p className="text-sm font-medium text-green-800 dark:text-green-200">
               Text selected successfully
             </p>
             {selectedText && (
-              <div className="text-sm text-green-700">
+              <div className="text-sm text-green-700 dark:text-green-500">
                 <p>
                   <span className="font-medium">Text ID:</span> {selectedTextId}
                 </p>
@@ -505,8 +492,8 @@ export function OpenPechaTextLoader({
                     {typeof selectedText.title === "string"
                       ? selectedText.title
                       : selectedText.title.bo ||
-                        selectedText.title.en ||
-                        Object.values(selectedText.title)[0]}
+                      selectedText.title.en ||
+                      Object.values(selectedText.title)[0]}
                   </p>
                 )}
               </div>
