@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-
-import { useAuth } from "../auth/use-auth-hook";
 import { Button } from "./ui/button";
 import { updateProject } from "@/api/project";
 import EditableText from "./ui/EditableText";
@@ -25,13 +23,9 @@ interface NavbarProps {
 }
 
 const Navbar = ({ project }: NavbarProps) => {
-  const { login, isAuthenticated } = useAuth();
   const [showPermissionsModal, setShowPermissionsModal] = useState(false);
   const { i18n } = useTranslation();
   const currentLanguage = i18n.language;
-  const handleAuth0Login = () => {
-    login();
-  };
 
   const permissionsOpen = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -62,20 +56,10 @@ const Navbar = ({ project }: NavbarProps) => {
       </div>
 
       {/* Navigation Menu */}
-      <div className="flex items-center gap-4">
-        <NavMenuList permissionsOpen={permissionsOpen} />
+      <div className="flex items-center gap-2">
         <SettingsButton />
-        {isAuthenticated ? (
-          <ProfileArea />
-        ) : (
-          <Button
-            onClick={handleAuth0Login}
-            className="px-4 py-2 bg-secondary-500 text-white text-sm font-medium rounded-lg shadow hover:bg-secondary-600 transition"
-          >
-            Login
-          </Button>
-        )}
-
+        <NavMenuList permissionsOpen={permissionsOpen} />
+        <ProfileArea />
       </div>
       {showPermissionsModal && (
         <ShareModal
@@ -143,7 +127,6 @@ export function NavMenuList({
       <Button
         onClick={permissionsOpen}
         variant="outline"
-        className="flex items-center gap-1.5 text-sm bg-secondary-50 dark:bg-neutral-800 dark:hover:bg-neutral-700 hover:bg-secondary-100 text-secondary-700 dark:text-neutral-300 border-secondary-200 rounded-full px-3 py-1 h-auto"
         aria-label="Share document"
       >
         <BiShare className="text-secondary-600 dark:text-neutral-300" />

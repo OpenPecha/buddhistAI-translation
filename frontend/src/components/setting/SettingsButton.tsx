@@ -4,7 +4,6 @@ import { useTranslationSidebarParams } from "@/hooks/useQueryParams";
 import { useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { GrSettingsOption } from "react-icons/gr";
-
 const SettingsButton: React.FC = () => {
   const { selectedTranslationId } = useTranslationSidebarParams();
   const { id } = useParams();
@@ -14,8 +13,7 @@ const SettingsButton: React.FC = () => {
       translationId={selectedTranslationId || undefined}
     >
       <Button
-        variant="ghost"
-        className="w-fit cursor-pointer flex gap-1  py-3 hover:bg-transparent"
+        variant="secondary"
       >
         <GrSettingsOption size={14} />
       </Button>
