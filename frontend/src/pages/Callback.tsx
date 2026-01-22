@@ -15,7 +15,7 @@ const Callback: React.FC = () => {
 	return (
 		<div className="flex min-h-screen items-center justify-center">
 			<div className="text-center">
-				<h2 className="text-2xl font-semibold mb-4">
+				<h2 className="mb-4">
 					Processing your login...
 				</h2>
 			</div>

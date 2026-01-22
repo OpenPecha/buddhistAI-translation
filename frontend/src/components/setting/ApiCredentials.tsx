@@ -214,9 +214,10 @@ const ApiCredentials: React.FC = () => {
         </h2>
         {!isAdding && !isEditing && (
           <Button
+            variant="outline"
             onClick={() => setIsAdding(true)}
+            className="cursor-pointer"
             size="sm"
-            className="flex items-center gap-1 bg-neutral-50 dark:bg-neutral-700 text-neutral-500 dark:text-neutral-300"
           >
             <Plus size={16} />
             {t("common.add", "Add")}
@@ -226,11 +227,10 @@ const ApiCredentials: React.FC = () => {
 
       {statusMessage && (
         <div
-          className={`p-2 rounded-md ${
-            statusMessage.type === "success"
-              ? "bg-green-100 text-green-800"
-              : "bg-red-100 text-red-800"
-          }`}
+          className={`p-2 rounded-md ${statusMessage.type === "success"
+            ? "bg-green-100 text-green-800"
+            : "bg-red-100 text-red-800"
+            }`}
         >
           {statusMessage.text}
         </div>
@@ -290,9 +290,9 @@ const ApiCredentials: React.FC = () => {
               <p className="text-xs text-gray-500 mt-1">
                 {formData.apiKey
                   ? t(
-                      "settings.leaveUnchanged",
-                      "Leave unchanged to keep current key"
-                    )
+                    "settings.leaveUnchanged",
+                    "Leave unchanged to keep current key"
+                  )
                   : "Loading key..."}
               </p>
             )}

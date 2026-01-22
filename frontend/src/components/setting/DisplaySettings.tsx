@@ -11,14 +11,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTranslation } from "react-i18next";
-import { useTheme } from "@/hooks/useTheme";
+import { useTheme } from "@/contexts/ThemeProvider";
 import { Eye, Type, Palette, RotateCcw, Minus, Plus } from "lucide-react";
 import {
   useDisplaySettings,
   type DisplaySettings,
   type TypographySettings,
 } from "@/hooks/useDisplaySettings";
-const DisplaySettings: React.FC<{}> = ({}) => {
+const DisplaySettings: React.FC<{}> = ({ }) => {
   const { t } = useTranslation();
   const {
     settings,
@@ -37,15 +37,15 @@ const DisplaySettings: React.FC<{}> = ({}) => {
 
   const backgroundColorOptions = isDark
     ? [
-        { value: "#40474F", label: "Dark Gray", preview: "#40474F" },
-        { value: "#353D46", label: "Charcoal Gray", preview: "#353D46" },
-        { value: "#586674", label: "Slate Gray", preview: "#586674" },
-      ]
+      { value: "#40474F", label: "Dark Gray", preview: "#40474F" },
+      { value: "#353D46", label: "Charcoal Gray", preview: "#353D46" },
+      { value: "#586674", label: "Slate Gray", preview: "#586674" },
+    ]
     : [
-        { value: "#f8fafc", label: "Light Blue Gray", preview: "#f8fafc" },
-        { value: "#fffea6", label: "Pale Yellow", preview: "#fffea6" },
-        { value: "#a2cbf5", label: "Light Sky Blue", preview: "#a2cbf5" },
-      ];
+      { value: "#f8fafc", label: "Light Blue Gray", preview: "#f8fafc" },
+      { value: "#fffea6", label: "Pale Yellow", preview: "#fffea6" },
+      { value: "#a2cbf5", label: "Light Sky Blue", preview: "#a2cbf5" },
+    ];
 
   const fontFamilyOptions = [
     { value: "google-sans-regular", label: "Google Sans (Default)" },
@@ -216,11 +216,10 @@ const DisplaySettings: React.FC<{}> = ({}) => {
                   onClick={() =>
                     updateSetting("editorBackgroundColor", option.value)
                   }
-                  className={`p-2 border rounded-md text-xs hover:border-gray-400 transition-colors ${
-                    settings.editorBackgroundColor === option.value
-                      ? "border-blue-500 bg-neutral-50 dark:bg-neutral-800"
-                      : "border-gray-200"
-                  }`}
+                  className={`p-2 border rounded-md text-xs hover:border-gray-400 transition-colors ${settings.editorBackgroundColor === option.value
+                    ? "border-blue-500 bg-neutral-50 dark:bg-neutral-800"
+                    : "border-gray-200"
+                    }`}
                 >
                   <div
                     className="w-full h-6 rounded mb-1"
