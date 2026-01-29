@@ -13,13 +13,6 @@
 	font-style: normal;
 }
 
-/* @font-face {
-	font-family: monlam-2;
-	src: url("/font/MonlamTBslim.woff") format("woff");
-	font-weight: normal;
-	font-style: normal;
-} */
-
 @font-face {
 	font-family: google-sans;
 	src: url("/font/ProductSans-Regular.ttf") format("truetype");
@@ -115,26 +108,13 @@
 	font-family: var(--font-monlam) !important;
 }
 
-body {
-	font-family:
-		"google-sans", "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
-		"Helvetica Neue", sans-serif;
-	line-height: 1.6;
-	color: var(--text-color);
-	overflow: hidden;
-}
-
-#root {
-	height: 100dvh;
-}
-
 .dark {
 	--text-color: #ced0d3;
-	--background: #343a40;
+	--background: #191919;
 	--foreground: oklch(0.985 0 0);
 	--card: oklch(0.21 0.006 285.885);
 	--card-foreground: oklch(0.985 0 0);
-	--popover: oklch(0.21 0.006 285.885);
+	--popover: #191919;
 	--popover-foreground: oklch(0.985 0 0);
 	--primary: oklch(0.92 0.004 286.32);
 	--primary-foreground: oklch(0.21 0.006 285.885);
@@ -204,7 +184,6 @@ body {
 	--color-editor-bg: var(--color-editor-background);
 	--color-footnote-bg: var(--color-footnote-background);
 
-	/* New Design System - Primary Colors */
 	--color-primary-50: #f1eff5;
 	--color-primary-100: #ccb4f7;
 	--color-primary-200: #a881f1;
@@ -215,7 +194,6 @@ body {
 	--color-primary-700: #20084b;
 	--color-primary-800: #0a0317;
 
-	/* New Design System - Secondary Colors */
 	--color-secondary-50: #eff5f5;
 	--color-secondary-100: #b4f1f7;
 	--color-secondary-200: #81e8f1;
@@ -226,7 +204,6 @@ body {
 	--color-secondary-700: #08454b;
 	--color-secondary-800: #031517;
 
-	/* New Design System - Neutral Colors */
 	--color-neutral-50: #fafafa;
 	--color-neutral-100: #f5f5f5;
 	--color-neutral-200: #e5e5e5;
@@ -247,30 +224,24 @@ body {
 	}
 }
 
-/* width */
 ::-webkit-scrollbar {
 	width: 5px;
 }
 
-/* Track */
 ::-webkit-scrollbar-track {
 	background: transparent;
 }
 f
-/* Handle */
 ::-webkit-scrollbar-thumb {
 	background: #888;
-	/* border-radius: 30%; */
 
 	cursor: pointer;
 }
 
-/* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
 	background: #555;
 }
 
-/* React Split Styles */
 .gutter {
 	background-color: #e5e7eb;
 	background-repeat: no-repeat;
@@ -305,7 +276,6 @@ f
 	flex-direction: column;
 }
 
-/* Ensure close button appears above splitter gutters */
 .gutter {
 	z-index: 1;
 }

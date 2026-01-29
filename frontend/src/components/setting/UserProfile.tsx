@@ -1,5 +1,5 @@
 import React from "react";
-import { User, Mail, Calendar, Shield } from "lucide-react";
+import { User, Mail, Shield } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/auth/use-auth-hook";
 import AvatarWrapper from "@/components/ui/custom-avatar";
@@ -12,7 +12,7 @@ const UserProfile: React.FC = () => {
 
 	if (!isAuthenticated || !currentUser) {
 		return (
-			<div className="p-4 border rounded-md bg-gray-50 text-center">
+			<div className=" border rounded-md bg-gray-50 text-center">
 				<p className="">
 					{t("profile.notAuthenticated", "Please log in to view your profile.")}
 				</p>
@@ -20,13 +20,11 @@ const UserProfile: React.FC = () => {
 		);
 	}
 
-	// Extract user information
 	const { name, email, picture } = currentUser;
 
 	return (
-		<div className="space-y-6">
-			{/* Profile Header */}
-			<Card className="bg-neutral-100 dark:bg-neutral-700">
+		<div className="space-y-2">
+			<Card className="shadow-none">
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
 						<User size={20} />
@@ -34,51 +32,45 @@ const UserProfile: React.FC = () => {
 					</CardTitle>
 				</CardHeader>
 				<CardContent>
-					<div className="flex items-start gap-6">
-						{/* Avatar */}
+					<div className="flex items-start gap-2">
 						<div className="flex-shrink-0">
 							<AvatarWrapper
 								imageUrl={picture}
 								name={name}
 								size={80}
-								className="border-4 border-neutral-100 dark:border-neutral-700 shadow-lg"
 							/>
 						</div>
 
-						{/* User Info */}
-						<div className="flex-1 space-y-4">
+						<div className="flex-1 space-y-2">
 							<div>
-								<h3 className="text-xl font-semibold">
+								<p className="text-lg font-semibold">
 									{name || t("profile.nameUnavailable", "Name not available")}
-								</h3>
+								</p>
 								<p className="text-sm">
 									{t("profile.member", "Pecha Tool Member")}
 								</p>
-							</div>
-
-							{/* Status Badge */}
-							<div className="flex items-center gap-2">
-								<Badge variant="secondary" className="flex items-center gap-1">
-									<Shield size={12} />
-									{t("profile.verified", "Verified Account")}
-								</Badge>
+								<div className="flex items-center">
+									<Badge variant="secondary" className="flex items-center">
+										<Shield size={12} />
+										{t("profile.verified", "Verified Account")}
+									</Badge>
+								</div>
 							</div>
 						</div>
 					</div>
 				</CardContent>
 			</Card>
 
-			{/* Account Details */}
-			<Card className="bg-neutral-100 dark:bg-neutral-700">
+			<Card className="shadow-none">
 				<CardHeader>
 					<CardTitle className="text-lg">
 						{t("profile.accountDetails", "Account Details")}
 					</CardTitle>
 				</CardHeader>
 				<CardContent>
-					<div className="space-y-4">
+					<div className="space-y-2">
 						{/* Email */}
-						<div className="flex items-center gap-3 p-3 bg-neutral-100 dark:bg-neutral-700 rounded-lg">
+						<div className="flex items-center gap-3 p-2 rounded-lg">
 							<Mail size={16} />
 							<div className="flex-1">
 								<p className="text-sm font-medium">

@@ -25,7 +25,7 @@ export const FormStep = React.memo(
     if (!selectedMethod) return null;
 
     return (
-      <div className="space-y-6">
+      <div className="space-y-2">
         {selectedMethod === "file" && (
           <FileUploadForm
             projectName={projectName}

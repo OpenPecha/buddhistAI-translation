@@ -89,11 +89,6 @@ const EditableText: React.FC<EditableTextProps> = ({
 					className={`${className} 
            ${isTibetan ? "font-monlam text-xs leading-[normal]" : "font-google-sans"}
           ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
-					style={{
-						width: `${inputValue.length + 1}ch`,
-						minWidth: "50px",
-						...style,
-					}}
 				/>
 			</form>
 		</div>

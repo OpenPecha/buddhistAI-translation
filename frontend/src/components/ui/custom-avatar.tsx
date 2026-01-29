@@ -4,10 +4,10 @@ const AvatarWrapper = ({ imageUrl, name, size = 32 }) => {
 	const getInitials = (name: string) => {
 		return name
 			? name
-					.split(" ")
-					.map((n) => n[0])
-					.join("")
-					.toUpperCase()
+				.split(" ")
+				.map((n) => n[0])
+				.join("")
+				.toUpperCase()
 			: "?";
 	};
 

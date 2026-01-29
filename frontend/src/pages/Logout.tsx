@@ -4,11 +4,8 @@ import OpenPecha from "@/assets/icon.png";
 
 const Logout: React.FC = () => {
 	useEffect(() => {
-		// Clear any remaining tokens when landing on logout page
 		localStorage.removeItem("access_token");
 		localStorage.removeItem("auth_token");
-		sessionStorage.removeItem("access_token");
-		sessionStorage.removeItem("auth_token");
 	}, []);
 
 	return (

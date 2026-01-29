@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { lazy } from "react";
+import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import DocumentsWrapper from "./components/DocumentWrapper";
@@ -9,13 +9,16 @@ import Documentation from "./documentation/Documentation";
 import Callback from "./pages/Callback";
 import Login from "./pages/Login";
 import Logout from "./pages/Logout";
-import { Layout, SuspenceWithLoadingFallback } from "./pages/layout";
+import { Layout } from "./pages/layout";
 import { AuthProvider } from "./auth/AuthProvider";
 import { TooltipProvider } from "./components/ui/tooltip";
 import "./i18n";
 import { useTranslation } from "react-i18next";
 import { EditorProvider } from "@/contexts/EditorContext";
-const ProjectList = lazy(() => import("./components/Dashboard/ProjectList"));
+import { ThemeProvider } from "./contexts/ThemeProvider";
+import Home from "./pages/Home/Home";
+const Dashboard = lazy(() => import("./components/Dashboard/Dashboard"));
+
 const QuillVersionProvider = lazy(() =>
   import("./contexts/VersionContext").then((module) => ({
     default: module.QuillVersionProvider,
@@ -44,16 +47,16 @@ function AppContent() {
   const currentLanguage = i18n.language;
   return (
     <div
-      className={`flex s flex-col h-full ${
-        currentLanguage === "bo" && "font-monlam-2 !text-md"
-      }`}
+      className={`flex flex-col h-full ${currentLanguage === "bo" && "font-monlam-2 !text-md"
+        }`}
     >
       <Routes>
+        <Route path="/" element={<Home />} />
         <Route
-          path="/"
+          path="/dashboard"
           element={
             <Layout>
-              <ProjectList />
+              <Dashboard />
             </Layout>
           }
         />
@@ -64,22 +67,22 @@ function AppContent() {
         <Route
           path="/documents/public/:id"
           element={
-            <SuspenceWithLoadingFallback>
+            <Suspense fallback={<div className="flex items-center justify-center text-lg h-screen">Loading...</div>}>
               <PublicDocumentViewer />
-            </SuspenceWithLoadingFallback>
+            </Suspense>
           }
         />
 
         <Route
           path="/documents/:id"
           element={
-            <SuspenceWithLoadingFallback>
+            <Suspense fallback={<div className="flex items-center justify-center text-lg h-screen">Loading...</div>}>
               <EditorProvider>
                 <QuillVersionProvider>
                   <DocumentsWrapper />
                 </QuillVersionProvider>
               </EditorProvider>
-            </SuspenceWithLoadingFallback>
+            </Suspense>
           }
         />
         <Route path="/help" element={<Documentation />} />
@@ -92,16 +95,18 @@ function AppContent() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <UserbackProvider>
-          <TooltipProvider>
-            <AppContent />
-          </TooltipProvider>
-        </UserbackProvider>
-      </AuthProvider>
-      <Toaster />
-    </QueryClientProvider>
+    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <UserbackProvider>
+            <TooltipProvider>
+              <AppContent />
+            </TooltipProvider>
+          </UserbackProvider>
+        </AuthProvider>
+        <Toaster />
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }
 

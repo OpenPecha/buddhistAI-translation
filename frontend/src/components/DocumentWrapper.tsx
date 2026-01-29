@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { createPortal } from "react-dom";
 import { IoIosArrowForward } from "react-icons/io";
 import { useParams } from "react-router-dom";
@@ -108,9 +109,8 @@ function DocumentsWrapperContent() {
           dragInterval={1}
           direction={isMobile ? "vertical" : "horizontal"}
           cursor="col-resize"
-          className={`split-pane h-full flex w-full overflow-hidden ${
-            isMobile ? "flex-col" : "flex-row"
-          }`}
+          className={`split-pane h-full flex w-full overflow-hidden ${isMobile ? "flex-col" : "flex-row"
+            }`}
           gutterStyle={() => ({
             backgroundColor: "#e5e7eb",
             border: "1px solid #d1d5db",
@@ -234,38 +234,42 @@ function TranslationEditor({
   );
 }
 
-function Loader({ show }: { show: boolean }) {
+
+export function Loader({ show }: { show: boolean }) {
   if (!show) return null;
 
   return (
-    <div className="absolute inset-0 flex bg-white/80 dark:bg-neutral-900/80 z-50">
-      {/* Main content skeleton */}
+    <div className="absolute inset-0 z-50 flex bg-background/80 backdrop-blur-sm">
       <div className="flex-1 p-6 space-y-4">
-        <div className="h-10 bg-neutral-200 dark:bg-neutral-600 rounded-md animate-pulse w-3/4 mb-8"></div>
-        <div className="h-6 bg-neutral-200 dark:bg-neutral-600 rounded-md animate-pulse w-full"></div>
-        <div className="h-6 bg-neutral-200 dark:bg-neutral-600 rounded-md animate-pulse w-5/6"></div>
-        <div className="h-6 bg-neutral-200 dark:bg-neutral-600 rounded-md animate-pulse w-4/6"></div>
-        <div className="h-6 bg-neutral-200 dark:bg-neutral-600 rounded-md animate-pulse w-5/6"></div>
-        <div className="h-6 bg-neutral-200 dark:bg-neutral-600 rounded-md animate-pulse w-3/6"></div>
-        <div className="h-64 bg-neutral-200 dark:bg-neutral-600 rounded-md animate-pulse w-full mt-6"></div>
-        <div className="h-24 bg-neutral-200 dark:bg-neutral-600 rounded-md animate-pulse w-full mt-4"></div>
+        <Skeleton className="h-10 w-3/4 mb-8" />
+
+        <Skeleton className="h-6 w-full" />
+        <Skeleton className="h-6 w-5/6" />
+        <Skeleton className="h-6 w-4/6" />
+        <Skeleton className="h-6 w-5/6" />
+        <Skeleton className="h-6 w-3/6" />
+
+        <Skeleton className="h-64 w-full mt-6" />
+        <Skeleton className="h-24 w-full mt-4" />
       </div>
 
-      {/* Sidebar skeleton */}
-      <div className="w-20 h-full border-r border-neutral-200 dark:border-neutral-600 p-4 space-y-4">
-        <div className="h-8 bg-neutral-200 dark:bg-neutral-600 rounded-md animate-pulse w-3/4"></div>
-        <div className="h-4 bg-neutral-200 dark:bg-neutral-600 rounded-md animate-pulse w-5/6 mt-6"></div>
-        <div className="h-4 bg-neutral-200 dark:bg-neutral-600 rounded-md animate-pulse w-4/6 mt-2"></div>
-        <div className="h-4 bg-neutral-200 dark:bg-neutral-600 rounded-md animate-pulse w-5/6 mt-2"></div>
-        <div className="h-4 bg-neutral-200 dark:bg-neutral-600 rounded-md animate-pulse w-3/6 mt-2"></div>
+      <div className="w-20 h-full border-l border-border p-4 space-y-4">
+        <Skeleton className="h-8 w-3/4" />
+
+        <Skeleton className="h-4 w-5/6 mt-6" />
+        <Skeleton className="h-4 w-4/6 mt-2" />
+        <Skeleton className="h-4 w-5/6 mt-2" />
+        <Skeleton className="h-4 w-3/6 mt-2" />
+
         <div className="mt-8 space-y-3">
-          <div className="h-10 bg-neutral-200 dark:bg-neutral-600 rounded-md animate-pulse w-full"></div>
-          <div className="h-10 bg-neutral-200 dark:bg-neutral-600 rounded-md animate-pulse w-full"></div>
-          <div className="h-10 bg-neutral-200 dark:bg-neutral-600 rounded-md animate-pulse w-full"></div>
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
         </div>
       </div>
     </div>
   );
 }
+
 
 export default DocumentsWrapper;

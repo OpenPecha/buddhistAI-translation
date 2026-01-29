@@ -203,6 +203,7 @@
   "projects.deleteProjectConfirmText": "Delete",
   "projects.deleteProjectMessage": "Are you sure you want to delete this project? This action cannot be undone.",
   "projects.enterProjectName": "Enter project name",
+  "projects.rename": "Rename",
   "projects.ExtraMetadata": "Provide extra metadata for your document (optional)",
   "projects.failedToCreateProject": "Failed to create project",
   "projects.importFromOpenPechaRepository": "Import from OpenPecha repository",
@@ -403,8 +404,10 @@
     "insertTranslationAtLine": "Insert translation at line position"
   },
   "project": {
-    "startFromScratch": "Start from scratch",
+    "Projects": "Projects",
+    "startFromScratch": "Start from a blank, Importing from File Document or OpenPecha Repository",
     "blank": "Blank",
+    "CreateDocument": "Create Document",
     "gallery": "Gallery",
     "myProjects": "My Projects",
     "lastModified": "Last modified",
@@ -413,7 +416,7 @@
     "ownedByMe": "Owned by me",
     "ownedByAnyone": "Owned by anyone",
     "notOwnedByMe": "Not owned by me"
-  },
+    },
   "today": "Today",
   "yesterday": "Yesterday",
   "last7Days": "Last 7 Days",

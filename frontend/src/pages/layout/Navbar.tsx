@@ -1,46 +1,35 @@
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import SearchInput from "@/components/Dashboard/SearchInput";
-import NavSidebar from "@/components/Dashboard/NavSidebar";
-import { useAuth } from "@/auth/use-auth-hook";
 import AppLauncher from "@/components/Applauncher";
-import DocIcon from "@/assets/doc_icon.png";
+import DocIcon from "@/assets/logo.svg";
 import ProfileArea from "@/components/ProfileArea";
-import { useTranslation } from "react-i18next";
-const Navbar = () => {
-	const { login, isAuthenticated } = useAuth();
-	const { i18n } = useTranslation();
-	const currentLanguage = i18n.language;
+import { ModeToggle } from "@/components/v2/ui/molecules/mode-toggle/ModeToggle";
+import { LanguageToggle } from "@/components/v2/ui/molecules/language-toggle/LanguageToggle";
 
+const Navbar = () => {
 	return (
-		<nav className={`${currentLanguage === "bo" && " leading-[normal]"} px-6 py-2 flex justify-between items-center`}>
+		<nav className="px-4 py-2 flex justify-between items-center">
 			<div className="flex gap-2">
-				<NavSidebar />
 				<Link
-					to="/"
-					className="flex items-center gap-3 font-semibold text-gray-500 hover:text-gray-700 transition capitalize"
+					to="/dashboard"
 				>
-					<img
-						alt="icon"
-						src={DocIcon}
-						width={40}
-						className=" object-contain"
-					/>
+					<div className="flex items-center gap-2">
+						<div className='flex items-center gap-2'>
+							<img src={DocIcon} alt="logo" className='w-8 h-8' />
+						</div>
+						<div className='flex flex-col font-sans'>
+							<span className="hidden md:block font-semibold text-lg tracking-tight leading-none">Buddhist AI Studio</span>
+							<span className='hidden md:block text-xs text-zinc-400 leading-none'>Translation Editor</span>
+						</div>
+					</div>
 				</Link>
 			</div>
 			<SearchInput />
-			<div className="flex items-center gap-4">
+			<div className="flex items-center gap-2">
 				<AppLauncher />
-				{isAuthenticated ? (
-					<ProfileArea />
-				) : (
-					<Button
-						onClick={() => login(false)}
-						className="px-4 py-2 bg-secondary-500 text-white text-sm font-medium rounded-lg shadow hover:bg-secondary-600 transition"
-					>
-						Login
-					</Button>
-				)}
+				<LanguageToggle />
+				<ModeToggle />
+				<ProfileArea />
 			</div>
 		</nav>
 	);

@@ -10,8 +10,6 @@ const getBaseHeaders = (): CustomHeaders => {
 	const token =
 		localStorage.getItem("auth_token") ??
 		localStorage.getItem("access_token") ??
-		sessionStorage.getItem("auth_token") ??
-		sessionStorage.getItem("access_token") ??
 		"";
 
 	// Check if token is expired before using it
@@ -20,8 +18,6 @@ const getBaseHeaders = (): CustomHeaders => {
 		// Clear expired tokens
 		localStorage.removeItem("auth_token");
 		localStorage.removeItem("access_token");
-		sessionStorage.removeItem("auth_token");
-		sessionStorage.removeItem("access_token");
 		// Redirect to logout
 		window.location.href = "/logout";
 		return {

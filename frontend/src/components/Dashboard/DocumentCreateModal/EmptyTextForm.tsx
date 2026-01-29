@@ -101,8 +101,8 @@ export function EmptyTextForm({
         setSelectedLanguage={setSelectedLanguage}
         selectedLanguage={selectedLanguage}
       />
-      <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-        <p className="text-sm text-blue-800 dark:text-blue-200">
+      <div className="p-4 bg-neutral-100 dark:bg-neutral-800 rounded">
+        <p className="text-sm">
           Empty text project will be created with the selected language.
         </p>
       </div>

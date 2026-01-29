@@ -153,11 +153,10 @@ const TextUploader: React.FC<TextUploaderProps> = ({
           <div className="flex items-center gap-2">
             <label
               htmlFor="text-file"
-              className={`text-sm font-medium ${
-                isLanguageDisabled
-                  ? "text-neutral-400 dark:text-neutral-500"
-                  : "text-neutral-700 dark:text-neutral-300"
-              }`}
+              className={`text-sm font-medium ${isLanguageDisabled
+                ? "text-neutral-400 dark:text-neutral-500"
+                : "text-neutral-700 dark:text-neutral-300"
+                }`}
             >
               {/* Upload {isRoot ? t(`pecha.root`) : t(`pecha.translation`)} Text (.txt) */}
               {t("documents.uploadText", {
@@ -171,33 +170,20 @@ const TextUploader: React.FC<TextUploaderProps> = ({
               </span>
             </div>
           </div>
-          <div className="relative">
-            <Input
-              id="text-file"
-              type="file"
-              accept=".txt, .docx"
-              onChange={handleFileChange}
-              disabled={isFullyDisabled}
-              className={`cursor-pointer transition-colors ${
-                isLanguageDisabled
-                  ? "border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed"
-                  : "border-gray-300 focus:border-secondary-500 focus:ring-secondary-500"
-              }`}
-            />
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-              <Upload
-                className={`h-4 w-4 ${
-                  isLanguageDisabled ? "text-gray-300" : "text-gray-400"
-                }`}
-              />
-            </div>
-          </div>
+          <Input
+            id="text-file"
+            type="file"
+            accept=".txt, .docx"
+            onChange={handleFileChange}
+            disabled={isFullyDisabled}
+            className="cursor-pointer"
+          />
         </div>
       )}
 
       {file && (
         <div className="space-y-3">
-          <div className="flex justify-between items-center p-3 bg-secondary-50 border border-secondary-200 rounded-lg bg-neutral-50 dark:bg-neutral-700">
+          <div className="flex justify-between items-center p-3 border rounded-lg bg-neutral-50 dark:bg-neutral-900">
             <div className="flex items-center gap-2">
               <FileText className="h-4 w-4 text-neutral-800 dark:text-neutral-400" />
               <span className="text-sm text-neutral-800 dark:text-neutral-400">
@@ -211,7 +197,7 @@ const TextUploader: React.FC<TextUploaderProps> = ({
             <button
               type="button"
               onClick={handleReset}
-              className="text-red-600 text-xs underline hover:text-red-800 transition-colors"
+              className="text-red-600 dark:text-red-700  cursor-pointer text-xs underline hover:text-red-800 transition-colors"
             >
               {t("translation.removeFile")}
             </button>
@@ -262,7 +248,7 @@ const TextUploader: React.FC<TextUploaderProps> = ({
                 {t("translation.uploadedSuccessfully")}
               </div>
               <textarea
-                className="w-full border border-gray-300 rounded-lg p-3 text-sm font-monlam leading-relaxed bg-gray-50 dark:bg-neutral-700"
+                className="w-full border border-gray-300 dark:border-neutral-700 rounded-lg p-3 text-sm leading-relaxed bg-gray-50 dark:bg-neutral-800"
                 rows={10}
                 readOnly
                 value={fileContent}
@@ -273,7 +259,6 @@ const TextUploader: React.FC<TextUploaderProps> = ({
         </div>
       )}
 
-      {/* File size validation error */}
       {fileSizeError && (
         <div className="p-4 rounded-lg bg-red-50 border border-red-200">
           <div className="flex items-start gap-3">
@@ -288,7 +273,6 @@ const TextUploader: React.FC<TextUploaderProps> = ({
         </div>
       )}
 
-      {/* Upload mutation error */}
       {errorMessage && (
         <div className="p-4 rounded-lg bg-red-50 border border-red-200">
           <div className="flex items-start gap-3">

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FileText, MoreVertical, Users, Share2 } from "lucide-react";
+import { FileText, MoreVertical, Share2 } from "lucide-react";
 import DocIcon from "@/assets/doc_icon.png";
 import {
   DropdownMenu,
@@ -11,93 +11,72 @@ import { RiDeleteBin6Line } from "react-icons/ri";
 import { BiRename } from "react-icons/bi";
 import { useTranslation } from "react-i18next";
 import { MdPublic } from "react-icons/md";
+import { OpenInNewTab } from "../v2/ui/atoms/Icons/Icons";
 
-interface ProjectItemProps {
-  title: string;
-  subtitle?: string;
-  date: string;
-  owner?: string;
-  hasDocument?: boolean;
-  hasSharedUsers?: boolean;
-  hasPermission?: boolean;
-  updateDocument: (e: React.MouseEvent) => void;
-  deleteDocument: (e: React.MouseEvent) => void;
-  shareDocument: (e: React.MouseEvent) => void;
-  view: "grid" | "list";
-  status?: string;
-  documentCount?: number;
-  url?: string;
-  isPublic?: boolean;
-}
-
-const ProjectItem: React.FC<ProjectItemProps> = ({
-  title,
-  subtitle,
-  date,
-  owner,
-  hasDocument = false,
-  hasSharedUsers = false,
-  hasPermission = false,
-  updateDocument,
-  deleteDocument,
-  shareDocument,
-  view,
-  documentCount = 0,
+const ProjectItem = ({
+  project,
+  currentUserId,
+  formattedDate,
   url,
-  isPublic = false,
-}) => {
+  view,
+  onUpdate,
+  onDelete,
+  onShare,
+}: any) => {
+  const { t } = useTranslation();
+  const owner =
+    project.ownerId === currentUserId
+      ? t("projects.me")
+      : project.owner?.username ?? "";
+
+  const hasPermission = project.ownerId === currentUserId;
+  const isPublic = project.isPublic;
+  const updateDocument = onUpdate;
+  const deleteDocument = onDelete;
+  const shareDocument = onShare;
   if (view === "list") {
     return (
-      <div className="flex items-center py-2 px-1 border-b border-gray-200 dark:border-neutral-700 hover:bg-secondary-50 hover:dark:bg-neutral-900/40 transition-all rounded-md">
+      <div className="flex items-center py-2 px-1 border-b border-gray-200 dark:border-neutral-700 hover:bg-zinc-50 hover:dark:bg-neutral-800 transition-all">
         <div className="flex-shrink-0 mr-4 w-[26px] flex justify-center">
           <img alt="icon" src={DocIcon} width={26} className="object-contain" />
         </div>
 
-        <div className="flex-grow  w-fit md:w-auto">
-          <div className="flex items-center">
-            <span className="flex text-sm font-monlam-2 truncate capitalize font-semibold tracking-wider">
-              {title}
+        <div className="flex-grow w-fit md:w-auto">
+          <div className="flex space-x-2 items-center">
+            <span className="inline-block text-sm text-foreground capitalize min-w-0 max-w-3xs lg:max-w-xs overflow-hidden truncate">
+              {project.name}
             </span>
 
-            {hasDocument && (
-              <span className="ml-2 p-1 flex items-center">
-                <FileText size={16} className="text-gray-500" />
-                {documentCount > 0 && (
-                  <span className="ml-1 text-xs text-gray-500">
-                    {documentCount}
-                  </span>
-                )}
-              </span>
-            )}
-            {hasSharedUsers && (
-              <span className="ml-1 p-1">
-                <Users size={16} className="text-gray-500" />
+            {project.roots.length > 0 && (
+              <span className="flex gap-x-1 items-center">
+                <FileText size={16} className="text-zinc-500" />
+                <span className="text-xs text-zinc-500">
+                  {project.roots.length}
+                </span>
               </span>
             )}
           </div>
-          {subtitle && (
-            <p className="text-xs font-monlam-2  text-neutral-500 dark:text-neutral-400 truncate leading-[normal]">
-              {subtitle}
+          {project.roots.length > 0 && (
+            <p className="text-xs text-zinc-500 dark:text-neutral-400 truncate leading-[normal]">
+              {project.roots[0].name}
             </p>
           )}
-          {/* Mobile: Show owner and date below title */}
-          <div className="flex items-center gap-4 mt-1 text-xs text-neutral-500 dark:text-neutral-400 sm:hidden">
+          <div className="flex items-center gap-2 mt-2 text-xs text-zinc-500 dark:text-zinc-400 md:hidden">
             <span>{owner ?? "—"}</span>
             <span>•</span>
-            <span>{date}</span>
+            <span>{formattedDate}</span>
           </div>
         </div>
 
-        {/* Desktop: Show owner and date in separate columns */}
-        <div className="hidden sm:flex items-center flex-shrink-0 text-sm text-neutral-500 dark:text-neutral-400 mx-4 w-36 text-right">
+        <div className="hidden md:flex items-center flex-shrink-0 text-sm text-zinc-500 dark:text-zinc-400 mx-4 w-36 text-right">
           {owner ?? "—"}
           {isPublic && (
             <MdPublic size={16} className="text-gray-500 ml-2" title="Public" />
           )}
         </div>
 
-        <div className="hidden sm:flex flex-shrink-0 text-sm text-neutral-500 dark:text-neutral-400 w-36">
-          {date}
+        <div className="hidden md:flex flex-shrink-0 text-sm text-zinc-500 dark:text-zinc-400 w-36">
+          {formattedDate}
         </div>
 
         <div className="flex-shrink-0 ml-2 w-[52px] flex justify-center">
@@ -114,53 +93,39 @@ const ProjectItem: React.FC<ProjectItemProps> = ({
   }
 
   return (
-    <div className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-      <div className="space-y-2">
-        <div className="flex items-center">
-          <div className="text-large truncate capitalize font-semibold tracking-wider">
-            {title}
+    <div className="h-full bg-white border dark:border-neutral-700 dark:bg-neutral-800  border-gray-200 transition-all cursor-pointer">
+      <div className="flex justify-between items-start">
+        <div className="w-full px-2 py-4">
+          <div className="flex items-center  justify-between">
+            <p className="text-sm capitalize font-medium text-foreground truncate">{project.name}</p>
+            <ProjectItemDropdownMenu
+              hasPermission={hasPermission}
+              updateDocument={updateDocument}
+              deleteDocument={deleteDocument}
+              shareDocument={shareDocument}
+              url={url}
+            />
           </div>
-        </div>
-        {subtitle && (
-          <p className="text-xs text-gray-500 truncate">{subtitle}</p>
-        )}
 
-        <div className="flex items-center mt-2 justify-between">
-          <div className="flex item-center">
-            {hasDocument && (
-              <div className="bg-secondary-100 p-2 rounded-full flex gap-1 items-center mx-1">
-                <FileText size={16} className="text-secondary-500" />
-                {documentCount > 0 && (
-                  <span className=" text-xs font-medium text-secondary-700">
-                    {documentCount}
-                  </span>
-                )}
-              </div>
-            )}
-            <div className="flex items-center text-xs text-gray-500">
-              <span className="mr-2">{date}</span>
-              {owner && <span>· {owner}</span>}
-              {isPublic && (
-                <MdPublic
-                  size={16}
-                  className="text-gray-500 ml-2"
-                  title="Public"
-                />
-              )}
-            </div>
-            {hasSharedUsers && (
-              <span>
-                <Users size={16} className="text-gray-500" />
-              </span>
-            )}
-          </div>
-          <ProjectItemDropdownMenu
-            hasPermission={hasPermission}
-            updateDocument={updateDocument}
-            deleteDocument={deleteDocument}
-            shareDocument={shareDocument}
-            url={url}
-          />
+          {project.roots.length > 0 ? (
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 flex items-center">
+              <span className="truncate">{project.roots[0].name}</span>
+            </p>
+          ) : (
+            <p className="text-xs text-zinc-400 italic">Empty project</p>
+          )}
+        </div>
+      </div>
+
+      <div className="p-2 bg-zinc-50 dark:bg-neutral-700 flex rounded-t-sm items-center justify-between text-xs text-zinc-400 dark:text-zinc-400">
+        {project.roots.length > 0 && (
+          <span title="document count" className="bg-blue-100 dark:bg-zinc-800 dark:text-zinc-600 text-blue-400 border-1 border-blue-400  dark:border-zinc-600 px-1.5 py-0.5">
+            {project.roots.length}
+          </span>
+        )}
+        <div className="flex items-center gap-2">
+          <span>{formattedDate}</span>
+          {isPublic && <MdPublic size={14} />}
         </div>
       </div>
     </div>
@@ -180,6 +145,7 @@ function ProjectItemDropdownMenu({
   readonly shareDocument: (e: React.MouseEvent) => void;
   readonly url?: string;
 }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const handleOpenClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -202,12 +168,12 @@ function ProjectItemDropdownMenu({
     }
     setOpen(false);
   };
-  const { t } = useTranslation();
+
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <button className="p-3 rounded-lg" onClick={handleOpenClick}>
-          <MoreVertical size={16} className="text-gray-500" />
+        <button className="rounded-lg" onClick={handleOpenClick}>
+          <MoreVertical size={16} className="text-zinc-500" />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
@@ -229,15 +195,7 @@ function ProjectItemDropdownMenu({
           <Share2 size={16} /> {t("common.share")}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleOpenInNewTab}>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            height="24px"
-            viewBox="0 -960 960 960"
-            width="24px"
-            fill="gray"
-          >
-            <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h560v-280h80v280q0 33-23.5 56.5T760-120H200Zm188-212-56-56 372-372H560v-80h280v280h-80v-144L388-332Z" />
-          </svg>
+          <OpenInNewTab />
           {t("common.openinnewtab")}
         </DropdownMenuItem>
       </DropdownMenuContent>

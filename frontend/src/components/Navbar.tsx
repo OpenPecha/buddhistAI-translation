@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-
-import { useAuth } from "../auth/use-auth-hook";
 import { Button } from "./ui/button";
 import { updateProject } from "@/api/project";
 import EditableText from "./ui/EditableText";
@@ -13,6 +11,7 @@ import ShareModal from "./ShareModal";
 import { BiShare } from "react-icons/bi";
 import ProfileArea from "./ProfileArea";
 import { useTranslation } from "react-i18next";
+import SettingsButton from "./setting/SettingsButton";
 
 type Project = {
   id: string;
@@ -24,13 +23,9 @@ interface NavbarProps {
 }
 
 const Navbar = ({ project }: NavbarProps) => {
-  const { login, isAuthenticated } = useAuth();
   const [showPermissionsModal, setShowPermissionsModal] = useState(false);
   const { i18n } = useTranslation();
   const currentLanguage = i18n.language;
-  const handleAuth0Login = () => {
-    login(false);
-  };
 
   const permissionsOpen = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -39,9 +34,8 @@ const Navbar = ({ project }: NavbarProps) => {
   };
   return (
     <nav
-      className={`${
-        currentLanguage === "bo" && " leading-[normal]"
-      } px-6 pt-2 flex justify-between items-center`}
+      className={`${currentLanguage === "bo" && " leading-[normal]"
+        } px-6 pt-2 flex justify-between items-center`}
     >
       {/* Logo and Brand */}
       <div className="flex gap-2 items-center">
@@ -62,26 +56,20 @@ const Navbar = ({ project }: NavbarProps) => {
       </div>
 
       {/* Navigation Menu */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2">
+        <SettingsButton />
         <NavMenuList permissionsOpen={permissionsOpen} />
-        {isAuthenticated ? (
-          <ProfileArea />
-        ) : (
-          <Button
-            onClick={handleAuth0Login}
-            className="px-4 py-2 bg-secondary-500 text-white text-sm font-medium rounded-lg shadow hover:bg-secondary-600 transition"
-          >
-            Login
-          </Button>
-        )}
+        <ProfileArea />
       </div>
       {showPermissionsModal && (
         <ShareModal
           projectId={project.id}
           projectName={project.name}
-          onClose={() => setShowPermissionsModal(false)}
+          open={showPermissionsModal}
+          onOpenChange={setShowPermissionsModal}
         />
       )}
+
     </nav>
   );
 };
@@ -117,11 +105,11 @@ function ProjectNameInput({ project }: { readonly project: Project }) {
   };
 
   return (
-    <div className="inline-block font-monlam text-lg leading-[normal]">
+    <div className="inline-block text-lg">
       <EditableText
         initialText={project.name}
         onSave={handleSave}
-        className="text-md text-gray-500 dark:text-neutral-300 hover:text-gray-700 transition capitalize hover:outline hover:outline-gray-300"
+        className="text-md text-gray-500 dark:text-neutral-300 hover:text-gray-700 transition capitalize outline-none ring-0"
         placeholder="Project name"
       />
     </div>
@@ -139,7 +127,6 @@ export function NavMenuList({
       <Button
         onClick={permissionsOpen}
         variant="outline"
-        className="flex items-center gap-1.5 text-sm bg-secondary-50 dark:bg-neutral-800 dark:hover:bg-neutral-700 hover:bg-secondary-100 text-secondary-700 dark:text-neutral-300 border-secondary-200 rounded-full px-3 py-1 h-auto"
         aria-label="Share document"
       >
         <BiShare className="text-secondary-600 dark:text-neutral-300" />
