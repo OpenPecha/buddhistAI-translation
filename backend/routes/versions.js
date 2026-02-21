@@ -26,7 +26,7 @@ const { authenticate } = require("../middleware/authenticate"); // Assuming auth
  *   }
  * ]
  */
-router.get("/:docId", authenticate, async (req, res) => {
+router.get("/:docId", async (req, res) => {
   try {
     const { docId } = req.params;
 

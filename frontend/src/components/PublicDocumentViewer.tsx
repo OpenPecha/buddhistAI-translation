@@ -1,6 +1,6 @@
 import React, { memo, useCallback, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, AlertCircle, Globe, Eye, FileText } from "lucide-react";
+import { ArrowLeft, AlertCircle, Globe, Eye, FileText, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/auth/use-auth-hook";
 // import { EditorProvider } from "@/contexts/EditorContext";
 import { CommentProvider } from "@/contexts/CommentContext";
+import { useTheme } from "@/contexts/ThemeProvider";
 import { FootNoteProvider } from "@/contexts/FootNoteContext";
 import { useCurrentDoc } from "@/hooks/useCurrentDoc";
 import { useTranslationSidebarParams } from "@/hooks/useQueryParams";
@@ -32,7 +33,7 @@ const PublicDocumentEditor = memo(
         liveEnabled={false}
         docId={docId}
         isEditable={false}
-        currentDoc={currentDoc}
+        currentDoc={currentDoc.data}
       />
     );
   }
@@ -105,18 +106,18 @@ const PublicDocumentViewer: React.FC<PublicDocumentViewerProps> = ({
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-neutral-900 flex items-center justify-center">
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Eye className="h-5 w-5" />
+              <Eye className="h-5 w-5 text-secondary-600 dark:text-neutral-300" />
               Loading Document
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading document...</p>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 dark:border-neutral-300 mx-auto mb-4"></div>
+              <p className="text-gray-600 dark:text-neutral-300">Loading document...</p>
             </div>
           </CardContent>
         </Card>
@@ -126,11 +127,11 @@ const PublicDocumentViewer: React.FC<PublicDocumentViewerProps> = ({
 
   if (error || !documentData) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-neutral-900 flex items-center justify-center">
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <AlertCircle className="h-5 w-5 text-red-600" />
+              <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
               Access Denied
             </CardTitle>
           </CardHeader>
@@ -148,7 +149,7 @@ const PublicDocumentViewer: React.FC<PublicDocumentViewerProps> = ({
                 variant="outline"
                 className="flex-1"
               >
-                <ArrowLeft className="h-4 w-4 mr-2" />
+                <ArrowLeft className="h-4 w-4 mr-2 text-secondary-600 dark:text-neutral-300" />
                 <span className="hidden md:block">
                   {isAuthenticated ? "Back to Dashboard" : "Go to Login"}
                 </span>
@@ -161,99 +162,96 @@ const PublicDocumentViewer: React.FC<PublicDocumentViewerProps> = ({
   }
 
   return (
-    // <EditorProvider>
-      <CommentProvider>
-        <AnnotationProvider>
-          <FootNoteProvider>
-            {/* Navbar rendered in portal - exactly like DocumentWrapper */}
-            {createPortal(
-              <PublicNavbar
-                document={documentData}
-                onBackToApp={handleBackToApp}
-                selectedTranslationId={selectedTranslationId}
-              />,
-              window.document.getElementById("navbar")!
-            )}
+    <CommentProvider>
+      <AnnotationProvider>
+        <FootNoteProvider>
+          {/* Navbar rendered in portal - exactly like DocumentWrapper */}
+          {createPortal(
+            <PublicNavbar
+              document={documentData}
+              onBackToApp={handleBackToApp}
+              selectedTranslationId={selectedTranslationId}
+            />,
+            window.document.getElementById("navbar")!
+          )}
 
-            {/* Main editor container - exactly like DocumentWrapper */}
-            <div className="grid grid-rows-[1fr] h-full">
-              <div className="relative flex px-2 w-full overflow-hidden">
-                {!selectedTranslationId ? (
-                  <>
+          {/* Main editor container - exactly like DocumentWrapper */}
+          <div className="grid grid-rows-[1fr] h-full">
+            <div className="relative flex px-2 w-full overflow-hidden">
+              {!selectedTranslationId ? (
+                <>
+                  <PublicDocumentEditor
+                    docId={documentId}
+                    currentDoc={documentData}
+                  />
+                  <PublicSideMenu
+                    documentId={documentId!}
+                    onSelectTranslation={handleSelectTranslation}
+                  />
+                </>
+              ) : (
+                <div className="relative h-full w-full group">
+                  {/* Close button positioned dynamically in the middle of the gutter */}
+                  <button
+                    className="absolute bg-neutral-50 dark:bg-neutral-600 border-2 border-gray-300 cursor-pointer rounded-full p-2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-neutral-700 dark:text-neutral-300 text-xl opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-hover/translation:opacity-100 duration-200 shadow-lg hover:shadow-xl hover:border-gray-400 transition-opacity z-10"
+                    style={{ left: isMobile ? "97%" : `${splitPosition}%` }}
+                    onClick={() => clearSelectedTranslationId()}
+                    aria-label="Close translation view"
+                    title="Close translation view"
+                    type="button"
+                  >
+                    <IoIosArrowForward />
+                  </button>
+
+                  <Split
+                    sizes={[splitPosition, 100 - splitPosition]}
+                    minSize={[300, 400]}
+                    expandToMin={false}
+                    gutterSize={8}
+                    gutterAlign="center"
+                    snapOffset={30}
+                    dragInterval={1}
+                    direction={isMobile ? "vertical" : "horizontal"}
+                    cursor="col-resize"
+                    className={`split-pane h-full flex w-full overflow-hidden ${isMobile ? "flex-col" : "flex-row"
+                      }`}
+                    gutterStyle={() => ({
+                      backgroundColor: "#e5e7eb",
+                      border: "1px solid #d1d5db",
+                      cursor: "col-resize",
+                      position: "relative",
+                    })}
+                    onDragStart={() => {
+                      document.body.style.cursor = "col-resize";
+                    }}
+                    onDragEnd={(sizes) => {
+                      document.body.style.cursor = "";
+                      setSplitPosition(sizes[0]);
+                    }}
+                    onDrag={(sizes) => {
+                      setSplitPosition(sizes[0]);
+                    }}
+                  >
+                    {/* Root Editor */}
                     <PublicDocumentEditor
                       docId={documentId}
                       currentDoc={documentData}
                     />
-                    <PublicSideMenu
-                      documentId={documentId!}
-                      onSelectTranslation={handleSelectTranslation}
-                    />
-                  </>
-                ) : (
-                  <div className="relative h-full w-full group">
-                    {/* Close button positioned dynamically in the middle of the gutter */}
-                    <button
-                      className="absolute bg-neutral-50 dark:bg-neutral-600 border-2 border-gray-300 cursor-pointer rounded-full p-2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-neutral-700 dark:text-neutral-300 text-xl opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-hover/translation:opacity-100 duration-200 shadow-lg hover:shadow-xl hover:border-gray-400 transition-opacity z-10"
-                      style={{ left: isMobile ? "97%" : `${splitPosition}%` }}
-                      onClick={() => clearSelectedTranslationId()}
-                      aria-label="Close translation view"
-                      title="Close translation view"
-                      type="button"
-                    >
-                      <IoIosArrowForward />
-                    </button>
 
-                    <Split
-                      sizes={[splitPosition, 100 - splitPosition]}
-                      minSize={[300, 400]}
-                      expandToMin={false}
-                      gutterSize={8}
-                      gutterAlign="center"
-                      snapOffset={30}
-                      dragInterval={1}
-                      direction={isMobile ? "vertical" : "horizontal"}
-                      cursor="col-resize"
-                      className={`split-pane h-full flex w-full overflow-hidden ${
-                        isMobile ? "flex-col" : "flex-row"
-                      }`}
-                      gutterStyle={() => ({
-                        backgroundColor: "#e5e7eb",
-                        border: "1px solid #d1d5db",
-                        cursor: "col-resize",
-                        position: "relative",
-                      })}
-                      onDragStart={() => {
-                        document.body.style.cursor = "col-resize";
-                      }}
-                      onDragEnd={(sizes) => {
-                        document.body.style.cursor = "";
-                        setSplitPosition(sizes[0]);
-                      }}
-                      onDrag={(sizes) => {
-                        setSplitPosition(sizes[0]);
-                      }}
-                    >
-                      {/* Root Editor */}
-                      <PublicDocumentEditor
-                        docId={documentId}
-                        currentDoc={documentData}
+                    {/* Translation Editor */}
+                    <div className="group/translation h-full w-full">
+                      <PublicTranslationEditor
+                        selectedTranslationId={selectedTranslationId}
                       />
-
-                      {/* Translation Editor */}
-                      <div className="group/translation h-full w-full">
-                        <PublicTranslationEditor
-                          selectedTranslationId={selectedTranslationId}
-                        />
-                      </div>
-                    </Split>
-                  </div>
-                )}
-              </div>
+                    </div>
+                  </Split>
+                </div>
+              )}
             </div>
-          </FootNoteProvider>
-        </AnnotationProvider>
-      </CommentProvider>
-    // </EditorProvider>
+          </div>
+        </FootNoteProvider>
+      </AnnotationProvider>
+    </CommentProvider>
   );
 };
 
@@ -280,6 +278,7 @@ const PublicNavbar: React.FC<{
   selectedTranslationId: string | null;
 }> = ({ document, onBackToApp, selectedTranslationId }) => {
   const { isAuthenticated } = useAuth();
+  const { theme, resolvedTheme, setTheme } = useTheme();
   const { currentDoc: translationDoc } = useCurrentDoc(
     selectedTranslationId || undefined,
     true
@@ -289,28 +288,35 @@ const PublicNavbar: React.FC<{
   const displayDocument = selectedTranslationId ? translationDoc : document;
   const isViewingTranslation = !!selectedTranslationId;
 
+  const toggleTheme = () => {
+    const isDark = resolvedTheme === "dark";
+    setTheme(isDark ? "light" : "dark");
+  };
+
+  const isDark = resolvedTheme === "dark";
+
   return (
-    <div className="bg-white border-b mb-3">
+    <div className="bg-white dark:bg-neutral-900 border-b mb-3">
       <div className="max-w-7xl mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <FileText className="h-6 w-6 text-secondary-600" />
+            <FileText className="h-6 w-6 text-secondary-600 dark:text-neutral-300" />
             <div>
-              <h1 className="text-lg font-semibold text-gray-900">
+              <h1 className="text-lg font-semibold text-gray-900 dark:text-neutral-300">
                 {displayDocument?.name || "Document"}
                 {isViewingTranslation && (
-                  <span className="text-sm font-normal text-gray-500 ml-2">
+                  <span className="text-sm font-normal text-gray-500 dark:text-neutral-300 ml-2">
                     (Translation)
                   </span>
                 )}
               </h1>
               <div className="flex items-center gap-2 mt-1">
                 <Badge variant="secondary" className="text-xs">
-                  <Globe className="h-3 w-3 mr-1" />
+                  <Globe className="h-3 w-3 mr-1 text-secondary-600 dark:text-neutral-300" />
                   Public Document
                 </Badge>
                 <Badge variant="outline" className="text-xs">
-                  <Eye className="h-3 w-3 mr-1" />
+                  <Eye className="h-3 w-3 mr-1 text-secondary-600 dark:text-neutral-300" />
                   Read-Only
                 </Badge>
                 {displayDocument?.language && (
@@ -322,12 +328,26 @@ const PublicNavbar: React.FC<{
             </div>
           </div>
 
-          <Button onClick={onBackToApp} variant="outline" size="sm">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            <span className="hidden md:block">
-              {isAuthenticated ? "Back to Dashboard" : "Sign In to Collaborate"}
-            </span>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={toggleTheme}
+              variant="outline"
+              size="icon"
+              aria-label="Toggle theme"
+            >
+              {isDark ? (
+                <Sun className="h-4 w-4 text-secondary-600 dark:text-neutral-300" />
+              ) : (
+                <Moon className="h-4 w-4 text-secondary-600 dark:text-neutral-300" />
+              )}
+            </Button>
+            <Button onClick={onBackToApp} variant="outline" size="sm">
+              <ArrowLeft className="h-4 w-4 mr-2 text-secondary-600 dark:text-neutral-300" />
+              <span className="hidden md:block">
+                {isAuthenticated ? "Back to Dashboard" : "Sign In to Collaborate"}
+              </span>
+            </Button>
+          </div>
         </div>
       </div>
     </div>

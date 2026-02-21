@@ -1,4 +1,4 @@
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useEffectEvent } from "react";
 import { useAuth } from "@/auth/use-auth-hook";
 import Footer from "./Footbar";
 import Navbar from "./Navbar";
@@ -7,12 +7,13 @@ import { Navigate } from "react-router-dom";
 export function Layout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, getToken } = useAuth();
 
+  const effect = useEffectEvent(() => {
+    if (isAuthenticated) getToken();
+  });
+
   useEffect(() => {
-    if (isAuthenticated) {
-      getToken();
-    }
-    return () => { };
-  }, []);
+    effect();
+  }, [effect]);
 
   if (!isAuthenticated) return <Navigate to="/" />;
 

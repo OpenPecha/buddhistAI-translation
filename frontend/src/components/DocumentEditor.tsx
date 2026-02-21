@@ -78,9 +78,9 @@ export const RealtimeDocumentEditor = ({
 
   const currentVersionData = currentDoc?.currentVersion
     ? {
-        id: currentDoc.currentVersion.id,
-        content: currentDoc.currentVersion.content,
-      }
+      id: currentDoc.currentVersion.id,
+      content: currentDoc.currentVersion.content,
+    }
     : undefined;
 
   return (
@@ -132,11 +132,10 @@ export const NormalDocumentEditor = ({
 }) => {
   const currentVersionData = currentDoc?.currentVersion
     ? {
-        id: currentDoc.currentVersion.id,
-        content: currentDoc.currentVersion.content,
-      }
+      id: currentDoc.currentVersion.id,
+      content: currentDoc.currentVersion.content,
+    }
     : undefined;
-
   return (
     <QuillVersionProvider
       docId={docId}
