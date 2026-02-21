@@ -28,6 +28,9 @@ interface PublicDocumentViewerProps {
 
 const PublicDocumentEditor = memo(
   ({ docId, currentDoc }: { docId: string | undefined; currentDoc: any }) => {
+    if (!currentDoc) {
+      return <div>Loading...</div>;
+    }
     return (
       <DocumentEditor
         liveEnabled={false}
@@ -38,6 +41,120 @@ const PublicDocumentEditor = memo(
     );
   }
 );
+
+
+// Translation Editor Component for Public View
+const PublicTranslationEditor: React.FC<{
+  selectedTranslationId: string;
+}> = ({ selectedTranslationId }) => {
+  const {
+    data: documentData,
+    isLoading,
+    error,
+  } = useFetchPublicDocument(selectedTranslationId);
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+  if (error) {
+    return <div>Error: {error.message}</div>;
+  }
+  return (
+    <div className="h-full w-full">
+      <PublicDocumentEditor
+        docId={selectedTranslationId}
+        currentDoc={documentData}
+      />
+    </div>
+  );
+};
+
+// Custom navbar for public view
+const PublicNavbar: React.FC<{
+  document: any;
+  onBackToApp: () => void;
+  selectedTranslationId: string | null;
+}> = ({ document, onBackToApp, selectedTranslationId }) => {
+  const { isAuthenticated } = useAuth();
+  const { theme, resolvedTheme, setTheme } = useTheme();
+  const { currentDoc: translationDoc } = useCurrentDoc(
+    selectedTranslationId || undefined,
+    true
+  );
+
+  // Show translation info if viewing a translation
+  const displayDocument = selectedTranslationId ? translationDoc : document;
+  const isViewingTranslation = !!selectedTranslationId;
+
+  const toggleTheme = () => {
+    const isDark = resolvedTheme === "dark";
+    setTheme(isDark ? "light" : "dark");
+  };
+
+  const isDark = resolvedTheme === "dark";
+
+  return (
+    <div className="bg-white dark:bg-neutral-900 border-b mb-3">
+      <div className="max-w-7xl mx-auto px-4 py-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <FileText className="h-6 w-6 text-secondary-600 dark:text-neutral-300" />
+            <div>
+              <h1 className="text-lg font-semibold text-gray-900 dark:text-neutral-300">
+                {displayDocument?.name || "Document"}
+                {isViewingTranslation && (
+                  <span className="text-sm font-normal text-gray-500 dark:text-neutral-300 ml-2">
+                    (Translation)
+                  </span>
+                )}
+              </h1>
+              <div className="flex items-center gap-2 mt-1">
+                <Badge variant="secondary" className="text-xs">
+                  <Globe className="h-3 w-3 mr-1 text-secondary-600 dark:text-neutral-300" />
+                  Public Document
+                </Badge>
+                <Badge variant="outline" className="text-xs">
+                  <Eye className="h-3 w-3 mr-1 text-secondary-600 dark:text-neutral-300" />
+                  Read-Only
+                </Badge>
+                {displayDocument?.language && (
+                  <Badge variant="outline" className="text-xs">
+                    {displayDocument.language.toUpperCase()}
+                  </Badge>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={toggleTheme}
+              variant="outline"
+              size="icon"
+              aria-label="Toggle theme"
+            >
+              {isDark ? (
+                <Sun className="h-4 w-4 text-secondary-600 dark:text-neutral-300" />
+              ) : (
+                <Moon className="h-4 w-4 text-secondary-600 dark:text-neutral-300" />
+              )}
+            </Button>
+            <Button onClick={onBackToApp} variant="outline" size="sm">
+              <ArrowLeft className="h-4 w-4 mr-2 text-secondary-600 dark:text-neutral-300" />
+              <span className="hidden md:block">
+                {isAuthenticated ? "Back to Dashboard" : "Sign In to Collaborate"}
+              </span>
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+
+
+
 
 const PublicDocumentViewer: React.FC<PublicDocumentViewerProps> = ({
   documentId: propDocumentId,
@@ -255,103 +372,6 @@ const PublicDocumentViewer: React.FC<PublicDocumentViewerProps> = ({
   );
 };
 
-// Translation Editor Component for Public View
-const PublicTranslationEditor: React.FC<{
-  selectedTranslationId: string;
-}> = ({ selectedTranslationId }) => {
-  const { currentDoc } = useCurrentDoc(selectedTranslationId);
 
-  return (
-    <div className="h-full w-full">
-      <PublicDocumentEditor
-        docId={selectedTranslationId}
-        currentDoc={currentDoc}
-      />
-    </div>
-  );
-};
-
-// Custom navbar for public view
-const PublicNavbar: React.FC<{
-  document: any;
-  onBackToApp: () => void;
-  selectedTranslationId: string | null;
-}> = ({ document, onBackToApp, selectedTranslationId }) => {
-  const { isAuthenticated } = useAuth();
-  const { theme, resolvedTheme, setTheme } = useTheme();
-  const { currentDoc: translationDoc } = useCurrentDoc(
-    selectedTranslationId || undefined,
-    true
-  );
-
-  // Show translation info if viewing a translation
-  const displayDocument = selectedTranslationId ? translationDoc : document;
-  const isViewingTranslation = !!selectedTranslationId;
-
-  const toggleTheme = () => {
-    const isDark = resolvedTheme === "dark";
-    setTheme(isDark ? "light" : "dark");
-  };
-
-  const isDark = resolvedTheme === "dark";
-
-  return (
-    <div className="bg-white dark:bg-neutral-900 border-b mb-3">
-      <div className="max-w-7xl mx-auto px-4 py-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <FileText className="h-6 w-6 text-secondary-600 dark:text-neutral-300" />
-            <div>
-              <h1 className="text-lg font-semibold text-gray-900 dark:text-neutral-300">
-                {displayDocument?.name || "Document"}
-                {isViewingTranslation && (
-                  <span className="text-sm font-normal text-gray-500 dark:text-neutral-300 ml-2">
-                    (Translation)
-                  </span>
-                )}
-              </h1>
-              <div className="flex items-center gap-2 mt-1">
-                <Badge variant="secondary" className="text-xs">
-                  <Globe className="h-3 w-3 mr-1 text-secondary-600 dark:text-neutral-300" />
-                  Public Document
-                </Badge>
-                <Badge variant="outline" className="text-xs">
-                  <Eye className="h-3 w-3 mr-1 text-secondary-600 dark:text-neutral-300" />
-                  Read-Only
-                </Badge>
-                {displayDocument?.language && (
-                  <Badge variant="outline" className="text-xs">
-                    {displayDocument.language.toUpperCase()}
-                  </Badge>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Button
-              onClick={toggleTheme}
-              variant="outline"
-              size="icon"
-              aria-label="Toggle theme"
-            >
-              {isDark ? (
-                <Sun className="h-4 w-4 text-secondary-600 dark:text-neutral-300" />
-              ) : (
-                <Moon className="h-4 w-4 text-secondary-600 dark:text-neutral-300" />
-              )}
-            </Button>
-            <Button onClick={onBackToApp} variant="outline" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2 text-secondary-600 dark:text-neutral-300" />
-              <span className="hidden md:block">
-                {isAuthenticated ? "Back to Dashboard" : "Sign In to Collaborate"}
-              </span>
-            </Button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 export default PublicDocumentViewer;
