@@ -45,25 +45,6 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({
         <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
           {t("translation.welcomeToTranslator")}
         </h3>
-
-        <div className="space-y-2 text-sm">
-          <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
-            <code className="bg-blue-50 dark:bg-blue-950 px-2 py-1 rounded">
-              {t("translation.commandTranslate")}
-            </code>
-            <span className="text-gray-600 dark:text-gray-400">
-              - {t("translation.translateSelectedText")}
-            </span>
-          </div>
-          <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
-            <code className="bg-green-50 dark:bg-green-950 px-2 py-1 rounded">
-              {t("translation.commandGlossary")}
-            </code>
-            <span className="text-gray-600 dark:text-gray-400">
-              - {t("translation.extractGlossaryTerms")}
-            </span>
-          </div>
-        </div>
       </div>
     );
   }

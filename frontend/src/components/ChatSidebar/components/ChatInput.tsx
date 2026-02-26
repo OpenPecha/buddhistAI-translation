@@ -12,7 +12,6 @@ import { ModelSelector } from "@/components/ui/ModelSelector";
 import { useTranslation } from "@/components/ChatSidebar/contexts/TranslationContext";
 
 import { type ModelName } from "@/api/translate";
-import { useEditor } from "@/hooks/useEditor";
 
 interface ChatInputProps {
   isProcessing?: boolean;
@@ -29,26 +28,19 @@ const ChatInput: React.FC<ChatInputProps> = ({
   const [input, setInput] = useState("");
   const [shouldStartTranslation, setShouldStartTranslation] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { getTextPairsByLineNumbers } = useEditor();
 
   const defaultPlaceholder =
     placeholder || t("translation.typePasteTextPlaceholder");
   const {
     isTranslating,
-    isExtractingGlossary,
     resetTranslations,
     resetGlossary,
-    hasActiveWorkflow,
-    resetActiveWorkflow,
     setManualText,
     setInputMode,
     startTranslation,
-    extractGlossaryFromEditors,
     manualText,
     inputMode,
-    selectedText,
     clearUISelection,
-    selectedTextLineNumbers,
     config,
     handleConfigChange,
   } = useTranslation();
@@ -92,63 +84,6 @@ const ChatInput: React.FC<ChatInputProps> = ({
     }
   }, [input, disabled, isTranslating, setInputMode, setManualText]);
 
-  // Handle quick command buttons for selected text
-  const handleTranslateSelected = useCallback(() => {
-    if (selectedText.trim() && !isTranslating) {
-      setInputMode("selection");
-      resetTranslations();
-      resetGlossary();
-      startTranslation();
-    }
-  }, [
-    selectedText,
-    isTranslating,
-    setInputMode,
-    resetTranslations,
-    resetGlossary,
-    startTranslation,
-  ]);
-
-  const handleGlossarySelected = useCallback(async () => {
-    if (selectedText.trim() && !isExtractingGlossary) {
-      // Create text pairs from selected text and corresponding translations
-
-      const textPairs = getTextPairsByLineNumbers();
-      if (!textPairs || textPairs.length === 0) {
-        console.warn("No valid text pairs found for glossary extraction");
-        return;
-      }
-      // Validate text pairs before sending
-      const validTextPairs = textPairs.filter(
-        (pair) =>
-          pair.original_text &&
-          pair.translated_text &&
-          pair.original_text.trim().length > 0 &&
-          pair.translated_text.trim().length > 0
-      );
-
-      if (validTextPairs.length === 0) {
-        console.warn("No valid text pairs after validation");
-        return;
-      }
-
-      setInputMode("selection");
-      resetTranslations();
-      resetGlossary();
-
-      // Use extractGlossaryFromEditors with validated text pairs
-      await extractGlossaryFromEditors(validTextPairs);
-    }
-  }, [
-    selectedText,
-    isExtractingGlossary,
-    getTextPairsByLineNumbers,
-    extractGlossaryFromEditors,
-    resetTranslations,
-    resetGlossary,
-    setInputMode,
-  ]);
-
   const handleKeyPress = useCallback(
     (e: KeyboardEvent<HTMLTextAreaElement>) => {
       if (e.key === "Enter" && !e.shiftKey) {
@@ -178,49 +113,6 @@ const ChatInput: React.FC<ChatInputProps> = ({
 
   return (
     <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
-      {/* Quick Commands for Selected Text */}
-      <div className="px-3 py-2 border-b border-gray-100 dark:border-gray-800 ">
-        {hasActiveWorkflow ? (
-          <Button
-            variant="ghost"
-            onClick={resetActiveWorkflow}
-            className="flex-shrink-0 h-7 justify-self-end text-xs gap-1 hover:bg-blue-50 hover:text-blue-600"
-          >
-            {t("translation.commandClear")}
-          </Button>
-        ) : (
-          <div className="flex gap-1 overflow-x-auto">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleTranslateSelected}
-              disabled={
-                !selectedText.trim() || isTranslating || isExtractingGlossary
-              }
-              className="flex-shrink-0 h-7 text-xs gap-1 cursor-pointer hover:bg-blue-50 hover:text-blue-600"
-              title="Translate selected text"
-            >
-              {t("translation.commandTranslate")}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleGlossarySelected}
-              disabled={
-                !selectedText.trim() ||
-                !selectedTextLineNumbers ||
-                isTranslating ||
-                isExtractingGlossary
-              }
-              className="flex-shrink-0 h-7 text-xs gap-1 cursor-pointer hover:bg-blue-50 hover:text-blue-600"
-              title="Extract glossary from selected text and corresponding translations"
-            >
-              {t("translation.commandGlossary")}
-            </Button>
-          </div>
-        )}
-      </div>
-
       {/* Input Area */}
       <div className="p-3">
         <div className="flex gap-2 items-center relative flex-col">
