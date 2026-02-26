@@ -1,4 +1,4 @@
-import { ChevronRight, MapPin, MessageSquare, Plus, X } from "lucide-react";
+import { MapPin, MessageSquare, Plus, X } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useTranslation as useTranslationI18next } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -8,9 +8,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import SettingsModal, {
-  TargetLanguageSelector,
-} from "./components/sidebar/SettingsModal";
+import { TargetLanguageSelector } from "./components/sidebar/SettingsModal";
 import {
   TranslationProvider,
   useTranslation,
@@ -27,7 +25,6 @@ interface ChatSidebarProps {
 const ChatSidebarContent: React.FC = () => {
   const { t } = useTranslationI18next();
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
   const { messages, clearHistory, messageCount, handleAction } = useChatFlow();
   const {
@@ -106,11 +103,10 @@ const ChatSidebarContent: React.FC = () => {
 
   const selectedLines =
     getLineRange(selectedTextLineNumbers)?.startLine ===
-    getLineRange(selectedTextLineNumbers)?.endLine
+      getLineRange(selectedTextLineNumbers)?.endLine
       ? `(${getLineRange(selectedTextLineNumbers)?.startLine})`
-      : `(${getLineRange(selectedTextLineNumbers)?.startLine} - ${
-          getLineRange(selectedTextLineNumbers)?.endLine
-        })`;
+      : `(${getLineRange(selectedTextLineNumbers)?.startLine} - ${getLineRange(selectedTextLineNumbers)?.endLine
+      })`;
   return (
     <div className="h-full w-full flex flex-col bg-white dark:bg-gray-900">
       {/* Header */}
@@ -132,12 +128,6 @@ const ChatSidebarContent: React.FC = () => {
               <Plus className="w-3 h-3" />
             </Button>
           )}
-          <SettingsModal
-            config={config}
-            isOpen={isSettingsModalOpen}
-            onOpenChange={setIsSettingsModalOpen}
-            onConfigChange={handleConfigChange}
-          />
         </div>
       </div>
       {/* Selected Text Display */}
