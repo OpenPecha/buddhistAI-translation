@@ -7,8 +7,18 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Bot } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Bot, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface AgentSelectorProps {
     value?: string;
@@ -20,6 +30,7 @@ const AgentSelector: React.FC<AgentSelectorProps> = ({
     onValueChange,
 }) => {
     const [selectedAgent, setSelectedAgent] = useState<string | undefined>(value);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
     const { agents, isLoading, error } = useAgents();
 
     const handleValueChange = (newValue: string) => {
@@ -45,38 +56,65 @@ const AgentSelector: React.FC<AgentSelectorProps> = ({
 
     return (
         <div className="flex flex-col gap-2">
-            <Select value={selectedAgent} onValueChange={handleValueChange}>
-                <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Choose an agent">
-                        {selectedAgent && (
-                            <div className="flex items-center gap-2">
-                                <Bot className="size-4" />
-                                <span>
-                                    {agents.find((a) => a.id === selectedAgent)?.name ||
-                                        "Select agent"}
-                                </span>
-                            </div>
-                        )}
-                    </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                    {agents.map((agent) => (
-                        <SelectItem key={agent.id} value={agent.id}>
-                            <div className="flex items-center gap-2">
-                                <Bot className="size-4" />
-                                <div className="flex flex-col">
-                                    <span className="font-medium">{agent.name}</span>
-                                    {agent.description && (
-                                        <span className="text-xs text-muted-foreground line-clamp-1">
-                                            {agent.description}
-                                        </span>
+            <div className="flex items-center gap-2">
+                <Select value={selectedAgent} onValueChange={handleValueChange}>
+                    <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Choose an agent">
+                            {selectedAgent && (
+                                <div className="flex items-center gap-2">
+                                    <Bot className="size-4" />
+                                    <span>
+                                        {agents.find((a) => a.id === selectedAgent)?.name ||
+                                            "Select agent"}
+                                    </span>
+                                </div>
+                            )}
+                        </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                        {agents.map((agent) => (
+                            <SelectItem key={agent.id} value={agent.id}>
+                                <div className="flex items-center gap-2">
+                                    <div className="flex flex-col">
+                                        <span className="font-medium">{agent.name}</span>
+                                        {agent.description && (
+                                            <span className="text-xs text-muted-foreground line-clamp-1">
+                                                {agent.description}
+                                            </span>
+                                        )}
+                                    </div>
+                                    {agent.system_assistance && (
+                                        <Badge>
+                                            System
+                                        </Badge>
                                     )}
                                 </div>
-                            </div>
-                        </SelectItem>
-                    ))}
-                </SelectContent>
-            </Select>
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+
+                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    <DialogTrigger asChild>
+                        <Button variant="outline" size="icon" className="shrink-0">
+                            <Plus className="size-4" />
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Create New Agent</DialogTitle>
+                            <DialogDescription>
+                                Create a new agent with custom settings and capabilities.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="py-4">
+                            <p className="text-sm text-muted-foreground">
+                                Agent creation form will go here
+                            </p>
+                        </div>
+                    </DialogContent>
+                </Dialog>
+            </div>
         </div>
     );
 };
