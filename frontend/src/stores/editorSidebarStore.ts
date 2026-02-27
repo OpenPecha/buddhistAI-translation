@@ -17,15 +17,11 @@ export const useEditorSidebarStore = create<EditorSidebarState>((set, get) => ({
   }));
  },
  toggleTab: (documentId: string, tabId: string) => {
-  set((state) => {
-    const currentTab = state.tabs[documentId];
-    const newTab = currentTab === tabId ? null : tabId;
-    return {
-      tabs: {
-        ...state.tabs,
-        [documentId]: newTab,
-      },
-    };
-  });  
+  set((state) => ({
+    tabs: {
+      ...state.tabs,
+      [documentId]: tabId,
+    },
+  }));
  },
 }));

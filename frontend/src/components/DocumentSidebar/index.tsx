@@ -122,7 +122,6 @@ const DocumentSidebar: React.FC<DocumentSidebarProps> = ({
             onBack={() => {
               setSidebarView(documentId, "list");
               setActiveThreadId(documentId, null);
-              // Clear the selection so auto-selection doesn't trigger
               setLineFocus(documentId, null);
             }}
           />
