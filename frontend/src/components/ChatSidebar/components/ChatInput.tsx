@@ -8,8 +8,15 @@ import {
 } from "react";
 import { useTranslation as useTranslationI18next } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { ModelSelector } from "@/components/ui/ModelSelector";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useTranslation } from "@/components/ChatSidebar/contexts/TranslationContext";
+import { useModels } from "@/hooks/useModels";
 
 import { type ModelName } from "@/api/translate";
 
@@ -44,6 +51,11 @@ const ChatInput: React.FC<ChatInputProps> = ({
     config,
     handleConfigChange,
   } = useTranslation();
+
+  const {
+    models,
+    isLoading: isLoadingModels,
+  } = useModels();
 
   // Effect to start translation when manual text is set from ChatInput
   useEffect(() => {
@@ -127,16 +139,31 @@ const ChatInput: React.FC<ChatInputProps> = ({
             rows={3}
           />
           <div className="flex justify-between w-full">
-            <ModelSelector
+            <Select
               value={config.modelName}
-              onValueChange={(value: ModelName) =>
-                handleConfigChange("modelName", value)
+              onValueChange={(value: string) =>
+                handleConfigChange("modelName", value as ModelName)
               }
-              disabled={disabled || isProcessing || isTranslating}
-              size="sm"
-              showIcon={false}
-              displayStyle="simple"
-            />
+              disabled={disabled || isProcessing || isTranslating || isLoadingModels}
+            >
+              <SelectTrigger size="sm">
+                <SelectValue placeholder={isLoadingModels ? "Loading..." : "Select model"} />
+              </SelectTrigger>
+              <SelectContent>
+                {models.length > 0 ? (
+                  models.map((model) => (
+                    <SelectItem key={model.value} value={model.value}>
+                      <span className="font-medium">{model.value}</span>
+                      <span className="text-xs text-gray-500">{model.provider}</span>
+                    </SelectItem>
+                  ))
+                ) : (
+                  <SelectItem value="no-models" disabled>
+                    No models available
+                  </SelectItem>
+                )}
+              </SelectContent>
+            </Select>
             <Button
               onClick={handleSend}
               variant="outline"
