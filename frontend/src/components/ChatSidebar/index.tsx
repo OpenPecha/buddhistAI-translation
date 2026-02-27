@@ -177,10 +177,12 @@ const ChatSidebarContent: React.FC = () => {
         )}
       </TooltipProvider>
       {/* Chat Area */}
+
       <div className="flex-1 flex flex-col min-h-0">
         {showPanel ? (
           <ResultsPanel inputMode={inputMode} />
         ) : (
+
           <ChatHistory
             messages={messages}
             isProcessing={
@@ -191,15 +193,15 @@ const ChatSidebarContent: React.FC = () => {
             onAction={handleAction}
           />
         )}
-        <ChatInput
-          isProcessing={
-            isTranslating || isExtractingGlossary || isAnalyzingStandardization
-          }
-        />
         <TargetLanguageSelector
           config={config}
           onConfigChange={handleConfigChange}
           showLabel={false}
+        />
+        <ChatInput
+          isProcessing={
+            isTranslating || isExtractingGlossary || isAnalyzingStandardization
+          }
         />
       </div>
     </div>
