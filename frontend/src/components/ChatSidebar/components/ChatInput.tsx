@@ -1,4 +1,4 @@
-import { Send } from "lucide-react";
+import { Brain, Send } from "lucide-react";
 import {
   type KeyboardEvent,
   useCallback,
@@ -153,7 +153,8 @@ const ChatInput: React.FC<ChatInputProps> = ({
                 {models.length > 0 ? (
                   models.map((model) => (
                     <SelectItem key={model.value} value={model.value}>
-                      <span className="font-medium">{model.value}</span>
+                      {model.is_thinking && <Brain className="size-4" />}
+                      <span className="font-medium">{model.name}</span>
                       <span className="text-xs text-gray-500">{model.provider}</span>
                     </SelectItem>
                   ))
