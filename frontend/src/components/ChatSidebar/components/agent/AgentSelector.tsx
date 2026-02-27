@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Bot, Plus } from "lucide-react";
+import { Bot, Plus, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface AgentSelectorProps {
@@ -84,7 +84,8 @@ const AgentSelector: React.FC<AgentSelectorProps> = ({
                                         )}
                                     </div>
                                     {agent.system_assistance && (
-                                        <Badge>
+                                        <Badge variant="outline" className="text-xs">
+                                            <Shield className="size-4" />
                                             System
                                         </Badge>
                                     )}

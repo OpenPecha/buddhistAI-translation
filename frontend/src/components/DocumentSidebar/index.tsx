@@ -62,36 +62,35 @@ const DocumentSidebar: React.FC<DocumentSidebarProps> = ({
     ...(isTranslationEditor
       ? []
       : [
-          {
-            id: "resources",
-            icon: FileText,
-            label: t(`common.resources`),
-            shortLabel: "Resources",
-          },
-        ]),
+        {
+          id: "resources",
+          icon: FileText,
+          label: t(`common.resources`),
+          shortLabel: "Resources",
+        },
+      ]),
     ...(isTranslationEditor
       ? [
-          {
-            id: "translation",
-            icon: RiGeminiLine,
-            label: t(`translation.aiTranslation`),
-            shortLabel: "Translator",
-          },
-          {
-            id: "upload",
-            icon: Upload,
-            label: "Upload to OpenPecha",
-            shortLabel: "Upload",
-          },
-        ]
+        {
+          id: "translation",
+          icon: RiGeminiLine,
+          label: t(`translation.aiTranslation`),
+          shortLabel: "Translator",
+        },
+        {
+          id: "upload",
+          icon: Upload,
+          label: "Upload to OpenPecha",
+          shortLabel: "Upload",
+        },
+      ]
       : []),
   ];
 
   return (
     <div
-      className={`flex h-full ${
-        isTranslationEditor ? "flex-row-reverse" : ""
-      } border-r border-l overflow-hidden`}
+      className={`flex h-full ${isTranslationEditor ? "flex-row-reverse" : ""
+        } border-r border-l overflow-hidden`}
     >
       {/* Vertical Icon Tabs - Only show when sidebar is closed */}
       {!activeTab && (
@@ -99,9 +98,8 @@ const DocumentSidebar: React.FC<DocumentSidebarProps> = ({
           role="toolbar"
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
-          className={`group w-12 hover:w-40 transition-all duration-300 ${
-            isTranslationEditor ? "border-l" : "border-r"
-          } bg-gray-50/50 dark:bg-gray-900/20 flex flex-col`}
+          className={`group w-12 hover:w-40 transition-all duration-300 ${isTranslationEditor ? "border-l" : "border-r"
+            } bg-gray-50/50 dark:bg-gray-900/20 flex flex-col`}
         >
           <SidebarTabs
             tabs={tabs}
@@ -131,7 +129,6 @@ const DocumentSidebar: React.FC<DocumentSidebarProps> = ({
               setLineFocus(documentId, null);
             }}
           />
-
           {/* Content */}
           <div className="flex-1 overflow-hidden">
             {activeTab === "toc" && (

@@ -176,6 +176,7 @@
   "documents.emptyText": "空白文档",
   "documents.startEmptyDocument": "从空白文档开始",
   "translation.welcomeToTranslator": "欢迎使用翻译器",
+  "translation.welcomeToTranslatorDescription": "请选择一个代理并开始翻译。",
   "translation.translateSelectedText": "翻译选中文本",
   "translation.extractGlossaryTerms": "提取术语表",
   "translation.commandTranslate": "/翻译",
