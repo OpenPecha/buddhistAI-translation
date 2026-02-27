@@ -17,6 +17,7 @@ import ChatHistory from "./components/ChatHistory";
 import ChatInput from "./components/ChatInput";
 import ResultsPanel from "./components/ResultsPanel";
 import { useChatFlow } from "./hooks/useChatFlow";
+import AgentSelector from "./components/agent/AgentSelector";
 
 interface ChatSidebarProps {
   documentId: string;
@@ -25,6 +26,7 @@ interface ChatSidebarProps {
 const ChatSidebarContent: React.FC = () => {
   const { t } = useTranslationI18next();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [selectedAgentId, setSelectedAgentId] = useState<string | undefined>();
 
   const { messages, clearHistory, messageCount, handleAction } = useChatFlow();
   const {
@@ -110,12 +112,13 @@ const ChatSidebarContent: React.FC = () => {
   return (
     <div className="h-full w-full flex flex-col bg-white dark:bg-gray-900">
       {/* Header */}
-      <div className="flex items-center justify-between p-1 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-        <TargetLanguageSelector
-          config={config}
-          onConfigChange={handleConfigChange}
-          showLabel={false}
-        />
+      <div className="flex items-center justify-between p-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+        <div className="flex-1 mr-2">
+          <AgentSelector
+            value={selectedAgentId}
+            onValueChange={setSelectedAgentId}
+          />
+        </div>
         <div className="">
           {messageCount > 0 && (
             <Button
@@ -194,6 +197,11 @@ const ChatSidebarContent: React.FC = () => {
           isProcessing={
             isTranslating || isExtractingGlossary || isAnalyzingStandardization
           }
+        />
+        <TargetLanguageSelector
+          config={config}
+          onConfigChange={handleConfigChange}
+          showLabel={false}
         />
       </div>
     </div>
