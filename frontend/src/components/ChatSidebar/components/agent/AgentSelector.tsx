@@ -101,7 +101,7 @@ const AgentSelector: React.FC<AgentSelectorProps> = ({
                             <Plus className="size-4" />
                         </Button>
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent onInteractOutside={(e) => e.preventDefault()}>
                         <DialogHeader>
                             <DialogTitle>Create New Agent</DialogTitle>
                             <DialogDescription>

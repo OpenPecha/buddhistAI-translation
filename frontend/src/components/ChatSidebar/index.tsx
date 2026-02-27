@@ -191,8 +191,6 @@ const ChatSidebarContent: React.FC = () => {
             onAction={handleAction}
           />
         )}
-
-        {/* Input Area */}
         <ChatInput
           isProcessing={
             isTranslating || isExtractingGlossary || isAnalyzingStandardization

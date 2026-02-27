@@ -1,4 +1,3 @@
-import { MessageSquare } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import type { ChatMessage as ChatMessageType } from "../types/chatTypes";

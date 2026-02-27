@@ -92,18 +92,15 @@ const DocumentSidebar: React.FC<DocumentSidebarProps> = ({
       className={`flex h-full ${isTranslationEditor ? "flex-row-reverse" : ""
         } border-r border-l overflow-hidden`}
     >
-      {/* Vertical Icon Tabs - Only show when sidebar is closed */}
       {!activeTab && (
         <div
           role="toolbar"
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
-          className={`group w-12 hover:w-40 transition-all duration-300 ${isTranslationEditor ? "border-l" : "border-r"
-            } bg-gray-50/50 dark:bg-gray-900/20 flex flex-col`}
+          className={`group w-12 hover:w-40 transition-all duration-300 bg-gray-50/50 dark:bg-gray-900/20 flex flex-col`}
         >
           <SidebarTabs
             tabs={tabs}
-            activeTab={activeTab}
             onTabClick={(tabId) => toggleTab(documentId, tabId)}
             isHovered={isHovered}
           />
