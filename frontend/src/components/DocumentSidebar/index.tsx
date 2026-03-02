@@ -3,11 +3,9 @@ import {
   MessageCircle,
   BookOpen,
   FileText,
-  MessageSquare,
   Upload,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useState } from "react";
 import TableOfContent from "../TableOfContent";
 import Resources from "../EditorSideMenu/Resources";
 import { useEditorSidebarStore } from "@/stores/editorSidebarStore";
@@ -38,7 +36,6 @@ const DocumentSidebar: React.FC<DocumentSidebarProps> = ({
     useCommentStore();
   const setLineFocus = useSelectionStore((state) => state.setLineFocus);
   const sidebarView = getSidebarView(documentId);
-  const [isHovered, setIsHovered] = useState(false);
 
   const tabs = [
     {
@@ -95,14 +92,11 @@ const DocumentSidebar: React.FC<DocumentSidebarProps> = ({
       {!activeTab && (
         <div
           role="toolbar"
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-          className={`group w-12 hover:w-40 transition-all duration-300 bg-gray-50/50 dark:bg-card flex flex-col`}
+          className=" bg-gray-50/50 dark:bg-card flex flex-col"
         >
           <SidebarTabs
             tabs={tabs}
             onTabClick={(tabId) => toggleTab(documentId, tabId)}
-            isHovered={isHovered}
           />
         </div>
       )}
