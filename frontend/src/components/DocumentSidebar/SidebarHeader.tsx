@@ -23,7 +23,7 @@ const SidebarHeader = ({
 }: SidebarHeaderProps) => {
   return (
     <div
-      className="flex items-center justify-between p-2 border-b bg-gray-50/50 dark:bg-gray-800/50">
+      className="flex items-center justify-between p-2 border-b bg-gray-50/50 dark:bg-zinc-800/50">
       <div
         className="flex items-center gap-1"
       >

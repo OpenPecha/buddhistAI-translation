@@ -87,7 +87,7 @@ const ChatSidebarContent: React.FC = () => {
 
   if (isCollapsed) {
     return (
-      <div className="h-full w-12 flex flex-col bg-neutral-50 dark:bg-neutral-800 border-l border-gray-200 dark:border-gray-700">
+      <div className="h-full w-12 flex flex-col bg-neutral-50 dark:bg-card border-l border-gray-200 dark:border-gray-700">
         <div className="p-2 flex flex-col items-center gap-4">
           <Button
             onClick={() => setIsCollapsed(false)}
@@ -110,9 +110,9 @@ const ChatSidebarContent: React.FC = () => {
       : `(${getLineRange(selectedTextLineNumbers)?.startLine} - ${getLineRange(selectedTextLineNumbers)?.endLine
       })`;
   return (
-    <div className="h-full w-full flex flex-col bg-white dark:bg-gray-900">
+    <div className="h-full w-full flex flex-col bg-white dark:bg-card">
       {/* Header */}
-      <div className="flex items-center justify-between p-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+      <div className="flex items-center justify-between p-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-card">
         <div className="flex-1 mr-2">
           <AgentSelector
             value={selectedAgentId}
@@ -125,7 +125,7 @@ const ChatSidebarContent: React.FC = () => {
               onClick={handleClearChat}
               variant="ghost"
               size="icon"
-              className="w-6 h-6 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-red-600"
+              className="w-6 h-6 hover:bg-gray-100 dark:hover:bg-card hover:text-red-600"
               title="Reset chat"
             >
               <Plus className="w-3 h-3" />

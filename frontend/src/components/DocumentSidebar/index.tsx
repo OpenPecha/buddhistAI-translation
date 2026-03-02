@@ -97,7 +97,7 @@ const DocumentSidebar: React.FC<DocumentSidebarProps> = ({
           role="toolbar"
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
-          className={`group w-12 hover:w-40 transition-all duration-300 bg-gray-50/50 dark:bg-gray-900/20 flex flex-col`}
+          className={`group w-12 hover:w-40 transition-all duration-300 bg-gray-50/50 dark:bg-card flex flex-col`}
         >
           <SidebarTabs
             tabs={tabs}
@@ -110,7 +110,7 @@ const DocumentSidebar: React.FC<DocumentSidebarProps> = ({
       {/* Content Panel */}
       {activeTab && (
         <div
-          className={`w-80 bg-white dark:bg-gray-900 flex flex-col transition-all duration-300`}
+          className={`w-80 bg-white dark:bg-card flex flex-col transition-all duration-300`}
         >
           <SidebarHeader
             tabs={tabs}
