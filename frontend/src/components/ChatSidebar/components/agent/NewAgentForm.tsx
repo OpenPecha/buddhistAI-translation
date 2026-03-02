@@ -394,106 +394,107 @@ const NewAgentForm = () => {
 
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-                <Label htmlFor="name">Name *</Label>
-                <Input
-                    id="name"
-                    placeholder="My Translation Assistant"
-                    value={formData.name}
-                    onChange={(e) => handleInputChange('name', e.target.value)}
-                    required
-                />
-            </div>
+            <div className="space-y-4 max-h-[65vh] overflow-y-auto">
+                <div className="space-y-2">
+                    <Label htmlFor="name">Name *</Label>
+                    <Input
+                        id="name"
+                        placeholder="My Translation Assistant"
+                        value={formData.name}
+                        onChange={(e) => handleInputChange('name', e.target.value)}
+                        required
+                    />
+                </div>
 
-            <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                    id="description"
-                    placeholder="What does this assistant do?"
-                    value={formData.description}
-                    onChange={(e) => handleInputChange('description', e.target.value)}
-                    rows={2}
-                />
-            </div>
+                <div className="space-y-2">
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea
+                        id="description"
+                        placeholder="What does this assistant do?"
+                        value={formData.description}
+                        onChange={(e) => handleInputChange('description', e.target.value)}
+                        rows={2}
+                    />
+                </div>
 
-            <div className="space-y-2">
-                <Label htmlFor="source_type">Source Type</Label>
-                <Input
-                    id="source_type"
-                    placeholder="e.g. translation, summarization..."
-                    value={formData.source_type}
-                    onChange={(e) => handleInputChange('source_type', e.target.value)}
-                />
-            </div>
+                <div className="space-y-2">
+                    <Label htmlFor="source_type">Source Type</Label>
+                    <Input
+                        id="source_type"
+                        placeholder="e.g. translation, summarization..."
+                        value={formData.source_type}
+                        onChange={(e) => handleInputChange('source_type', e.target.value)}
+                    />
+                </div>
 
-            <div className="space-y-2">
-                <Label htmlFor="system_prompt">System Prompt *</Label>
-                <Textarea
-                    id="system_prompt"
-                    placeholder="You are a helpful translation assistant..."
-                    value={formData.system_prompt}
-                    onChange={(e) => handleInputChange('system_prompt', e.target.value)}
-                    rows={4}
-                    required
-                />
-            </div>
+                <div className="space-y-2">
+                    <Label htmlFor="system_prompt">System Prompt *</Label>
+                    <Textarea
+                        id="system_prompt"
+                        placeholder="You are a helpful translation assistant..."
+                        value={formData.system_prompt}
+                        onChange={(e) => handleInputChange('system_prompt', e.target.value)}
+                        rows={4}
+                        required
+                    />
+                </div>
 
-            <div className="flex items-center gap-2">
-                <Switch
-                    id="system_assistance"
-                    checked={formData.system_assistance}
-                    onCheckedChange={(checked) => handleInputChange('system_assistance', checked)}
-                />
-                <Label htmlFor="system_assistance" className="cursor-pointer">
-                    System Assistance
-                </Label>
-            </div>
+                <div className="flex items-center gap-2">
+                    <Switch
+                        id="system_assistance"
+                        checked={formData.system_assistance}
+                        onCheckedChange={(checked) => handleInputChange('system_assistance', checked)}
+                    />
+                    <Label htmlFor="system_assistance" className="cursor-pointer">
+                        System Assistance
+                    </Label>
+                </div>
 
-            <div className="space-y-2">
-                <Label>Contexts</Label>
-                <p className="text-xs text-muted-foreground">
-                    Add context for your assistant (optional)
-                </p>
+                <div className="space-y-2">
+                    <Label>Contexts</Label>
+                    <p className="text-xs text-muted-foreground">
+                        Add context for your assistant (optional)
+                    </p>
 
-                <Select onValueChange={(value) => addContext(value as Context['type'])}>
-                    <SelectTrigger>
-                        <SelectValue placeholder="-- Add context --" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="content">Content (Text)</SelectItem>
-                        <SelectItem value="file">File Upload (.pdf, .docx, .txt)</SelectItem>
-                        <SelectItem value="search">Search Pecha</SelectItem>
-                    </SelectContent>
-                </Select>
+                    <Select onValueChange={(value) => addContext(value as Context['type'])}>
+                        <SelectTrigger>
+                            <SelectValue placeholder="-- Add context --" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="content">Content (Text)</SelectItem>
+                            <SelectItem value="file">File Upload (.pdf, .docx, .txt)</SelectItem>
+                            <SelectItem value="search">Search Pecha</SelectItem>
+                        </SelectContent>
+                    </Select>
 
-                <div className="space-y-3 mt-3">
-                    {contexts.map((context) => (
-                        <div
-                            key={context.id}
-                            className="relative p-4 border rounded-md bg-card space-y-3"
-                        >
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                className="absolute top-2 right-2 h-6 w-6 p-0 text-destructive hover:text-destructive"
-                                onClick={() => removeContext(context.id)}
+                    <div className="space-y-3 mt-3">
+                        {contexts.map((context) => (
+                            <div
+                                key={context.id}
+                                className="relative p-4 border rounded-md bg-card space-y-3"
                             >
-                                <X className="size-4" />
-                            </Button>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    className="absolute top-2 right-2 h-6 w-6 p-0 text-destructive hover:text-destructive"
+                                    onClick={() => removeContext(context.id)}
+                                >
+                                    <X className="size-4" />
+                                </Button>
 
-                            <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                                {context.type === 'content' && 'Content'}
-                                {context.type === 'file' && 'File Upload'}
-                                {context.type === 'search' && 'Search Pecha'}
+                                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                                    {context.type === 'content' && 'Content'}
+                                    {context.type === 'file' && 'File Upload'}
+                                    {context.type === 'search' && 'Search Pecha'}
+                                </div>
+
+                                {renderContextField(context)}
                             </div>
-
-                            {renderContextField(context)}
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
             </div>
-
             <div className="flex justify-end gap-2 pt-4">
                 <Button type="submit" disabled={isSubmitting}>
                     {isSubmitting ? (

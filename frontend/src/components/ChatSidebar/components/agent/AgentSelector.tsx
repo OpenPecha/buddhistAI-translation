@@ -106,7 +106,7 @@ const AgentSelector: React.FC<AgentSelectorProps> = ({
                         <DialogHeader>
                             <DialogTitle>Create New Agent</DialogTitle>
                             <DialogDescription>
-                                Create a new agent with custom settings and capabilities.
+                                Create a new agent with custom Prompt and Contexts.
                             </DialogDescription>
                         </DialogHeader>
                         <div className="py-4">
