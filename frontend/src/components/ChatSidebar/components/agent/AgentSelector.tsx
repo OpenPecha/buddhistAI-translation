@@ -19,6 +19,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Bot, Plus, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import NewAgentForm from "./NewAgentForm";
 
 interface AgentSelectorProps {
     value?: string;
@@ -109,9 +110,7 @@ const AgentSelector: React.FC<AgentSelectorProps> = ({
                             </DialogDescription>
                         </DialogHeader>
                         <div className="py-4">
-                            <p className="text-sm text-muted-foreground">
-                                Agent creation form will go here
-                            </p>
+                            <NewAgentForm />
                         </div>
                     </DialogContent>
                 </Dialog>
