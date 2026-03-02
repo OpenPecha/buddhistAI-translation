@@ -207,8 +207,12 @@ const NewAgentForm = () => {
                 }
             });
 
+            const accessToken = sessionStorage.getItem('id_token');
             const response = await fetch('/agent/assistant', {
                 method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                },
                 body: formDataToSend,
             });
 

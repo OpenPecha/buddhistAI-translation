@@ -20,6 +20,7 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isLoading,
     user,
     getAccessTokenSilently,
+    getIdTokenClaims,
     loginWithRedirect,
     logout: auth0Logout,
     error,
@@ -35,7 +36,19 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({ children }) => {
       picture: user?.picture || "",
     };
     createUser(userData as User);
-  }, [isAuthenticated, user, getAccessTokenSilently]);
+
+    const storeIdToken = async () => {
+      try {
+        const idTokenClaims = await getIdTokenClaims();
+        if (idTokenClaims?.__raw) {
+          sessionStorage.setItem("id_token", idTokenClaims.__raw);
+        }
+      } catch (err) {
+        console.error("Error storing ID token:", err);
+      }
+    };
+    storeIdToken();
+  }, [isAuthenticated, user, getAccessTokenSilently, getIdTokenClaims]);
 
   const getToken = useCallback(async (): Promise<string | null> => {
     try {
@@ -62,6 +75,7 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const logout = useCallback(() => {
     localStorage.removeItem("auth_token");
     localStorage.removeItem("access_token");
+    sessionStorage.removeItem("id_token");
     auth0Logout({
       logoutParams: {
         returnTo: `${import.meta.env.VITE_WORKSPACE_URL}/logout`,
