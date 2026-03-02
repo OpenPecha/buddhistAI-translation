@@ -1,4 +1,4 @@
-import { MapPin, MessageSquare, Plus, X } from "lucide-react";
+import { Info, MapPin, MessageSquare, Plus, X } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useTranslation as useTranslationI18next } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,7 @@ import ChatInput from "./components/ChatInput";
 import ResultsPanel from "./components/ResultsPanel";
 import { useChatFlow } from "./hooks/useChatFlow";
 import AgentSelector from "./components/agent/AgentSelector";
+import AgentDetailModal from "./components/agent/AgentDetailModal";
 
 interface ChatSidebarProps {
   documentId: string;
@@ -27,6 +28,7 @@ const ChatSidebarContent: React.FC = () => {
   const { t } = useTranslationI18next();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [selectedAgentId, setSelectedAgentId] = useState<string | undefined>();
+  const [isAgentDetailModalOpen, setIsAgentDetailModalOpen] = useState(false);
 
   const { messages, clearHistory, messageCount, handleAction } = useChatFlow();
   const {
@@ -131,6 +133,15 @@ const ChatSidebarContent: React.FC = () => {
               <Plus className="w-3 h-3" />
             </Button>
           )}
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setIsAgentDetailModalOpen(true)}
+            disabled={!selectedAgentId}
+            title={!selectedAgentId ? "Select an agent to view details" : "View agent details"}
+          >
+            <Info />
+          </Button>
         </div>
       </div>
       {/* Selected Text Display */}
@@ -176,7 +187,6 @@ const ChatSidebarContent: React.FC = () => {
           </div>
         )}
       </TooltipProvider>
-      {/* Chat Area */}
 
       <div className="flex-1 flex flex-col min-h-0">
         {showPanel ? (
@@ -204,6 +214,12 @@ const ChatSidebarContent: React.FC = () => {
           }
         />
       </div>
+
+      <AgentDetailModal
+        agentId={selectedAgentId}
+        open={isAgentDetailModalOpen}
+        onOpenChange={setIsAgentDetailModalOpen}
+      />
     </div>
   );
 };
