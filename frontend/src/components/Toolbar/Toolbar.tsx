@@ -204,10 +204,7 @@ const Toolbar = ({
       style={{
         display: showToolbar ? "flex" : "none", // Add isEditable check
         opacity: showToolbar ? 1 : 0, // Add isEditable check
-        width: !isMobile ? "94vw" : undefined,
         position: "relative",
-        margin: "5px auto",
-        borderRadius: !isMobile ? "75px" : undefined,
       }}
       className={`bg-neutral-100 dark:bg-neutral-800/40  flex-wrap`}
     >

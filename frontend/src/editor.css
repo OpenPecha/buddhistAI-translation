@@ -13,17 +13,14 @@
 	--editor-text-hover-color: #222;
 
 	--editor-dark-text-color: #ccc;
-	--editor-dark-text-hover-color: #fff;
+	--editor-dark-text-hover-color: #9a2b2b;
 }
-
-
 
 .line-numbers {
 	text-align: right;
-	font-family: monospace;
-	line-height: 1.5;
 	user-select: none;
 	z-index: 1;
+	font-weight: 100;
 	overflow: hidden;
 	white-space: pre;
 	width: 4ch;
@@ -164,15 +161,7 @@ z-index: 9999;
 	padding: 3px !important;
 	padding-block: 5px !important;
 	height: auto !important;
-	transition: all 0.3s ease !important;
-	/* Apply curved borders */
-	border-top-left-radius: 75px;
-	border-bottom-left-radius: 75px;
-	border-top-right-radius: 75px;
-	border-bottom-right-radius: 75px;
-	box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1) !important;
-	max-width: 100dvw !important;
-	margin: 10px auto !important;
+	margin-top: 10px !important;
 }
 
 .ql-toolbar.ql-snow .ql-formats {
