@@ -233,7 +233,7 @@ const PublicDocumentViewer: React.FC<PublicDocumentViewerProps> = ({
           <CardContent>
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 dark:border-neutral-300 mx-auto mb-4"></div>
-              <p className="text-gray-600 dark:text-neutral-300">Loading document...</p>
+              <p>Loading document...</p>
             </div>
           </CardContent>
         </Card>

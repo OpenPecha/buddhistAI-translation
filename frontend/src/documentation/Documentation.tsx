@@ -34,7 +34,7 @@ const LoadingIframe = ({ src, title }: { src: string; title: string }) => {
 				<div className="absolute inset-0 bg-gray-50 flex items-center justify-center z-10">
 					<div className="flex flex-col items-center gap-4">
 						<Loader2 className="h-8 w-8 animate-spin text-secondary-500" />
-						<p className="text-gray-600">Loading documentation for ..</p>
+						<p>Loading documentation for ..</p>
 					</div>
 				</div>
 			)}
@@ -91,85 +91,77 @@ function Documentation() {
 			<div className="flex h-[calc(100vh-120px)]">
 				{/* Sidebar */}
 				<div
-					className={`bg-white border-r transition-all duration-300 ease-in-out ${
-						sidebarOpen ? "w-64" : "w-0"
-					} overflow-hidden`}
+					className={`bg-white border-r transition-all duration-300 ease-in-out ${sidebarOpen ? "w-64" : "w-0"
+						} overflow-hidden`}
 				>
 					<div className="p-4">
 						<div className="space-y-2">
 							<button
 								onClick={() => handleTabChange("getting-started")}
-								className={`flex items-center gap-3 w-full justify-start p-3 rounded-lg transition-colors ${
-									activeTab === "getting-started"
-										? "bg-secondary-50 text-secondary-700"
-										: "hover:bg-gray-50"
-								}`}
+								className={`flex items-center gap-3 w-full justify-start p-3 rounded-lg transition-colors ${activeTab === "getting-started"
+									? "bg-secondary-50 text-secondary-700"
+									: "hover:bg-gray-50"
+									}`}
 							>
 								<Play size={16} />
 								<span>Getting Started</span>
 							</button>
 							<button
 								onClick={() => handleTabChange("projects")}
-								className={`flex items-center gap-3 w-full justify-start p-3 rounded-lg transition-colors ${
-									activeTab === "projects"
-										? "bg-secondary-50 text-secondary-700"
-										: "hover:bg-gray-50"
-								}`}
+								className={`flex items-center gap-3 w-full justify-start p-3 rounded-lg transition-colors ${activeTab === "projects"
+									? "bg-secondary-50 text-secondary-700"
+									: "hover:bg-gray-50"
+									}`}
 							>
 								<BookOpen size={16} />
 								<span>Projects</span>
 							</button>
 							<button
 								onClick={() => handleTabChange("translations")}
-								className={`flex items-center gap-3 w-full justify-start p-3 rounded-lg transition-colors ${
-									activeTab === "translations"
-										? "bg-secondary-50 text-secondary-700"
-										: "hover:bg-gray-50"
-								}`}
+								className={`flex items-center gap-3 w-full justify-start p-3 rounded-lg transition-colors ${activeTab === "translations"
+									? "bg-secondary-50 text-secondary-700"
+									: "hover:bg-gray-50"
+									}`}
 							>
 								<Languages size={16} />
 								<span>Translations</span>
 							</button>
 							<button
 								onClick={() => handleTabChange("versions")}
-								className={`flex items-center gap-3 w-full justify-start p-3 rounded-lg transition-colors ${
-									activeTab === "versions"
-										? "bg-secondary-50 text-secondary-700"
-										: "hover:bg-gray-50"
-								}`}
+								className={`flex items-center gap-3 w-full justify-start p-3 rounded-lg transition-colors ${activeTab === "versions"
+									? "bg-secondary-50 text-secondary-700"
+									: "hover:bg-gray-50"
+									}`}
 							>
 								<GitBranch size={16} />
 								<span>Versions</span>
 							</button>
 							<button
 								onClick={() => handleTabChange("comments")}
-								className={`flex items-center gap-3 w-full justify-start p-3 rounded-lg transition-colors ${
-									activeTab === "comments"
-										? "bg-secondary-50 text-secondary-700"
-										: "hover:bg-gray-50"
-								}`}
+								className={`flex items-center gap-3 w-full justify-start p-3 rounded-lg transition-colors ${activeTab === "comments"
+									? "bg-secondary-50 text-secondary-700"
+									: "hover:bg-gray-50"
+									}`}
 							>
 								<MessageSquare size={16} />
 								<span>Comments</span>
 							</button>
 							<button
 								onClick={() => handleTabChange("collaboration")}
-								className={`flex items-center gap-3 w-full justify-start p-3 rounded-lg transition-colors ${
-									activeTab === "collaboration"
-										? "bg-secondary-50 text-secondary-700"
-										: "hover:bg-gray-50"
-								}`}
+								className={`flex items-center gap-3 w-full justify-start p-3 rounded-lg transition-colors ${activeTab === "collaboration"
+									? "bg-secondary-50 text-secondary-700"
+									: "hover:bg-gray-50"
+									}`}
 							>
 								<Users size={16} />
 								<span>Collaboration</span>
 							</button>
 							<button
 								onClick={() => handleTabChange("export")}
-								className={`flex items-center gap-3 w-full justify-start p-3 rounded-lg transition-colors ${
-									activeTab === "export"
-										? "bg-secondary-50 text-secondary-700"
-										: "hover:bg-gray-50"
-								}`}
+								className={`flex items-center gap-3 w-full justify-start p-3 rounded-lg transition-colors ${activeTab === "export"
+									? "bg-secondary-50 text-secondary-700"
+									: "hover:bg-gray-50"
+									}`}
 							>
 								<Download size={16} />
 								<span>Export</span>

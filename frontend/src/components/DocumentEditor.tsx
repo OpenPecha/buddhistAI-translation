@@ -209,7 +209,7 @@ function LoadingScreen() {
   return (
     <div className="flex items-center justify-center h-full w-full">
       <div className="flex flex-col items-center gap-4">
-        <p className="text-gray-600">Loading document...</p>
+        <p>Loading document...</p>
       </div>
     </div>
   );
