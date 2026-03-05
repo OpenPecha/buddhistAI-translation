@@ -115,13 +115,13 @@ const ChatSidebarContent: React.FC = () => {
     <div className="h-full w-full flex flex-col bg-white dark:bg-card">
       {/* Header */}
       <div className="flex items-center justify-between p-2 border-b border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-card">
-        <div className="flex-1 mr-2">
+        <div className="flex-1 mr-1">
           <AgentSelector
             value={selectedAgentId}
             onValueChange={setSelectedAgentId}
           />
         </div>
-        <div className="">
+        <div>
           {messageCount > 0 && (
             <Button
               onClick={handleClearChat}

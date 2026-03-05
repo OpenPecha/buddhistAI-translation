@@ -56,15 +56,15 @@ const AgentSelector: React.FC<AgentSelectorProps> = ({
     }
 
     return (
-        <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2">
+        <div className="flex flex-col ">
+            <div className="flex items-center gap-1">
                 <Select value={selectedAgent} onValueChange={handleValueChange}>
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger className="w-full max-w-[15vw]">
                         <SelectValue placeholder="Choose an agent">
                             {selectedAgent && (
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 truncate">
                                     <Bot className="size-4" />
-                                    <span>
+                                    <span className="truncate">
                                         {agents.find((a) => a.id === selectedAgent)?.name ||
                                             "Select agent"}
                                     </span>
@@ -72,7 +72,7 @@ const AgentSelector: React.FC<AgentSelectorProps> = ({
                             )}
                         </SelectValue>
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="max-h-[90vh] overflow-y-auto max-w-[20vw]">
                         {agents.map((agent) => (
                             <SelectItem key={agent.id} value={agent.id}>
                                 <div className="flex items-center gap-2">
