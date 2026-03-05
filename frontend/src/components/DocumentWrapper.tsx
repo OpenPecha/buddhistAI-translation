@@ -86,10 +86,10 @@ function DocumentsWrapperContent() {
     const isSplitView = !!selectedTranslationId;
 
     return (
-      <div className="group relative h-full w-full ">
+      <div className="group h-full w-full">
         {isSplitView && (
           <button
-            className="absolute z-50 bg-neutral-50 dark:bg-neutral-600 border-2 border-gray-300 cursor-pointer rounded-full p-2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-neutral-700 dark:text-neutral-300 text-xl opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-hover/translation:opacity-100 duration-200 shadow-lg hover:shadow-xl hover:border-gray-400 transition-opacity "
+            className="absolute z-50 bg-neutral-50 dark:bg-neutral-600 border-2 border-gray-300 dark:border-neutral-700 cursor-pointer rounded-full p-2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-neutral-700 dark:text-neutral-300 text-xl opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-hover/translation:opacity-100 duration-200 shadow-lg hover:shadow-xl hover:border-gray-400 transition-opacity "
             onClick={clearSelectedTranslationId}
             aria-label="Close translation view"
             title="Close translation view"
@@ -111,12 +111,6 @@ function DocumentsWrapperContent() {
           cursor="col-resize"
           className={`split-pane h-full flex w-full overflow-hidden ${isMobile ? "flex-col" : "flex-row"
             }`}
-          gutterStyle={() => ({
-            backgroundColor: "#e5e7eb",
-            border: "1px solid #d1d5db",
-            cursor: "col-resize",
-            position: "relative",
-          })}
           onDragStart={() => {
             if (isSplitView) document.body.style.cursor = "col-resize";
           }}

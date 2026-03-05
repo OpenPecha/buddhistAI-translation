@@ -90,16 +90,6 @@ export function useDisplaySettings() {
   useEffect(() => {
     const root = document.documentElement;
 
-    // Set CSS custom properties for global access
-    root.style.setProperty(
-      "--color-editor-background",
-      settings.editorBackgroundColor
-    );
-    root.style.setProperty(
-      "--selection-highlight-color",
-      settings.selectionHighlightColor
-    );
-
     // Root Editor Typography
     const rootFontFamily =
       settings.rootEditorTypography?.fontFamily === "google-sans-regular"
@@ -149,10 +139,7 @@ export function useDisplaySettings() {
     updateRootTypography,
     updateTranslationTypography,
     resetToDefaults,
-    // Convenience getters
     showLineNumbers: settings.showLineNumbers,
-    editorBackgroundColorLight: settings.editorBackgroundColorLight,
-    selectionHighlightColor: settings.selectionHighlightColor,
     rootEditorTypography: settings.rootEditorTypography,
     translationEditorTypography: settings.translationEditorTypography,
   };

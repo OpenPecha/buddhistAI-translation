@@ -331,12 +331,6 @@ const PublicDocumentViewer: React.FC<PublicDocumentViewerProps> = ({
                     cursor="col-resize"
                     className={`split-pane h-full flex w-full overflow-hidden ${isMobile ? "flex-col" : "flex-row"
                       }`}
-                    gutterStyle={() => ({
-                      backgroundColor: "#e5e7eb",
-                      border: "1px solid #d1d5db",
-                      cursor: "col-resize",
-                      position: "relative",
-                    })}
                     onDragStart={() => {
                       document.body.style.cursor = "col-resize";
                     }}
