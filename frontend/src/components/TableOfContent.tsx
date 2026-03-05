@@ -5,7 +5,6 @@ import React, {
   useCallback,
   useRef,
 } from "react";
-import { Button } from "./ui/button";
 import { useEditor } from "@/hooks/useEditor";
 import { MAX_HEADING_LEVEL } from "@/utils/editorConfig";
 import { cn } from "@/lib/utils";
@@ -14,7 +13,7 @@ import {
   useTableOfContentSyncStore,
   useTableOfContentOpenStore,
 } from "@/stores/tableOfContentStore";
-import { BookOpen, Dot, ChevronDown, ChevronRight } from "lucide-react";
+import { Dot, ChevronDown, ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import isMobile from "@/lib/isMobile";
 
@@ -32,7 +31,7 @@ interface TableOfContentProps {
 type ExpandedSections = { [key: string]: boolean };
 
 const TableOfContent: React.FC<TableOfContentProps> = ({ documentId }) => {
-  const { isOpen, setIsOpen, addDocumentId, removeDocumentId } =
+  const { addDocumentId, removeDocumentId } =
     useTableOfContentOpenStore();
   const [headings, setHeadings] = useState<Heading[]>([]);
   const { synced } = useTableOfContentSyncStore();
