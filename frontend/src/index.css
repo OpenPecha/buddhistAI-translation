@@ -221,24 +221,6 @@
 	}
 }
 
-::-webkit-scrollbar {
-	width: 5px;
-}
-
-::-webkit-scrollbar-track {
-	background: transparent;
-}
-f
-::-webkit-scrollbar-thumb {
-	background: #888;
-
-	cursor: pointer;
-}
-
-::-webkit-scrollbar-thumb:hover {
-	background: #555;
-}
-
 .gutter {
 	background-color: #F5F5F5;
 	background-repeat: no-repeat;
