@@ -389,7 +389,7 @@ const EditableDocumentName: React.FC<{
   };
 
   return (
-    <div className="flex items-center gap-2 px-2 py-1 bg-neutral-50 dark:bg-neutral-800 rounded-2xl border">
+    <div className="flex items-center gap-2 px-2 py-1 bg-neutral-50 dark:bg-neutral-800 border">
       <svg
         className="w-4 h-4 text-neutral-800 dark:text-neutral-300"
         fill="none"

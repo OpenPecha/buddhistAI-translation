@@ -1,15 +1,15 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Trash2, Loader2, FileText } from "lucide-react";
+import { Trash2, Loader2 } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { deleteDocument, updateDocument } from "@/api/document";
 import { useTranslationSidebarParams } from "@/hooks/useQueryParams";
-import formatTimeAgo from "@/lib/formatTimeAgo";
 import { languages } from "@/utils/Constants";
 import type { Translation } from "../../DocumentWrapper";
 import TranslationMenu from "./TranslationMenu";
+import { Button } from "@/components/ui/button";
 
 interface TranslationItemProps {
   translation: Translation;
@@ -48,10 +48,9 @@ const TranslationItem: React.FC<TranslationItemProps> = ({ translation }) => {
       console.error(t("translation.errorDeletingTranslation"), error);
       // Clear the deleting state on error too
       window.alert(
-        `Error: ${
-          error instanceof Error
-            ? error.message
-            : t("translation.failedToDeleteTranslation")
+        `Error: ${error instanceof Error
+          ? error.message
+          : t("translation.failedToDeleteTranslation")
         }`
       );
     },
@@ -105,30 +104,20 @@ const TranslationItem: React.FC<TranslationItemProps> = ({ translation }) => {
   return (
     <div
       key={translation.id}
-      className={`group flex w-full items-center gap-2 rounded-md p-2 ${
-        !disabled && "hover:bg-neutral-200/60 dark:hover:bg-neutral-700/60"
-      }`}
+      className="group flex w-full items-center"
     >
-      <button
+      <Button
         type="button"
+        variant="ghost"
         onClick={() => {
-          // Only allow selection if translation is completed and modal is not open
           if (!disabled && !isModalOpen) {
             setSelectedTranslationId(translation.id);
           }
         }}
-        className={`flex flex-1 items-center gap-2 text-left ${
-          disabled ? "cursor-not-allowed opacity-70" : ""
-        }`}
         aria-label={`Open translation ${translation.id}`}
         disabled={disabled}
       >
-        <div className="relative flex items-center">
-          <FileText size={24} color={"#d1d5db"} className="flex-shrink-0" />
-          <div className="absolute inset-0 flex items-center justify-center text-xs font-semibold text-gray-700 capitalize">
-            {getLanguageInfo(translation.language).flag}
-          </div>
-        </div>
+        <div className="w-3 h-3 bg-[#12A7FC]" />
         <div className="flex-1 overflow-hidden">
           <div className="flex justify-between gap-2">
             <div className="truncate">{translation.name}</div>
@@ -137,13 +126,12 @@ const TranslationItem: React.FC<TranslationItemProps> = ({ translation }) => {
             <span className="capitalize">
               {getLanguageInfo(translation.language).name}
             </span>
-            <span>•</span>
             <span>
               <RenderStatusIndicator isDeleting={isDeleting} />
             </span>
           </div>
         </div>
-      </button>
+      </Button>
       {isDeleting || isUpdating ? (
         <Loader2 className="animate-spin" />
       ) : (

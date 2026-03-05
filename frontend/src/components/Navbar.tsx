@@ -123,7 +123,7 @@ export function NavMenuList({
         variant="outline"
         aria-label="Share document"
       >
-        <Share2 className="text-secondary-600 dark:text-neutral-300" />
+        <Share2 />
         <span className="capitalize leading-[normal]">
           {t("common.share")}/{t("common.download")}
         </span>
