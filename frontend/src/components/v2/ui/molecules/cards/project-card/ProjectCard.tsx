@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { Eye, Pen } from "lucide-react";
-import DocIcon from "@/assets/doc_icon.png";
 
 interface ProjectOwner {
     username: string;
@@ -36,9 +35,8 @@ export const ProjectCard = ({ project }: ProjectCardProps) => {
             to={rootDocument ? `/documents/${rootDocument.id}` : "#"}
             className="group flex flex-col dark:bg-[#1c1c1c] bg-white rounded-sm overflow-hidden"
         >
-            <div className="flex-1 hidden p-4 md:flex flex-col justify-center items-center gap-3">
-                <div className="group-hover:scale-110 h-[120px] w-[120px] flex justify-center items-center transition-transform duration-300">
-                    <img src={DocIcon} alt="Project Icon" className="w-12 h-12" />
+            <div className="flex-1 hidden p-4 md:flex flex-col bg-[#12A7FC]/20 justify-center items-center gap-3">
+                <div className="h-[100px] w-[100px] flex justify-center items-center ">
                 </div>
             </div>
 
