@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import useLocalStorage from "./useLocalStorage";
 
 export interface TypographySettings {
-  fontFamily: "monlam-2" | "google-sans-regular" | "serif" | "monospace";
+  fontFamily: "monlam" | "google-sans-regular" | "serif" | "monospace";
   fontSize: number; // in rem
   lineHeight: number;
 }
@@ -11,10 +11,6 @@ export interface DisplaySettings {
   // Line Numbers
   showLineNumbers: boolean;
 
-  // Background & Colors
-  editorBackgroundColor: string;
-  selectionHighlightColor: string;
-
   // Typography Settings - Separate for Root and Translation Editors
   rootEditorTypography: TypographySettings;
   translationEditorTypography: TypographySettings;
@@ -22,8 +18,6 @@ export interface DisplaySettings {
 
 export const DEFAULT_DISPLAY_SETTINGS: DisplaySettings = {
   showLineNumbers: true,
-  editorBackgroundColor: "rgb(248, 250, 252)",
-  selectionHighlightColor: "rgba(66, 133, 244, 0.4)",
   rootEditorTypography: {
     fontFamily: "monlam",
     fontSize: 1.3,
@@ -75,11 +69,9 @@ export function useDisplaySettings() {
   };
 
   const resetToDefaults = () => {
-    const darkColorBackground = "rgb(64, 71, 79)";
     const root = document.documentElement;
     const isDark = root.classList.contains("dark");
     if (isDark) {
-      DEFAULT_DISPLAY_SETTINGS.editorBackgroundColor = darkColorBackground;
       setSettings(DEFAULT_DISPLAY_SETTINGS);
     } else {
       setSettings(DEFAULT_DISPLAY_SETTINGS);
