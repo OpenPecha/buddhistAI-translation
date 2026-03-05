@@ -8,7 +8,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { TargetLanguageSelector } from "./components/sidebar/SettingsModal";
+import TargetLanguageSelector from "./components/sidebar/TranslationLanguageSelector";
 import {
   TranslationProvider,
   useTranslation,
@@ -231,7 +231,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ documentId }) => {
 
   return (
     <TranslationProvider documentId={documentId} selectedAgentId={selectedAgentId}>
-      <ChatSidebarContent 
+      <ChatSidebarContent
         selectedAgentId={selectedAgentId}
         setSelectedAgentId={setSelectedAgentId}
       />

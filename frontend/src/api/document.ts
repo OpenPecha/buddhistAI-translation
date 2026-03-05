@@ -240,40 +240,6 @@ export const updateDocument = async (
   }
 };
 
-export interface GenerateTranslationParams {
-  rootId: string;
-  language: string;
-  model: string;
-  use_segmentation: string | null;
-}
-
-export const generateTranslation = async (
-  params: GenerateTranslationParams
-) => {
-  try {
-    const response = await fetch(
-      `${server_url}/documents/generate-translation`,
-      {
-        method: "POST",
-        headers: getHeaders(),
-        body: JSON.stringify(params),
-      }
-    );
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error ?? "Failed to generate translation");
-    }
-
-    return await response.json();
-  } catch (error) {
-    if (error instanceof Error) {
-      throw new Error(error.message);
-    }
-    throw new Error("Failed to generate translation");
-  }
-};
-
 export const updateContentDocument = async (
   id: string,
   data: UpdateDocumentParams
@@ -298,39 +264,7 @@ export const updateContentDocument = async (
   }
 };
 
-export const fetchTranslationContext = async (documentId: string) => {
-  const response = await fetch(
-    `${server_url}/documents/translation-context/${documentId}`,
-    {
-      headers: getHeaders(),
-    }
-  );
-  if (response.ok) {
-    const data = await response.json();
-    return data.data;
-  }
-  throw new Error("Failed to fetch translation context");
-};
 
-export const deleteTranslationContextFile = async (fileId: string) => {
-  const response = await fetch(
-    `${server_url}/documents/translation-context/${fileId}`,
-    {
-      headers: getHeaders(),
-      method: "DELETE",
-    }
-  );
-  if (response.ok) {
-    const data = await response.json();
-    return data;
-  }
-  const errorData = await response.json().catch(() => ({}));
-  throw new Error(
-    errorData.error ||
-      errorData.message ||
-      "Failed to delete translation context file"
-  );
-};
 
 /**
  * Create a document and project from an OpenPecha text ID
