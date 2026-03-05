@@ -1,6 +1,6 @@
 import React, { memo, useCallback, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, AlertCircle, Globe, Eye, FileText, Moon, Sun } from "lucide-react";
+import { ArrowLeft, AlertCircle, Globe, Eye, FileText, Moon, Sun, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -13,7 +13,6 @@ import { FootNoteProvider } from "@/contexts/FootNoteContext";
 import { useCurrentDoc } from "@/hooks/useCurrentDoc";
 import { useTranslationSidebarParams } from "@/hooks/useQueryParams";
 import { createPortal } from "react-dom";
-import { IoIosArrowForward } from "react-icons/io";
 import Split from "react-split";
 import isMobile from "@/lib/isMobile";
 
@@ -317,7 +316,7 @@ const PublicDocumentViewer: React.FC<PublicDocumentViewerProps> = ({
                     title="Close translation view"
                     type="button"
                   >
-                    <IoIosArrowForward />
+                    <ChevronRight />
                   </button>
 
                   <Split

@@ -1,10 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Trash2 } from "lucide-react";
+import { Trash2, Loader2, FileText } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
-import { FaSpinner } from "react-icons/fa";
-import { GrDocument } from "react-icons/gr";
 import { useParams } from "react-router-dom";
 import { deleteDocument, updateDocument } from "@/api/document";
 import { useTranslationSidebarParams } from "@/hooks/useQueryParams";
@@ -126,7 +124,7 @@ const TranslationItem: React.FC<TranslationItemProps> = ({ translation }) => {
         disabled={disabled}
       >
         <div className="relative flex items-center">
-          <GrDocument size={24} color={"#d1d5db"} className="flex-shrink-0" />
+          <FileText size={24} color={"#d1d5db"} className="flex-shrink-0" />
           <div className="absolute inset-0 flex items-center justify-center text-xs font-semibold text-gray-700 capitalize">
             {getLanguageInfo(translation.language).flag}
           </div>
@@ -147,7 +145,7 @@ const TranslationItem: React.FC<TranslationItemProps> = ({ translation }) => {
         </div>
       </button>
       {isDeleting || isUpdating ? (
-        <FaSpinner className="animate-spin" />
+        <Loader2 className="animate-spin" />
       ) : (
         <TranslationMenu
           translation={translation}

@@ -4,7 +4,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { BsFillGrid3X3GapFill } from "react-icons/bs";
+import { LayoutGrid } from "lucide-react";
 import { useFetchTools } from "@/api/queries/other";
 import { Button } from "./ui/button";
 
@@ -23,7 +23,7 @@ const AppLauncher: React.FC = () => {
         <Button
           variant="ghost"
         >
-          <BsFillGrid3X3GapFill size={20} />
+          <LayoutGrid size={20} />
         </Button>
       </PopoverTrigger>
       <PopoverContent

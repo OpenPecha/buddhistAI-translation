@@ -11,7 +11,7 @@ import { debounce } from "lodash";
 import { useParams } from "react-router-dom";
 import { useEditor } from "@/hooks/useEditor";
 import useLocalStorage from "@/hooks/useLocalStorage";
-import { FaBookmark, FaChevronUp, FaChevronDown } from "react-icons/fa";
+import { Bookmark, ChevronUp, ChevronDown } from "lucide-react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { useSelectionStore } from "@/stores/selectionStore";
@@ -294,7 +294,7 @@ const LineNumberVirtualized = ({
                 title={t("common.previousBookmark")}
                 className="rounded-l "
               >
-                <FaChevronUp />
+                <ChevronUp />
               </button>
             )}
             <button
@@ -305,7 +305,7 @@ const LineNumberVirtualized = ({
               title={t("common.goToCurrentBookmark")}
               className="  "
             >
-              <FaBookmark />
+              <Bookmark />
             </button>
             {bookmarks.length > 0 && (
               <button
@@ -313,7 +313,7 @@ const LineNumberVirtualized = ({
                 title={t("common.nextBookmark")}
                 className=" rounded-r "
               >
-                <FaChevronDown />
+                <ChevronDown />
               </button>
             )}
           </div>,

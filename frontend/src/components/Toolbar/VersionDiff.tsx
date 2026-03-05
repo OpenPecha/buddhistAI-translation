@@ -1,6 +1,6 @@
 import { useQuillVersion } from "@/contexts/VersionContext";
 import { useState, useEffect } from "react";
-import { IoMdClose } from "react-icons/io";
+import { X } from "lucide-react";
 import { getVersionDiff } from "@/api/version";
 import DiffViewer from "../../pages/DiffViewer";
 import { Button } from "@/components/ui/button";
@@ -109,7 +109,7 @@ function VersionDiff({ onClose }: VersionDiffProps) {
 					onClick={onClose}
 					className="flex flex-row items-center text-gray-500 hover:text-gray-700"
 				>
-					<IoMdClose size={20} className="mr-2 font-bold" />
+					<X size={20} className="mr-2 font-bold" />
 				</button>
 				<Button
 					onClick={handleRestore}

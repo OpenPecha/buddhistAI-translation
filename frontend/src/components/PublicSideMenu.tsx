@@ -1,11 +1,9 @@
 import React, { useState } from "react";
-import { Languages, Eye } from "lucide-react";
+import { Languages, Eye, ChevronRight, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { IoIosArrowForward } from "react-icons/io";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import AvatarWrapper from "@/components/ui/custom-avatar";
 import { groupBy } from "lodash";
-import { GrDocument } from "react-icons/gr";
 import { Badge } from "@/components/ui/badge";
 import formatTimeAgo from "@/lib/formatTimeAgo";
 import { Translation } from "@/hooks/useCurrentDoc";
@@ -157,7 +155,7 @@ function PublicTranslationItem({
         aria-disabled={isDisabled}
       >
         <div className="relative flex items-center">
-          <GrDocument size={24} color={"#d1d5db"} className="flex-shrink-0" />
+          <FileText size={24} color={"#d1d5db"} className="flex-shrink-0" />
           <div className="absolute inset-0 flex items-center justify-center text-xs font-semibold text-gray-700 capitalize">
             {translation.language}
           </div>
@@ -435,7 +433,7 @@ function InMenuWrapper({
           className="absolute bg-white border rounded-full p-2 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 cursor-pointer text-gray-700 text-xl z-10 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-hover/content:opacity-100 transition-opacity duration-200"
           onClick={onBackClick}
         >
-          <IoIosArrowForward />
+          <ChevronRight />
         </div>
       </div>
 

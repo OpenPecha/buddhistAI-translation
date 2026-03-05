@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { createPortal } from "react-dom";
-import { IoIosArrowForward } from "react-icons/io";
+import { ChevronRight } from "lucide-react";
 import { useParams } from "react-router-dom";
 import Split from "react-split";
 import { EditorProvider } from "@/contexts/EditorContext";
@@ -96,7 +96,7 @@ function DocumentsWrapperContent() {
             type="button"
             style={{ left: isMobile ? "97%" : `${splitPosition}%` }}
           >
-            <IoIosArrowForward />
+            <ChevronRight />
           </button>
         )}
         <Split

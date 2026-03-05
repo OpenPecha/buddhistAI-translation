@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FileText, MoreVertical, Share2 } from "lucide-react";
+import { FileText, MoreVertical, Share2, Trash2, PencilLine, Globe } from "lucide-react";
 import DocIcon from "@/assets/doc_icon.png";
 import {
   DropdownMenu,
@@ -7,10 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { RiDeleteBin6Line } from "react-icons/ri";
-import { BiRename } from "react-icons/bi";
 import { useTranslation } from "react-i18next";
-import { MdPublic } from "react-icons/md";
 import { OpenInNewTab } from "../v2/ui/atoms/Icons/Icons";
 
 const ProjectItem = ({
@@ -71,7 +68,7 @@ const ProjectItem = ({
         <div className="hidden md:flex items-center flex-shrink-0 text-sm text-zinc-500 dark:text-zinc-400 mx-4 w-36 text-right">
           {owner ?? "—"}
           {isPublic && (
-            <MdPublic size={16} className="text-gray-500 ml-2" title="Public" />
+            <Globe size={16} className="text-gray-500 ml-2" title="Public" />
           )}
         </div>
 
@@ -125,7 +122,7 @@ const ProjectItem = ({
         )}
         <div className="flex items-center gap-2">
           <span>{formattedDate}</span>
-          {isPublic && <MdPublic size={14} />}
+          {isPublic && <Globe size={14} />}
         </div>
       </div>
     </div>
@@ -182,12 +179,12 @@ function ProjectItemDropdownMenu({
             <DropdownMenuItem
               onClick={(e) => handleCloseClick(e, updateDocument)}
             >
-              <BiRename /> {t("common.rename")}
+              <PencilLine /> {t("common.rename")}
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={(e) => handleCloseClick(e, deleteDocument)}
             >
-              <RiDeleteBin6Line /> {t("common.remove")}
+              <Trash2 /> {t("common.remove")}
             </DropdownMenuItem>
           </>
         )}

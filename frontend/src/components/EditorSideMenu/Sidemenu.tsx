@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import SelectTranslation from "./SelectTranslation";
-import { IoIosArrowForward } from "react-icons/io";
 import { cn } from "@/lib/utils";
 
 type MenuOption =

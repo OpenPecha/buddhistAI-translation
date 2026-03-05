@@ -8,7 +8,7 @@ import EditableText from "./ui/EditableText";
 import DocIcon from "@/assets/doc_icon.png";
 import ShareModal from "./ShareModal";
 
-import { BiShare } from "react-icons/bi";
+import { Share2 } from "lucide-react";
 import ProfileArea from "./ProfileArea";
 import { useTranslation } from "react-i18next";
 import SettingsButton from "./setting/SettingsButton";
@@ -129,7 +129,7 @@ export function NavMenuList({
         variant="outline"
         aria-label="Share document"
       >
-        <BiShare className="text-secondary-600 dark:text-neutral-300" />
+        <Share2 className="text-secondary-600 dark:text-neutral-300" />
         <span className="capitalize leading-[normal]">
           {t("common.share")}/{t("common.download")}
         </span>

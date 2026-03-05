@@ -4,6 +4,7 @@ import {
   BookOpen,
   FileText,
   Upload,
+  Sparkles,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import TableOfContent from "../TableOfContent";
@@ -18,7 +19,6 @@ import MetadataContent from "./MetadataContent";
 import UploadContent from "./UploadContent";
 import SidebarTabs from "./SidebarTabs";
 import SidebarHeader from "./SidebarHeader";
-import { RiGeminiLine } from "react-icons/ri";
 
 interface DocumentSidebarProps {
   documentId: string;
@@ -70,7 +70,7 @@ const DocumentSidebar: React.FC<DocumentSidebarProps> = ({
       ? [
         {
           id: "translation",
-          icon: RiGeminiLine,
+          icon: Sparkles,
           label: t(`translation.aiTranslation`),
           shortLabel: "Translator",
         },

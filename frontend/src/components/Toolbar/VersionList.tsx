@@ -1,7 +1,5 @@
 import { useQuillVersion } from "@/contexts/VersionContext";
-import { MdDelete } from "react-icons/md";
-import { SiTicktick } from "react-icons/si";
-import { FaSpinner } from "react-icons/fa";
+import { Trash2, CircleCheck, Loader2 } from "lucide-react";
 import formatTimeAgo from "@/lib/formatTimeAgo";
 import { useState } from "react";
 import { ConfirmationModal } from "@/components/ui/ConfirmationModal";
@@ -192,9 +190,9 @@ function EachVersion({ version, onDeleteClick, isDeleting }: EachVersionProps) {
               className="px-2 py-1 rounded text-sm bg-neutral-200 hover:bg-neutral-300 dark:bg-neutral-800 dark:hover:bg-neutral-700"
             >
               {isLoading ? (
-                <FaSpinner className="animate-spin" />
+                <Loader2 className="animate-spin" />
               ) : (
-                <SiTicktick />
+                <CircleCheck />
               )}
             </button>
           ) : (
@@ -213,9 +211,9 @@ function EachVersion({ version, onDeleteClick, isDeleting }: EachVersionProps) {
               }`}
             >
               {isDeleting ? (
-                <FaSpinner className="animate-spin" />
+                <Loader2 className="animate-spin" />
               ) : (
-                <MdDelete />
+                <Trash2 />
               )}
             </button>
           ) : (

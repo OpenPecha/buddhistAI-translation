@@ -1,7 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { TbApi } from "react-icons/tb";
-import { File, FileText } from "lucide-react";
+import { File, FileText, Cable } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AvailableMethodType, UploadMethod } from "./types";
 import { Button } from "@/components/ui/button";
@@ -33,7 +32,7 @@ export const MethodSelection = React.memo(
         isDisabled: false,
       },
       openpecha: {
-        icon: <TbApi size={24} />,
+        icon: <Cable size={24} />,
         title: t("common.openpecha"),
         description: t("projects.importFromOpenPechaRepository"),
         isDisabled: false,

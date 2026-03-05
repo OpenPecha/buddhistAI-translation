@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { IoIosLogOut } from "react-icons/io";
+import { LogOut } from "lucide-react";
 
 function ProfileArea() {
   const { currentUser, logout } = useAuth();
@@ -49,7 +49,7 @@ function ProfileArea() {
             className="flex w-full items-center gap-2"
             onClick={handleLogout}
           >
-            <IoIosLogOut className="h-4 w-4" />
+            <LogOut className="h-4 w-4" />
             Logout
           </button>
         </DropdownMenuItem>
