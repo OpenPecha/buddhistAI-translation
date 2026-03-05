@@ -24,10 +24,12 @@ interface ChatSidebarProps {
   documentId: string;
 }
 
-const ChatSidebarContent: React.FC = () => {
+const ChatSidebarContent: React.FC<{
+  selectedAgentId: string | undefined;
+  setSelectedAgentId: (id: string | undefined) => void;
+}> = ({ selectedAgentId, setSelectedAgentId }) => {
   const { t } = useTranslationI18next();
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [selectedAgentId, setSelectedAgentId] = useState<string | undefined>();
   const [isAgentDetailModalOpen, setIsAgentDetailModalOpen] = useState(false);
 
   const { messages, clearHistory, messageCount, handleAction } = useChatFlow();
@@ -225,9 +227,14 @@ const ChatSidebarContent: React.FC = () => {
 };
 
 const ChatSidebar: React.FC<ChatSidebarProps> = ({ documentId }) => {
+  const [selectedAgentId, setSelectedAgentId] = useState<string | undefined>();
+
   return (
-    <TranslationProvider documentId={documentId}>
-      <ChatSidebarContent />
+    <TranslationProvider documentId={documentId} selectedAgentId={selectedAgentId}>
+      <ChatSidebarContent 
+        selectedAgentId={selectedAgentId}
+        setSelectedAgentId={setSelectedAgentId}
+      />
     </TranslationProvider>
   );
 };

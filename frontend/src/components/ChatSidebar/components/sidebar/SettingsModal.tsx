@@ -20,15 +20,7 @@ import {
 } from "@/api/translate";
 import { useTranslation } from "react-i18next";
 import { TranslationContextFileSelector } from "./TranslationContextFileSelector";
-
-export interface TranslationConfig {
-  targetLanguage: TargetLanguage;
-  textType: TextType;
-  modelName: ModelName;
-  batchSize: number;
-  userRules: string;
-  extractGlossary: boolean;
-}
+import type { TranslationConfig } from "@/hooks/useTranslationSettings";
 
 interface TargetLanguageProps {
   config: TranslationConfig;

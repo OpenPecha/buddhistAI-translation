@@ -51,6 +51,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
     clearUISelection,
     config,
     handleConfigChange,
+    selectedAgentId,
   } = useTranslation();
 
   const {
@@ -82,7 +83,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
   ]);
   const handleSend = useCallback(() => {
     const text = input.trim();
-    if (text && !disabled && !isTranslating) {
+    if (text && !disabled && !isTranslating && selectedAgentId) {
       setInputMode("manual");
       setManualText(text);
       setShouldStartTranslation(true);
@@ -92,7 +93,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
         textareaRef.current.style.height = "auto";
       }
     }
-  }, [input, disabled, isTranslating, setInputMode, setManualText]);
+  }, [input, disabled, isTranslating, selectedAgentId, setInputMode, setManualText]);
 
   const handleKeyPress = useCallback(
     (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -163,14 +164,13 @@ const ChatInput: React.FC<ChatInputProps> = ({
             onClick={handleSend}
             variant="outline"
             disabled={
-              disabled || !input.trim() || isProcessing || isTranslating
+              disabled || !input.trim() || isProcessing || isTranslating || !selectedAgentId
             }
             size="icon"
             title="Translate text (Enter)"
           >
             <Send className="size-4 text-gray-600" />
           </Button>
-
         </div>
       </div>
     </div>

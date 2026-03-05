@@ -10,12 +10,14 @@ const TranslationContext = createContext<TranslationContextType>(null);
 
 export const TranslationProvider = ({
   documentId,
+  selectedAgentId,
   children,
 }: {
   documentId: string;
+  selectedAgentId?: string;
   children: React.ReactNode;
 }) => {
-  const operations = useTranslationController({ documentId });
+  const operations = useTranslationController({ documentId, selectedAgentId });
   return (
     <TranslationContext.Provider value={operations}>
       {children}
