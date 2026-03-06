@@ -89,6 +89,56 @@ export const getAgentDetail = async (agentId: string): Promise<AgentDetail> => {
 };
 
 
+export interface UpdateAgentRequest {
+  name: string;
+  source_type: string;
+  description: string;
+  system_prompt: string;
+  contexts: {
+    content: string | null;
+    pecha_title: string | null;
+    pecha_text_id: string | null;
+  }[];
+  system_assistance: boolean;
+}
+
+export const deleteAgent = async (agentId: string): Promise<void> => {
+  const token = sessionStorage.getItem('id_token');
+
+  const response = await fetch(`/agent/assistant/${agentId}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to delete agent: ${response.statusText}`);
+  }
+};
+
+export const updateAgent = async (
+  agentId: string,
+  data: UpdateAgentRequest
+): Promise<AgentDetail> => {
+  const token = sessionStorage.getItem('id_token');
+
+  const response = await fetch(`/agent/assistant/${agentId}`, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to update agent: ${response.statusText}`);
+  }
+
+  return response.json();
+};
+
 export const performAITranslation = async (
   params: AITranslationRequest
 ): Promise<AITranslationResponse> => {

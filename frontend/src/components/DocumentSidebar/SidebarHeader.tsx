@@ -55,7 +55,7 @@ const SidebarHeader = ({
                   onClick={() => onTabClick(tab.id)}
                   title={tab.label}
                 >
-                  <Icon className="h-4 w-4" />
+                  <Icon className={isActive ? "text-amber-500" : "text-gray-500 dark:text-gray-400"} />
                 </Button>
               );
             })}

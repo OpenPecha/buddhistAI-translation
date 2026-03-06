@@ -1,5 +1,12 @@
-import { useQuery } from "@tanstack/react-query";
-import getAgents, { type Agent, type AgentDetail, getAgentDetail } from "@/api/agent";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import getAgents, {
+  type Agent,
+  type AgentDetail,
+  type UpdateAgentRequest,
+  getAgentDetail,
+  deleteAgent,
+  updateAgent,
+} from "@/api/agent";
 
 export const agentsKeys = {
   all: ["agents"] as const,
@@ -65,4 +72,28 @@ export const useAgentDetail = (id: string | undefined): UseAgentDetailReturn => 
     isLoading,
     error: error?.message || null,
   };
+};
+
+export const useDeleteAgent = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (agentId: string) => deleteAgent(agentId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: agentsKeys.lists() });
+    },
+  });
+};
+
+export const useUpdateAgent = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ agentId, data }: { agentId: string; data: UpdateAgentRequest }) =>
+      updateAgent(agentId, data),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: agentsKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: agentsKeys.detail(variables.agentId) });
+    },
+  });
 };
