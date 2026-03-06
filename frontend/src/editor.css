@@ -13,17 +13,14 @@
 	--editor-text-hover-color: #222;
 
 	--editor-dark-text-color: #ccc;
-	--editor-dark-text-hover-color: #fff;
+	--editor-dark-text-hover-color: #9a2b2b;
 }
-
-
 
 .line-numbers {
 	text-align: right;
-	font-family: monospace;
-	line-height: 1.5;
 	user-select: none;
 	z-index: 1;
+	font-weight: 100;
 	overflow: hidden;
 	white-space: pre;
 	width: 4ch;
@@ -60,12 +57,10 @@
 }
 .ql-editor {
 	padding: 0 !important;
-	/* background-color: var(--editor-background-color, white); */
 	border: 0 !important;
 	font-size: var(--root-editor-font-size, 1rem);
 	font-family: var(--root-editor-font-family, "google-sans");
 	line-height: var(--root-editor-line-height, 1.5);
-	/* padding-bottom: 100px !important; */
 	counter-reset: footnote-counter;
 	height: 100%;
 	overflow-y: auto;
@@ -94,37 +89,13 @@
 	background-color: var(--color-neutral-200);
 }
 
-.ql-editor p:not(.focused_p) {
-	color: var(--color-neutral-400);
-	/* background-color: var(--color-neutral-50); */
-}
+
 
 .ql-editor p {
 cursor:pointer;
 
 z-index: 9999;
 }
-.ql-editor::selection{
-	background-color: lightyellow;
-}
-
-.ql-editor p.selected_text_segment::selection{
-	background-color: lightyellow;
-}
-
-.ql-editor p:hover {
-	cursor: pointer;
-	z-index: 9999;
-	color:#000
-}
-
-.ql-editor p.selected_text_segment {
-	background-color: var(--color-neutral-100);
-	cursor: pointer;
-	z-index: 9999;
-	color:#000
-} 
-
 
 .hide-line-numbers .ql-editor {
 	padding-left: 5px !important;
@@ -138,9 +109,7 @@ z-index: 9999;
 .hide-line-numbers .translation-editor-container .ql-editor {
 	padding-left: 5px !important;
 }
-/* .ql-editor::selection {
-	background-color: var(--selection-highlight-color, rgba(66, 133, 244, 0.4));
-} */
+
 .ql-formats button {
 	padding: 10px;
 }
@@ -148,7 +117,6 @@ z-index: 9999;
 	opacity: 0.3;
 }
 .ql-formats button svg {
-	fill: #6f7074 !important;
 	width: 20px;
 	height: 20px;
 }
@@ -164,15 +132,7 @@ z-index: 9999;
 	padding: 3px !important;
 	padding-block: 5px !important;
 	height: auto !important;
-	transition: all 0.3s ease !important;
-	/* Apply curved borders */
-	border-top-left-radius: 75px;
-	border-bottom-left-radius: 75px;
-	border-top-right-radius: 75px;
-	border-bottom-right-radius: 75px;
-	box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1) !important;
-	max-width: 100dvw !important;
-	margin: 10px auto !important;
+	margin-top: 10px !important;
 }
 
 .ql-toolbar.ql-snow .ql-formats {

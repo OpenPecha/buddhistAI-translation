@@ -1,11 +1,9 @@
 import React, { useState } from "react";
-import { Languages, Eye } from "lucide-react";
+import { Languages, Eye, ChevronRight, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { IoIosArrowForward } from "react-icons/io";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import AvatarWrapper from "@/components/ui/custom-avatar";
 import { groupBy } from "lodash";
-import { GrDocument } from "react-icons/gr";
 import { Badge } from "@/components/ui/badge";
 import formatTimeAgo from "@/lib/formatTimeAgo";
 import { Translation } from "@/hooks/useCurrentDoc";
@@ -148,16 +146,15 @@ function PublicTranslationItem({
             onSelectTranslation(translation.id);
           }
         }}
-        className={`flex flex-1 items-center gap-2 p-2 rounded-md w-full text-left flex-grow ${
-          isDisabled
-            ? "opacity-70 cursor-not-allowed bg-gray-50"
-            : "cursor-pointer hover:bg-gray-100"
-        }`}
+        className={`flex flex-1 items-center gap-2 p-2 rounded-md w-full text-left flex-grow ${isDisabled
+          ? "opacity-70 cursor-not-allowed bg-gray-50"
+          : "cursor-pointer hover:bg-gray-100"
+          }`}
         aria-label={`View translation ${translation.id}`}
         aria-disabled={isDisabled}
       >
         <div className="relative flex items-center">
-          <GrDocument size={24} color={"#d1d5db"} className="flex-shrink-0" />
+          <FileText size={24} color={"#d1d5db"} className="flex-shrink-0" />
           <div className="absolute inset-0 flex items-center justify-center text-xs font-semibold text-gray-700 capitalize">
             {translation.language}
           </div>
@@ -422,20 +419,11 @@ function InMenuWrapper({
   return (
     <div className="h-full flex group relative w-full">
       <div className="relative h-full">
-        {/* Vertical Line (hidden by default, shows on hover except on mobile) */}
-        <div
-          className="absolute left-1/2 top-0 h-full w-px bg-gray-300 transform -translate-x-1/2 
-          opacity-100 
-          sm:opacity-0 sm:group-hover:opacity-100 sm:group-hover/content:opacity-100
-          transition-opacity duration-200"
-        />
-
-        {/* Arrow (always visible on mobile, only on hover on desktop) */}
         <div
           className="absolute bg-white border rounded-full p-2 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 cursor-pointer text-gray-700 text-xl z-10 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-hover/content:opacity-100 transition-opacity duration-200"
           onClick={onBackClick}
         >
-          <IoIosArrowForward />
+          <ChevronRight />
         </div>
       </div>
 

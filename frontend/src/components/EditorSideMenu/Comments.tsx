@@ -1,6 +1,6 @@
 import { deleteComment } from "@/api/comment";
 import { useEditor } from "@/hooks/useEditor";
-import { BiTrash } from "react-icons/bi";
+import { Trash2 } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { useState } from "react";
 import Quill from "quill";
@@ -285,7 +285,7 @@ function CommentCard({ comment, deleteComment, quill }: CommentCardProps) {
             }}
             title="Delete comment"
           >
-            <BiTrash className="h-4 w-4" />
+            <Trash2 className="h-4 w-4" />
           </button>
         </div>
         <div className="p-3 pt-2">

@@ -3,7 +3,7 @@ import SettingsModal from "./SettingsModal";
 import { useTranslationSidebarParams } from "@/hooks/useQueryParams";
 import { useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { GrSettingsOption } from "react-icons/gr";
+import { Settings } from "lucide-react";
 const SettingsButton: React.FC = () => {
   const { selectedTranslationId } = useTranslationSidebarParams();
   const { id } = useParams();
@@ -15,7 +15,7 @@ const SettingsButton: React.FC = () => {
       <Button
         variant="secondary"
       >
-        <GrSettingsOption size={14} />
+        <Settings size={14} />
       </Button>
     </SettingsModal>
   );

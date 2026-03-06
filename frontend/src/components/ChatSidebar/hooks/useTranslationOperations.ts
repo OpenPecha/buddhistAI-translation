@@ -1,22 +1,7 @@
 import { useState, useRef } from "react";
-import {
-  TargetLanguage,
-  TextType,
-  ModelName,
-  performStreamingTranslation,
-  TranslationStreamEvent,
-} from "@/api/translate";
+import { performAITranslation } from "@/api/agent";
 import { useTranslation } from "react-i18next";
-
-export interface TranslationConfig {
-  targetLanguage: TargetLanguage;
-  textType: TextType;
-  modelName: ModelName;
-  batchSize: number;
-  userRules: string;
-  extractGlossary: boolean;
-  contextFiles: File[];
-}
+import type { TranslationConfig } from "@/hooks/useTranslationSettings";
 
 export interface TranslationResult {
   id: string;
@@ -35,22 +20,15 @@ export interface TranslationResult {
 
 interface UseTranslationOperationsProps {
   config: TranslationConfig;
-  selectedText: string;
   selectedTextLineNumbers: Record<string, { from: number; to: number }> | null;
+  selectedAgentId?: string;
   onStreamComplete?: (results: TranslationResult[]) => void;
 }
 
-const removeQuotes = (text: string): string => {
-  if (text.length >= 2 && text.startsWith('"') && text.endsWith('"')) {
-    return text.substring(1, text.length - 1);
-  }
-  return text;
-};
-
 export const useTranslationOperations = ({
   config,
-  selectedText,
   selectedTextLineNumbers,
+  selectedAgentId,
   onStreamComplete,
 }: UseTranslationOperationsProps) => {
   // Translation state
@@ -58,8 +36,6 @@ export const useTranslationOperations = ({
   const [translationResults, setTranslationResults] = useState<
     TranslationResult[]
   >([]);
-  const resultsRef = useRef(translationResults);
-  resultsRef.current = translationResults;
 
   const [currentStatus, setCurrentStatus] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
@@ -69,21 +45,6 @@ export const useTranslationOperations = ({
   const abortControllerRef = useRef<AbortController | null>(null);
   const currentSegmentIndexRef = useRef<number>(0);
   const { t } = useTranslation();
-  // Helper functions
-  const updateProgress = (percent: number | null, text: string) => {
-    if (percent !== null) {
-      setProgressPercent(percent);
-    }
-    setCurrentStatus(text);
-  };
-
-  const onStreamError = (error: string) => {
-    console.error("Stream error:", error);
-    setError(error);
-    setIsTranslating(false);
-    setCurrentStatus("Error");
-  };
-
   // Helper function to create segment-specific line number mappings
   const createSegmentLineMapping = (
     selectedText: string,
@@ -119,109 +80,18 @@ export const useTranslationOperations = ({
     return segmentMappings;
   };
 
-  const handleStreamEvent = (
-    event: TranslationStreamEvent,
-    segmentLineMappings?: Array<Record<
-      string,
-      { from: number; to: number }
-    > | null>
-  ) => {
-    switch (event.type) {
-      case "initialization":
-        updateProgress(
-          0,
-          `Starting translation of ${event.total_texts} line${
-            event.total_texts === 1 ? "" : "s"
-          }...`
-        );
-        break;
-
-      case "planning":
-        updateProgress(5, `Created ${event.total_batches} batches`);
-        break;
-
-      case "batch_start":
-        updateProgress(
-          event.progress_percent || 0,
-          `Processing batch ${event.batch_number}...`
-        );
-        break;
-
-      case "translation_start":
-        updateProgress(null, "Translating...");
-        break;
-
-      case "text_completed":
-        updateProgress(
-          event.progress_percent || 0,
-          `Completed ${event.text_number}/${event.total_texts} lines`
-        );
-
-        // Add partial result if we have translation preview
-        if (event.translation_preview) {
-          // Placeholder for future implementation
-        }
-        break;
-
-      case "batch_completed":
-        updateProgress(
-          event.cumulative_progress || 0,
-          `Batch ${event.batch_number} completed in ${event.processing_time}s`
-        );
-
-        // Display batch results immediately
-        if (event.batch_results && event.batch_results.length > 0) {
-          const newResults = event.batch_results.map((result, batchIndex) => {
-            // Get the segment-specific line numbers using the current segment index
-            const segmentIndex = currentSegmentIndexRef.current + batchIndex;
-            const segmentLineNumbers =
-              segmentLineMappings?.[segmentIndex] || null;
-
-            const updatedResult: TranslationResult = {
-              id: `${event.batch_id}-${batchIndex}-${Date.now()}`,
-              originalText: result.original_text || "",
-              translatedText: removeQuotes(result.translated_text) || "",
-              timestamp: event.timestamp,
-              metadata: {
-                batch_id: event.batch_id,
-                ...result.metadata,
-              },
-              lineNumbers: segmentLineNumbers,
-            };
-
-            return updatedResult;
-          });
-
-          // Update the segment index counter for the next batch
-          currentSegmentIndexRef.current += event.batch_results.length;
-
-          setTranslationResults((prev) => {
-            const updatedResults = [...prev, ...newResults];
-            return updatedResults;
-          });
-        }
-        break;
-
-      case "completion":
-        updateProgress(100, "Translation completed!");
-        break;
-
-      case "error":
-        console.error("Stream error:", event.error);
-        onStreamError(event.error);
-        break;
-
-      default:
-        console.warn("Unknown event type:", event.type);
-    }
-  };
-
   const startTranslation = async (text: string) => {
     const selectedText = text;
     if (!selectedText.trim()) {
       setError("Please enter text to translate");
       return;
     }
+
+    if (!selectedAgentId) {
+      setError("Please select an AI agent first");
+      return;
+    }
+
     resetTranslations();
     // Reset segment index counter
     currentSegmentIndexRef.current = 0;
@@ -255,73 +125,61 @@ export const useTranslationOperations = ({
         setIsTranslating(false);
         return;
       }
-      const context = config.contextFiles
-        .map((file) => file.contextFileId)
-        .join("\n");
-      const translationParams = {
-        texts: textLines,
+
+      setCurrentStatus("Processing with AI agent...");
+      setProgressPercent(10);
+
+      const response = await performAITranslation({
+        assistant_id: selectedAgentId,
         target_language: config.targetLanguage,
-        text_type: config.textType,
-        model_name: config.modelName ?? "claude-3-5-haiku-20241022",
-        batch_size: config.batchSize,
-        user_rules: config.userRules,
-        context: context,
-      };
-      await performStreamingTranslation(
-        translationParams,
-        // onEvent - handle structured events
-        (event: TranslationStreamEvent) => {
-          if (!abortControllerRef.current?.signal.aborted) {
-            handleStreamEvent(event, segmentLineMappings);
-          }
-        },
-        // onComplete
-        () => {
-          setIsTranslating(false);
-          setCurrentStatus("Translation complete");
-          if (onStreamComplete) {
-            onStreamComplete(resultsRef.current);
-          }
-        },
-        // onError
-        (error: Error) => {
-          console.error("Translation error:", error);
-          let errorMessage = error.message;
+        prompt: textLines,
+        model: config.modelName ?? "claude-3-5-haiku-20241022",
+      });
 
-          // Handle specific error cases
-          if (
-            errorMessage.includes("503") ||
-            errorMessage.includes("service unavailable")
-          ) {
-            errorMessage =
-              "Translation service is currently unavailable. Please try again later.";
-          } else if (
-            errorMessage.includes("504") ||
-            errorMessage.includes("timed out")
-          ) {
-            errorMessage =
-              "Translation request timed out. The service may be experiencing high load.";
-          } else if (errorMessage.includes("Authentication")) {
-            errorMessage =
-              "Authentication failed. Please refresh the page and try again.";
-          }
+      if (response.errors && response.errors.length > 0) {
+        throw new Error(response.errors.join(", "));
+      }
 
-          setError(errorMessage);
-          setIsTranslating(false);
-          setCurrentStatus("Error");
-        },
-        // Pass the abort controller
-        abortControllerRef.current
-      );
+      setProgressPercent(90);
+      setCurrentStatus("Processing results...");
+
+      // Extract output_text from results
+      const results = response.results.map((result, index) => {
+        const segmentLineNumbers = segmentLineMappings?.[index] || null;
+        
+        return {
+          id: `ai-${Date.now()}-${index}`,
+          originalText: textLines[index] || "",
+          translatedText: result.output_text,
+          timestamp: response.metadata.completed_at,
+          metadata: {
+            batch_id: "ai-batch",
+            model_used: config.modelName,
+            processing_time: response.metadata.total_processing_time,
+          },
+          lineNumbers: segmentLineNumbers,
+        } as TranslationResult;
+      });
+
+      setTranslationResults(results);
+      setProgressPercent(100);
+      setCurrentStatus("Translation complete");
+      setIsTranslating(false);
+
+      if (onStreamComplete) {
+        onStreamComplete(results);
+      }
     } catch (err) {
       // Don't show error for aborted requests
       if (err instanceof Error && err.name === "AbortError") {
         return;
       }
 
-      setError(err instanceof Error ? err.message : "Translation failed");
+      console.error("AI translation error:", err);
+      const errorMessage = err instanceof Error ? err.message : "AI translation failed";
+      setError(errorMessage);
       setIsTranslating(false);
-      setCurrentStatus("Failed");
+      setCurrentStatus("Error");
     }
   };
 

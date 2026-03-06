@@ -1,6 +1,6 @@
 import React, { memo, useCallback, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, AlertCircle, Globe, Eye, FileText, Moon, Sun } from "lucide-react";
+import { ArrowLeft, AlertCircle, Globe, Eye, FileText, Moon, Sun, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -13,7 +13,6 @@ import { FootNoteProvider } from "@/contexts/FootNoteContext";
 import { useCurrentDoc } from "@/hooks/useCurrentDoc";
 import { useTranslationSidebarParams } from "@/hooks/useQueryParams";
 import { createPortal } from "react-dom";
-import { IoIosArrowForward } from "react-icons/io";
 import Split from "react-split";
 import isMobile from "@/lib/isMobile";
 
@@ -234,7 +233,7 @@ const PublicDocumentViewer: React.FC<PublicDocumentViewerProps> = ({
           <CardContent>
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 dark:border-neutral-300 mx-auto mb-4"></div>
-              <p className="text-gray-600 dark:text-neutral-300">Loading document...</p>
+              <p>Loading document...</p>
             </div>
           </CardContent>
         </Card>
@@ -317,7 +316,7 @@ const PublicDocumentViewer: React.FC<PublicDocumentViewerProps> = ({
                     title="Close translation view"
                     type="button"
                   >
-                    <IoIosArrowForward />
+                    <ChevronRight />
                   </button>
 
                   <Split
@@ -332,12 +331,6 @@ const PublicDocumentViewer: React.FC<PublicDocumentViewerProps> = ({
                     cursor="col-resize"
                     className={`split-pane h-full flex w-full overflow-hidden ${isMobile ? "flex-col" : "flex-row"
                       }`}
-                    gutterStyle={() => ({
-                      backgroundColor: "#e5e7eb",
-                      border: "1px solid #d1d5db",
-                      cursor: "col-resize",
-                      position: "relative",
-                    })}
                     onDragStart={() => {
                       document.body.style.cursor = "col-resize";
                     }}

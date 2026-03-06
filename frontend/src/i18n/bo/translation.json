@@ -375,6 +375,7 @@
   "translation.uploadFailed": "འཇུག་མ་ཐུབ།",
   "translation.uploading": "འཇུག་བཞིན་པ།",
   "translation.welcomeToTranslator": "སྒྱུར་བྱེད་ལ་དགའ་བསུ་ཞུ།",
+  "translation.welcomeToTranslatorDescription": "དགའ་བསུ་ཞུ་བའི་གནས་ཚུལ་འདེམས་རོགས།",
   "translation.translateSelectedText": "འདེམས་ཟིན་ཡི་གེ་སྒྱུར་བ།",
   "translation.extractGlossaryTerms": "མིང་ཚིག་ཐོ་འདོན་པ།",
   "translation.aiTranslation": "ཡིད་སྤྲོད་རིག་ནུས་སྒྱུར་བ།",

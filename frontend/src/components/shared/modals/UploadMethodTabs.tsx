@@ -3,8 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 
-import { File } from "lucide-react";
-import { MdApi } from "react-icons/md";
+import { File, Cable } from "lucide-react";
 
 export type UploadMethod = "file" | "openpecha" | "ai";
 
@@ -42,7 +41,7 @@ export function UploadMethodTabs({
     openpecha: {
       value: "openpecha",
       label: t("common.openpecha"),
-      icon: <MdApi size={16} className="text-gray-600" />,
+      icon: <Cable size={16} className="text-gray-600" />,
     },
     ai: {
       value: "ai",

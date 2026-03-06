@@ -11,8 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTranslation } from "react-i18next";
-import { useTheme } from "@/contexts/ThemeProvider";
-import { Eye, Type, Palette, RotateCcw, Minus, Plus } from "lucide-react";
+import { Eye, Type, RotateCcw, Minus, Plus } from "lucide-react";
 import {
   useDisplaySettings,
   type DisplaySettings,
@@ -27,25 +26,6 @@ const DisplaySettings: React.FC<{}> = ({ }) => {
     updateTranslationTypography,
     resetToDefaults,
   } = useDisplaySettings();
-  const { theme } = useTheme();
-  function isHtmlTagDark() {
-    if (typeof document === "undefined") return false;
-    const html = document.documentElement;
-    return html.classList.contains("dark");
-  }
-  const isDark = theme === "dark" || isHtmlTagDark();
-
-  const backgroundColorOptions = isDark
-    ? [
-      { value: "#40474F", label: "Dark Gray", preview: "#40474F" },
-      { value: "#353D46", label: "Charcoal Gray", preview: "#353D46" },
-      { value: "#586674", label: "Slate Gray", preview: "#586674" },
-    ]
-    : [
-      { value: "#f8fafc", label: "Light Blue Gray", preview: "#f8fafc" },
-      { value: "#fffea6", label: "Pale Yellow", preview: "#fffea6" },
-      { value: "#a2cbf5", label: "Light Sky Blue", preview: "#a2cbf5" },
-    ];
 
   const fontFamilyOptions = [
     { value: "google-sans-regular", label: "Google Sans (Default)" },
@@ -193,56 +173,6 @@ const DisplaySettings: React.FC<{}> = ({ }) => {
             <Label htmlFor="line-numbers">
               {t("settings.showLineNumbers", "Show Line Numbers")}
             </Label>
-          </div>
-        </div>
-      </div>
-
-      {/* Colors & Themes */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-2 text-sm font-medium">
-          <Palette className="w-4 h-4" />
-          {t("settings.colorsThemes", "Colors & Themes")}
-        </div>
-
-        <div className="space-y-4">
-          <div>
-            <Label className="text-sm font-medium mb-2 block">
-              {t("settings.editorBackground", "Editor Background")}
-            </Label>
-            <div className="grid grid-cols-3 gap-2">
-              {backgroundColorOptions.map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() =>
-                    updateSetting("editorBackgroundColor", option.value)
-                  }
-                  className={`p-2 border rounded-md text-xs hover:border-gray-400 transition-colors ${settings.editorBackgroundColor === option.value
-                    ? "border-blue-500 bg-neutral-50 dark:bg-neutral-800"
-                    : "border-gray-200"
-                    }`}
-                >
-                  <div
-                    className="w-full h-6 rounded mb-1"
-                    style={{ backgroundColor: option.preview }}
-                  />
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <Label className="text-sm font-medium mb-2 block">
-              {t("settings.selectionHighlight", "Selection Highlight Color")}
-            </Label>
-            <Input
-              type="color"
-              value={settings.selectionHighlightColor}
-              onChange={(e) =>
-                updateSetting("selectionHighlightColor", e.target.value)
-              }
-              className="w-20 h-10"
-            />
           </div>
         </div>
       </div>

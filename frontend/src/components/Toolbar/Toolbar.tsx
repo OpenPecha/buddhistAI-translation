@@ -1,10 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { FaHistory } from "react-icons/fa";
 import QuillVersionControls from "./QuillVersionControls";
 import { useEditor } from "@/hooks/useEditor";
 import HeaderDropdown from "@/components/quillExtension/HeaderDropdown";
 import { EDITOR_READ_ONLY, MAX_HEADING_LEVEL } from "@/utils/editorConfig";
-import { BiCommentAdd } from "react-icons/bi";
 import { Button } from "@/components/ui/button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateDocument } from "@/api/document";
@@ -13,12 +11,9 @@ import EditableText from "@/components/ui/EditableText";
 import { createPortal } from "react-dom";
 import VersionDiff from "./VersionDiff";
 import Quill from "quill";
-import { useAuth } from "@/auth/use-auth-hook";
 import isMobile from "@/lib/isMobile";
-import { useCurrentDoc } from "@/hooks/useCurrentDoc";
 import { tokenize } from "@/api/tokenizer/botok";
-import { Loader2 } from "lucide-react";
-import { MdFormatAlignJustify } from "react-icons/md";
+import { Loader2, History, MessageSquarePlus, AlignJustify } from "lucide-react";
 const isEnabled = !EDITOR_READ_ONLY;
 
 interface ToolbarProps {
@@ -204,10 +199,7 @@ const Toolbar = ({
       style={{
         display: showToolbar ? "flex" : "none", // Add isEditable check
         opacity: showToolbar ? 1 : 0, // Add isEditable check
-        width: !isMobile ? "94vw" : undefined,
         position: "relative",
-        margin: "5px auto",
-        borderRadius: !isMobile ? "75px" : undefined,
       }}
       className={`bg-neutral-100 dark:bg-neutral-800/40  flex-wrap`}
     >
@@ -267,16 +259,14 @@ const Toolbar = ({
           <ToolbarButton
             onClick={() => addComment()}
             title="Suggestion"
-            className=""
           >
-            <BiCommentAdd size={28} />
+            <MessageSquarePlus size={28} />
           </ToolbarButton>
           <ToolbarButton
             title="Versions"
-            className=""
             onClick={() => setOpenHistory(!openHistory)}
           >
-            <FaHistory />
+            <History />
           </ToolbarButton>
           <span className="ql-formats" style={isEnabledStyle}>
             <button className="ql-footnote" title="footnote" />
@@ -292,7 +282,7 @@ const Toolbar = ({
             {isFormatting ? (
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
-              <MdFormatAlignJustify className="w-4 h-4" />
+              <AlignJustify className="w-4 h-4" />
             )}
           </button>
         </span>
@@ -355,12 +345,10 @@ export const ToolbarButton = ({
   children,
   onClick,
   title,
-  className,
 }: {
   children: React.ReactNode;
   onClick: () => void;
   title: string;
-  className: string;
 }) => {
   return (
     <Button
@@ -368,10 +356,7 @@ export const ToolbarButton = ({
       onClick={onClick}
       variant="ghost"
       title={title}
-      className={
-        className +
-        " w-full text-left py-2 px-4  rounded-lg cursor-pointer font-medium text-gray-700 transition-colors flex items-center justify-between"
-      }
+
     >
       {children}
     </Button>
@@ -404,7 +389,7 @@ const EditableDocumentName: React.FC<{
   };
 
   return (
-    <div className="flex items-center gap-2 px-2 py-1 bg-neutral-50 dark:bg-neutral-800 rounded-2xl border">
+    <div className="flex items-center gap-2 px-2 py-1 bg-neutral-50 dark:bg-neutral-800 border">
       <svg
         className="w-4 h-4 text-neutral-800 dark:text-neutral-300"
         fill="none"

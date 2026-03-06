@@ -1,16 +1,22 @@
-import { ChevronRight, MapPin, MessageSquare, Plus, X } from "lucide-react";
+import { EllipsisVertical, Eye, MapPin, MessageSquare, Pencil, Plus, Trash2, X } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useTranslation as useTranslationI18next } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import SettingsModal, {
-  TargetLanguageSelector,
-} from "./components/sidebar/SettingsModal";
+import { toast } from "sonner";
+import TargetLanguageSelector from "./components/sidebar/TranslationLanguageSelector";
 import {
   TranslationProvider,
   useTranslation,
@@ -19,15 +25,24 @@ import ChatHistory from "./components/ChatHistory";
 import ChatInput from "./components/ChatInput";
 import ResultsPanel from "./components/ResultsPanel";
 import { useChatFlow } from "./hooks/useChatFlow";
+import AgentSelector from "./components/agent/AgentSelector";
+import AgentDetailModal from "./components/agent/AgentDetailModal";
+import EditAgentModal from "./components/agent/EditAgentModal";
+import { useDeleteAgent } from "@/api/queries/agents";
 
 interface ChatSidebarProps {
   documentId: string;
 }
 
-const ChatSidebarContent: React.FC = () => {
+const ChatSidebarContent: React.FC<{
+  selectedAgentId: string | undefined;
+  setSelectedAgentId: (id: string | undefined) => void;
+}> = ({ selectedAgentId, setSelectedAgentId }) => {
   const { t } = useTranslationI18next();
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [isAgentDetailModalOpen, setIsAgentDetailModalOpen] = useState(false);
+  const [isEditAgentModalOpen, setIsEditAgentModalOpen] = useState(false);
+  const deleteMutation = useDeleteAgent();
 
   const { messages, clearHistory, messageCount, handleAction } = useChatFlow();
   const {
@@ -74,6 +89,21 @@ const ChatSidebarContent: React.FC = () => {
     };
   };
 
+  const handleDeleteAgent = useCallback(() => {
+    if (!selectedAgentId) return;
+    if (!globalThis.confirm("Are you sure you want to delete this agent? This action cannot be undone.")) return;
+
+    deleteMutation.mutate(selectedAgentId, {
+      onSuccess: () => {
+        toast.success("Agent deleted successfully");
+        setSelectedAgentId(undefined);
+      },
+      onError: (err) => {
+        toast.error(`Failed to delete agent: ${err.message}`);
+      },
+    });
+  }, [selectedAgentId, deleteMutation, setSelectedAgentId]);
+
   const handleClearChat = useCallback(() => {
     if (
       globalThis.confirm(
@@ -88,7 +118,7 @@ const ChatSidebarContent: React.FC = () => {
 
   if (isCollapsed) {
     return (
-      <div className="h-full w-12 flex flex-col bg-neutral-50 dark:bg-neutral-800 border-l border-gray-200 dark:border-gray-700">
+      <div className="h-full w-12 flex flex-col bg-neutral-50 dark:bg-card border-l border-gray-200 dark:border-gray-700">
         <div className="p-2 flex flex-col items-center gap-4">
           <Button
             onClick={() => setIsCollapsed(false)}
@@ -106,38 +136,62 @@ const ChatSidebarContent: React.FC = () => {
 
   const selectedLines =
     getLineRange(selectedTextLineNumbers)?.startLine ===
-    getLineRange(selectedTextLineNumbers)?.endLine
+      getLineRange(selectedTextLineNumbers)?.endLine
       ? `(${getLineRange(selectedTextLineNumbers)?.startLine})`
-      : `(${getLineRange(selectedTextLineNumbers)?.startLine} - ${
-          getLineRange(selectedTextLineNumbers)?.endLine
-        })`;
+      : `(${getLineRange(selectedTextLineNumbers)?.startLine} - ${getLineRange(selectedTextLineNumbers)?.endLine
+      })`;
   return (
-    <div className="h-full w-full flex flex-col bg-white dark:bg-gray-900">
+    <div className="h-full w-full flex flex-col bg-white dark:bg-card">
       {/* Header */}
-      <div className="flex items-center justify-between p-1 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-        <TargetLanguageSelector
-          config={config}
-          onConfigChange={handleConfigChange}
-          showLabel={false}
-        />
-        <div className="">
+      <div className="flex items-center justify-between p-2 border-b border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-card">
+        <div className="flex-1 mr-1">
+          <AgentSelector
+            value={selectedAgentId}
+            onValueChange={setSelectedAgentId}
+          />
+        </div>
+        <div>
           {messageCount > 0 && (
             <Button
               onClick={handleClearChat}
               variant="ghost"
               size="icon"
-              className="w-6 h-6 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-red-600"
+              className="w-6 h-6 hover:bg-gray-100 dark:hover:bg-card hover:text-red-600"
               title="Reset chat"
             >
               <Plus className="w-3 h-3" />
             </Button>
           )}
-          <SettingsModal
-            config={config}
-            isOpen={isSettingsModalOpen}
-            onOpenChange={setIsSettingsModalOpen}
-            onConfigChange={handleConfigChange}
-          />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                disabled={!selectedAgentId}
+                title={!selectedAgentId ? "Select an agent first" : "Agent options"}
+              >
+                <EllipsisVertical className="size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setIsAgentDetailModalOpen(true)}>
+                <Eye className="size-4" />
+                View Details
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setIsEditAgentModalOpen(true)}>
+                <Pencil className="size-4" />
+                Edit
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={handleDeleteAgent}
+              >
+                <Trash2 className="size-4" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
       {/* Selected Text Display */}
@@ -183,11 +237,12 @@ const ChatSidebarContent: React.FC = () => {
           </div>
         )}
       </TooltipProvider>
-      {/* Chat Area */}
+
       <div className="flex-1 flex flex-col min-h-0">
         {showPanel ? (
           <ResultsPanel inputMode={inputMode} />
         ) : (
+
           <ChatHistory
             messages={messages}
             isProcessing={
@@ -198,22 +253,41 @@ const ChatSidebarContent: React.FC = () => {
             onAction={handleAction}
           />
         )}
-
-        {/* Input Area */}
+        <TargetLanguageSelector
+          config={config}
+          onConfigChange={handleConfigChange}
+          showLabel={false}
+        />
         <ChatInput
           isProcessing={
             isTranslating || isExtractingGlossary || isAnalyzingStandardization
           }
         />
       </div>
+
+      <AgentDetailModal
+        agentId={selectedAgentId}
+        open={isAgentDetailModalOpen}
+        onOpenChange={setIsAgentDetailModalOpen}
+      />
+      <EditAgentModal
+        agentId={selectedAgentId}
+        open={isEditAgentModalOpen}
+        onOpenChange={setIsEditAgentModalOpen}
+      />
     </div>
   );
 };
 
 const ChatSidebar: React.FC<ChatSidebarProps> = ({ documentId }) => {
+  const [selectedAgentId, setSelectedAgentId] = useState<string | undefined>();
+
   return (
-    <TranslationProvider documentId={documentId}>
-      <ChatSidebarContent />
+    <TranslationProvider documentId={documentId} selectedAgentId={selectedAgentId}>
+      <ChatSidebarContent
+        selectedAgentId={selectedAgentId}
+        setSelectedAgentId={setSelectedAgentId}
+      />
     </TranslationProvider>
   );
 };

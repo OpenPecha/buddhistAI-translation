@@ -95,7 +95,6 @@
 	--sidebar-border: oklch(0.92 0.004 286.32);
 	--sidebar-ring: oklch(0.705 0.015 286.067);
 	--font-monlam: "monlam", sans-serif;
-	--color-editor-background: #f8fafc;
 	--color-footnote-background: #738596;
 }
 
@@ -112,7 +111,7 @@
 	--text-color: #ced0d3;
 	--background: #191919;
 	--foreground: oklch(0.985 0 0);
-	--card: oklch(0.21 0.006 285.885);
+	--card: #1E1E1E;
 	--card-foreground: oklch(0.985 0 0);
 	--popover: #191919;
 	--popover-foreground: oklch(0.985 0 0);
@@ -141,7 +140,6 @@
 	--sidebar-accent-foreground: oklch(0.985 0 0);
 	--sidebar-border: oklch(1 0 0 / 10%);
 	--sidebar-ring: oklch(0.552 0.016 285.938);
-	--color-editor-background: #40474f;
 	--color-footnote-background: #0b77f2;
 }
 
@@ -181,7 +179,6 @@
 	--color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
 	--color-sidebar-border: var(--sidebar-border);
 	--color-sidebar-ring: var(--sidebar-ring);
-	--color-editor-bg: var(--color-editor-background);
 	--color-footnote-bg: var(--color-footnote-background);
 
 	--color-primary-50: #f1eff5;
@@ -224,43 +221,22 @@
 	}
 }
 
-::-webkit-scrollbar {
-	width: 5px;
-}
-
-::-webkit-scrollbar-track {
-	background: transparent;
-}
-f
-::-webkit-scrollbar-thumb {
-	background: #888;
-
-	cursor: pointer;
-}
-
-::-webkit-scrollbar-thumb:hover {
-	background: #555;
-}
-
 .gutter {
-	background-color: #e5e7eb;
+	background-color: #F5F5F5;
 	background-repeat: no-repeat;
 	background-position: 50%;
-	border: 1px solid #d1d5db;
-	transition: background-color 0.2s ease;
 }
 
-.gutter:hover {
-	background-color: #d1d5db;
+.dark .gutter {
+	background-color: #1E1E1E;
 }
+
 
 .gutter.gutter-horizontal {
-	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+YMAxmAo5hKyBBiAJJBKUhNQrjJu5EyAwAAFNQFDIWKqE8AAAAASUVORK5CYII=");
 	cursor: col-resize;
 }
 
 .gutter.gutter-vertical {
-	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFCAYAAABFwYEkAAAAIklEQVQoU2M4c+YMAxpgVFSdIhLUPJxhHKKKGVQAq0HVNwoAAI8kBhJm0SfUAAAAAElFTkSuQmCC");
 	cursor: row-resize;
 }
 
@@ -276,11 +252,22 @@ f
 	flex-direction: column;
 }
 
-.gutter {
-	z-index: 1;
-}
 
-/* Button should always be above gutters */
 button[aria-label="Close translation view"] {
 	z-index: 99 !important;
+}
+
+
+::-webkit-scrollbar,
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+div::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }

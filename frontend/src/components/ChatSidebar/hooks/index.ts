@@ -7,7 +7,7 @@ export { useStandardizationOperations } from "./useStandardizationOperations";
 
 // Export types for external use
 export type {
-  TranslationConfig,
   TranslationResult,
 } from "./useTranslationOperations";
+export type { TranslationConfig } from "@/hooks/useTranslationSettings";
 export type { GlossaryTerm, GlossaryEvent } from "./useGlossaryOperations";

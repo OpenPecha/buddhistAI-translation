@@ -5,10 +5,9 @@ import { Button } from "./ui/button";
 import { updateProject } from "@/api/project";
 import EditableText from "./ui/EditableText";
 
-import DocIcon from "@/assets/doc_icon.png";
 import ShareModal from "./ShareModal";
 
-import { BiShare } from "react-icons/bi";
+import { Share2 } from "lucide-react";
 import ProfileArea from "./ProfileArea";
 import { useTranslation } from "react-i18next";
 import SettingsButton from "./setting/SettingsButton";
@@ -43,12 +42,7 @@ const Navbar = ({ project }: NavbarProps) => {
           to="/"
           className="flex items-center gap-3 font-semibold text-gray-500 hover:text-gray-700 transition capitalize"
         >
-          <img
-            alt="icon"
-            src={DocIcon}
-            width={40}
-            className=" object-contain"
-          />
+          <div className="w-3 h-3 bg-[#12A7FC]" />
         </Link>
         <div className="flex flex-col w-fit items-center -space-y-1">
           <ProjectNameWrapper project={project} />
@@ -129,7 +123,7 @@ export function NavMenuList({
         variant="outline"
         aria-label="Share document"
       >
-        <BiShare className="text-secondary-600 dark:text-neutral-300" />
+        <Share2 />
         <span className="capitalize leading-[normal]">
           {t("common.share")}/{t("common.download")}
         </span>

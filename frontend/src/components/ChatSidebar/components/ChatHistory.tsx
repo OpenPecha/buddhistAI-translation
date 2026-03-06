@@ -1,4 +1,3 @@
-import { MessageSquare } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import type { ChatMessage as ChatMessageType } from "../types/chatTypes";
@@ -35,35 +34,15 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({
     }
   }, [messages]);
 
-  // Show empty state when no messages
   if (messages.length === 0) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center text-center">
-        <div className="bg-gray-100 dark:bg-gray-800 rounded-full p-4 mb-4">
-          <MessageSquare className="w-8 h-8 text-gray-400" />
-        </div>
-        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+        <p className="text-lg font-medium text-gray-900 dark:text-gray-100">
           {t("translation.welcomeToTranslator")}
-        </h3>
-
-        <div className="space-y-2 text-sm">
-          <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
-            <code className="bg-blue-50 dark:bg-blue-950 px-2 py-1 rounded">
-              {t("translation.commandTranslate")}
-            </code>
-            <span className="text-gray-600 dark:text-gray-400">
-              - {t("translation.translateSelectedText")}
-            </span>
-          </div>
-          <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
-            <code className="bg-green-50 dark:bg-green-950 px-2 py-1 rounded">
-              {t("translation.commandGlossary")}
-            </code>
-            <span className="text-gray-600 dark:text-gray-400">
-              - {t("translation.extractGlossaryTerms")}
-            </span>
-          </div>
-        </div>
+        </p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          {t("translation.welcomeToTranslatorDescription")}
+        </p>
       </div>
     );
   }

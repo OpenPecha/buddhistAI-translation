@@ -1,16 +1,12 @@
 import React, { useState } from "react";
-import { FileText, MoreVertical, Share2 } from "lucide-react";
-import DocIcon from "@/assets/doc_icon.png";
+import { FileText, MoreVertical, Share2, Trash2, PencilLine, Globe } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { RiDeleteBin6Line } from "react-icons/ri";
-import { BiRename } from "react-icons/bi";
 import { useTranslation } from "react-i18next";
-import { MdPublic } from "react-icons/md";
 import { OpenInNewTab } from "../v2/ui/atoms/Icons/Icons";
 
 const ProjectItem = ({
@@ -38,7 +34,7 @@ const ProjectItem = ({
     return (
       <div className="flex items-center py-2 px-1 border-b border-gray-200 dark:border-neutral-700 hover:bg-zinc-50 hover:dark:bg-neutral-800 transition-all">
         <div className="flex-shrink-0 mr-4 w-[26px] flex justify-center">
-          <img alt="icon" src={DocIcon} width={26} className="object-contain" />
+          <div className="w-3 h-3 bg-[#12A7FC]" />
         </div>
 
         <div className="flex-grow w-fit md:w-auto">
@@ -71,7 +67,7 @@ const ProjectItem = ({
         <div className="hidden md:flex items-center flex-shrink-0 text-sm text-zinc-500 dark:text-zinc-400 mx-4 w-36 text-right">
           {owner ?? "—"}
           {isPublic && (
-            <MdPublic size={16} className="text-gray-500 ml-2" title="Public" />
+            <Globe size={16} className="text-gray-500 ml-2" />
           )}
         </div>
 
@@ -125,7 +121,7 @@ const ProjectItem = ({
         )}
         <div className="flex items-center gap-2">
           <span>{formattedDate}</span>
-          {isPublic && <MdPublic size={14} />}
+          {isPublic && <Globe size={14} />}
         </div>
       </div>
     </div>
@@ -182,12 +178,12 @@ function ProjectItemDropdownMenu({
             <DropdownMenuItem
               onClick={(e) => handleCloseClick(e, updateDocument)}
             >
-              <BiRename /> {t("common.rename")}
+              <PencilLine /> {t("common.rename")}
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={(e) => handleCloseClick(e, deleteDocument)}
             >
-              <RiDeleteBin6Line /> {t("common.remove")}
+              <Trash2 /> {t("common.remove")}
             </DropdownMenuItem>
           </>
         )}

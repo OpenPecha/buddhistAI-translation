@@ -19,21 +19,20 @@ function SelectTranslation() {
 		useCurrentDocTranslations(rootId);
 
 	return (
-		<div className="rounded-lg overflow-hidden">
-			<div className="flex justify-between items-center mb-4">
-				<h3 className="font-medium font-google-sans text-neutral-800 dark:text-neutral-100">
+		<div className="space-y-2">
+			<div className="flex justify-between items-center">
+				<p className="font-medium  text-neutral-800 dark:text-neutral-100">
 					{t("translation.translations")}
-				</h3>
+				</p>
 				<Button
+					variant="outline"
 					onClick={() => setShowCreateModal(true)}
 					size="sm"
-					className="flex items-center gap-1 h-8 cursor-pointer"
 				>
 					<Plus className="h-4 w-4" />
 				</Button>
 			</div>
-
-			<div className="flex flex-col gap-2 p-2">
+			<div className="flex flex-col">
 				<TranslationList translations={translations} />
 			</div>
 			{showCreateModal && (

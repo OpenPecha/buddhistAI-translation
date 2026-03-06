@@ -1,6 +1,5 @@
-import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { SidebarTab } from "./types";
 
 interface SidebarHeaderProps {
@@ -24,16 +23,9 @@ const SidebarHeader = ({
 }: SidebarHeaderProps) => {
   return (
     <div
-      className={cn(
-        "flex items-center justify-between p-2 border-b bg-gray-50/50 dark:bg-gray-800/50",
-        isTranslationEditor && "flex-row-reverse"
-      )}
-    >
+      className="flex items-center justify-between p-2 border-b bg-gray-50/50 dark:bg-zinc-800/50">
       <div
-        className={cn(
-          "flex items-center gap-2",
-          isTranslationEditor && "flex-1 flex-row-reverse"
-        )}
+        className="flex items-center gap-1"
       >
         {activeTab === "comments" && (sidebarView === "thread" || sidebarView === "new") ? (
           <>
@@ -55,22 +47,15 @@ const SidebarHeader = ({
             {tabs.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
-
               return (
                 <Button
                   key={tab.id}
-                  variant={isActive ? "default" : "ghost"}
-                  size="sm"
+                  variant={isActive ? "outline" : "ghost"}
+                  size="icon"
                   onClick={() => onTabClick(tab.id)}
-                  className={cn(
-                    "h-6 w-8 p-0 flex items-center justify-center",
-                    isActive
-                      ? "bg-primary text-primary-foreground"
-                      : "hover:bg-gray-200 dark:hover:bg-gray-700"
-                  )}
                   title={tab.label}
                 >
-                  <Icon className="h-4 w-4" />
+                  <Icon className={isActive ? "text-amber-500" : "text-gray-500 dark:text-gray-400"} />
                 </Button>
               );
             })}
@@ -79,16 +64,11 @@ const SidebarHeader = ({
       </div>
       <Button
         variant="ghost"
-        size="sm"
+        size="icon"
         onClick={onClose}
-        className="h-6 w-6 p-0 hover:bg-gray-200 dark:hover:bg-gray-700"
         title="Close sidebar"
       >
-        {isTranslationEditor ? (
-          <ChevronRight className="h-4 w-4" />
-        ) : (
-          <ChevronLeft className="h-4 w-4" />
-        )}
+        <X className="h-4 w-4" />
       </Button>
     </div>
   );

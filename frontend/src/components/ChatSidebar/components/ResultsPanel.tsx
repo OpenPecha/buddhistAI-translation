@@ -9,9 +9,9 @@ import {
   Globe,
   StopCircle,
   X,
+  Replace,
 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { TbReplaceFilled } from "react-icons/tb";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -169,7 +169,7 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
                         size="sm"
                         className="h-5 w-5 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30"
                       >
-                        <TbReplaceFilled className="w-3 h-3 " />
+                        <Replace className="w-3 h-3 " />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>

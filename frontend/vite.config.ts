@@ -8,7 +8,8 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
 
   const target_url = env.VITE_SERVER_URL || "http://localhost:9000";
-
+  const agent_url = env.VITE_AGENT_URL;
+  const pecha_api_url = env.VITE_PECHA_API_URL;
   return {
     plugins: [react(), tailwindcss()],
     optimizeDeps: {
@@ -18,6 +19,12 @@ export default defineConfig(({ mode }) => {
       port: 3000,
       allowedHosts: true,
       proxy: {
+        "/agent": {
+          target: agent_url,
+          changeOrigin: true,
+          secure: false,
+          rewrite: (path) => path.replace(/^\/agent/, ""),
+        },
         "/api": {
           target: target_url,
           changeOrigin: true,
@@ -42,6 +49,12 @@ export default defineConfig(({ mode }) => {
           target: target_url,
           changeOrigin: true,
           secure: false,
+        },
+        "/pecha": {
+          target: pecha_api_url,
+          changeOrigin: true,
+          secure: false,
+          rewrite: (path) => path.replace(/^\/pecha/, ""),
         },
       },
     },

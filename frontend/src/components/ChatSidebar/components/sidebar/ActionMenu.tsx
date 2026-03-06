@@ -7,9 +7,9 @@ import {
   Edit3,
   Eye,
   EyeOff,
+  Replace,
 } from "lucide-react";
 import type React from "react";
-import { TbReplaceFilled } from "react-icons/tb";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -110,7 +110,7 @@ const ActionMenu: React.FC<ActionMenuProps> = ({
                 className="h-7 w-7 p-0 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                 disabled={disabled}
               >
-                <TbReplaceFilled className="w-3 h-3" />
+                <Replace className="w-3 h-3" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>{t("translation.insertTranslationAtLine")}</TooltipContent>

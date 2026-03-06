@@ -1,27 +1,27 @@
-const server_url = import.meta.env.VITE_SERVER_URL;
-
 export interface Model {
-  /** Human-readable model description */
-  name: string;
-  /** Model ID/identifier used in API calls */
   value: string;
-  /** Model provider (e.g., "Anthropic", "Google") */
+  name: string;
   provider: string;
-  /** Array of model capabilities */
+  is_thinking: boolean;
   capabilities: string[];
-  /** Context window size */
-  contextWindow: number;
+  contextWindow: number | null;
+}
+
+interface ModelData {
+  name: string;
+  provider: string;
+  description: string;
+  capabilities: string[];
+  context_window: number | null;
+  is_thinking: boolean;
 }
 
 export interface ModelsResponse {
-  success: boolean;
-  data: Model[];
-  message?: string;
-  error?: string;
+  models: Record<string, ModelData>;
 }
 
 const getModels = async (): Promise<Model[]> => {
-  const response = await fetch(`${server_url}/models`);
+  const response = await fetch("/agent/ai/models");
 
   if (!response.ok) {
     throw new Error(`Failed to fetch models: ${response.statusText}`);
@@ -29,11 +29,14 @@ const getModels = async (): Promise<Model[]> => {
 
   const result: ModelsResponse = await response.json();
 
-  if (!result.success) {
-    throw new Error(result.message || result.error || "Failed to fetch models");
-  }
-
-  return result.data;
+  return Object.entries(result.models).map(([key, modelData]) => ({
+    value: key,
+    name: modelData.name,
+    provider: modelData.provider,
+    is_thinking: modelData.is_thinking,
+    capabilities: modelData.capabilities,
+    contextWindow: modelData.context_window,
+  }));
 };
 
 export default getModels;

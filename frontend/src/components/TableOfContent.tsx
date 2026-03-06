@@ -5,18 +5,15 @@ import React, {
   useCallback,
   useRef,
 } from "react";
-import { Button } from "./ui/button";
-import { FaList, FaChevronDown, FaChevronRight } from "react-icons/fa";
 import { useEditor } from "@/hooks/useEditor";
 import { MAX_HEADING_LEVEL } from "@/utils/editorConfig";
 import { cn } from "@/lib/utils";
 import { debounce } from "lodash";
-import { HiArrowLeft } from "react-icons/hi2";
 import {
   useTableOfContentSyncStore,
   useTableOfContentOpenStore,
 } from "@/stores/tableOfContentStore";
-import { BookOpen, Dot } from "lucide-react";
+import { Dot, ChevronDown, ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import isMobile from "@/lib/isMobile";
 
@@ -34,7 +31,7 @@ interface TableOfContentProps {
 type ExpandedSections = { [key: string]: boolean };
 
 const TableOfContent: React.FC<TableOfContentProps> = ({ documentId }) => {
-  const { isOpen, setIsOpen, addDocumentId, removeDocumentId } =
+  const { addDocumentId, removeDocumentId } =
     useTableOfContentOpenStore();
   const [headings, setHeadings] = useState<Heading[]>([]);
   const { synced } = useTableOfContentSyncStore();
@@ -384,9 +381,9 @@ const Toc = React.memo(function Toc({
                   title={isExpanded ? "Collapse section" : "Expand section"}
                 >
                   {isExpanded ? (
-                    <FaChevronDown size={12} />
+                    <ChevronDown size={12} />
                   ) : (
-                    <FaChevronRight size={12} />
+                    <ChevronRight size={12} />
                   )}
                 </button>
               )}

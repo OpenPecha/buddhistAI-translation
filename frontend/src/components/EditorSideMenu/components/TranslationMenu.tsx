@@ -9,7 +9,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { Translation } from "../../DocumentWrapper";
-import { Button } from "../../ui/button";
 import EditTranslationModal from "./EditTranslationModal";
 
 interface TranslationMenuProps {
@@ -43,7 +42,7 @@ const TranslationMenu: React.FC<TranslationMenuProps> = ({
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <MoreVertical className="size-4 p-0 opacity-70 group-hover:opacity-100 transition-opacity cursor-pointer hover:bg-gray-200" />
+          <MoreVertical className="size-4 p-0 opacity-70 group-hover:opacity-100 transition-opacity cursor-pointer" />
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align="end"

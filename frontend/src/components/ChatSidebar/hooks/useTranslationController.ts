@@ -13,10 +13,12 @@ import { useTranslationSettings } from "@/hooks/useTranslationSettings";
 
 interface UseTranslationControllerProps {
   documentId: string;
+  selectedAgentId?: string;
 }
 
 export const useTranslationController = ({
   documentId,
+  selectedAgentId,
 }: UseTranslationControllerProps) => {
   const [analysisSourceItems, setAnalysisSourceItems] = useState<
     GlossaryItem[]
@@ -109,8 +111,8 @@ export const useTranslationController = ({
     setError,
   } = useTranslationOperations({
     config,
-    selectedText: selectedText,
     selectedTextLineNumbers: getCurrentLineNumbers(),
+    selectedAgentId,
     onStreamComplete: (finalResults) => {
       // Clear UI selection but keep line numbers for replace functionality
       if (inputMode === "selection") {
@@ -297,6 +299,7 @@ export const useTranslationController = ({
     handleConfigChange,
     isSidebarCollapsed,
     setIsSidebarCollapsed,
+    selectedAgentId,
 
     // Text input (selection + manual)
     selectedText,
