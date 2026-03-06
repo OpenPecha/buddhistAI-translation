@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,6 +14,7 @@ import {
 } from '@/components/ui/select';
 import { X, Search, Upload, FileText, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { agentsKeys } from '@/api/queries/agents';
 
 interface Context {
     id: string;
@@ -29,6 +31,7 @@ interface SearchResult {
 }
 
 const NewAgentForm = () => {
+    const queryClient = useQueryClient();
     const [formData, setFormData] = useState({
         name: '',
         description: '',
@@ -222,6 +225,7 @@ const NewAgentForm = () => {
             }
 
             toast.success('Assistant created successfully!');
+            await queryClient.invalidateQueries({ queryKey: agentsKeys.lists() });
 
             setFormData({
                 name: '',
