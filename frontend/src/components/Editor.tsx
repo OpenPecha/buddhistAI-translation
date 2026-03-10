@@ -173,7 +173,7 @@ const Editor = ({
   // Get display settings
   const { showLineNumbers } = useDisplaySettings();
   useEffect(() => {
-    if (!yText || !provider) return () => {};
+    if (!yText || !provider) return () => { };
     const name = currentUser?.name || "Anonymous User";
     // Generate a random dark color (R, G, and B <= 100)
     function getRandomDarkColor() {
@@ -294,7 +294,6 @@ const Editor = ({
       },
       readOnly: !isTranslationEditor && !isEditable,
       placeholder: t("editor.startTyping") as string,
-      // className is not a valid Quill option, apply these styles to the container instead
     });
 
     quillRef.current = quill;
@@ -490,7 +489,7 @@ const Editor = ({
         debouncedSave(currentContent as any);
       }
     });
-    quill.on("selection-change", () => {});
+    quill.on("selection-change", () => { });
 
     function handleFormatChange(type: string) {
       const range = quill.getSelection();
@@ -533,7 +532,7 @@ const Editor = ({
 
   useEffect(() => {
     const content = currentDoc?.currentVersion?.content.ops || [];
-    if (yText || provider) return () => {};
+    if (yText || provider) return () => { };
     if (
       quillRef.current &&
       quillRef.current.getText().trim() === "" &&
@@ -589,9 +588,8 @@ const Editor = ({
         document.getElementById("toolbar-container")!
       )}
       <div
-        className={`relative w-full flex flex-1 h-full overflow-hidden ${
-          isTranslationEditor ? "flex-row-reverse" : ""
-        }`}
+        className={`relative w-full flex flex-1 h-full overflow-hidden ${isTranslationEditor ? "flex-row-reverse" : ""
+          }`}
       >
         <DocumentSidebar
           documentId={documentId}
@@ -636,11 +634,10 @@ const Editor = ({
                     ? "black"
                     : undefined,
               }}
-              title={`${
-                characterCount > MAX_TEXT_LENGTH_FOR_REALTIME_COLLABORATION
+              title={`${characterCount > MAX_TEXT_LENGTH_FOR_REALTIME_COLLABORATION
                   ? `collaboration limit exceeded , max limit is ${MAX_TEXT_LENGTH_FOR_REALTIME_COLLABORATION} characters`
                   : ""
-              }`}
+                }`}
             >
               <div id={`${counterId}`} className="leading-[normal]">
                 0

@@ -19,7 +19,6 @@ const EditableText: React.FC<EditableTextProps> = ({
 	onSave,
 	className = "",
 	placeholder = "",
-	style = {},
 	disabled = false,
 	allowEmpty = false,
 }) => {
@@ -86,8 +85,8 @@ const EditableText: React.FC<EditableTextProps> = ({
 					onBlur={handleBlur}
 					disabled={disabled || isLoading}
 					placeholder={placeholder}
-					className={`${className} 
-           ${isTibetan ? "font-monlam text-xs leading-[normal]" : "font-google-sans"}
+					className={`${className} truncate w-xl max-sm:w-full
+           ${isTibetan ? "font-monlam truncate leading-[normal]" : "font-google-sans"}
           ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
 				/>
 			</form>
