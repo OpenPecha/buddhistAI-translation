@@ -32,7 +32,6 @@ const Toolbar = ({
   documentId,
   toolbarId,
   range,
-  isEditable,
   documentName,
 }: ToolbarProps) => {
   const versionRef = useRef<HTMLDivElement>(null);
@@ -224,14 +223,6 @@ const Toolbar = ({
             />
           </span>
         )}
-        {/* <span className="ql-formats" title="Size" style={isEnabledStyle}>
-              <select className="ql-size">
-                <option value="small" />
-                <option selected />
-                <option value="large" />
-                <option value="huge" />
-              </select>
-            </span> */}
         <div className="flex items-center gap-2" style={isEnabledStyle}>
           <span className="ql-formats">
             <button className="ql-bold" title="Bold" />
@@ -243,7 +234,6 @@ const Toolbar = ({
             )}
           </span>
         </div>
-        {/* <select className="ql-color"></select> */}
         <select
           className="ql-background"
           style={isEnabledStyle}
@@ -327,8 +317,6 @@ const Toolbar = ({
               </div>
             )}
           </div>
-
-          {/* Document name - editable */}
           {documentName && (
             <EditableDocumentName
               documentId={documentId}
@@ -410,6 +398,14 @@ const EditableDocumentName: React.FC<{
         placeholder="Document name"
       />
     </div>
+  );
+};
+
+export const ToolbarSkeleton = () => {
+  return (
+    <div
+      className="bg-neutral-100 dark:bg-neutral-800/40 my-2 h-10 p-4 "
+    />
   );
 };
 
