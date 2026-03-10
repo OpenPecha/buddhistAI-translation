@@ -58,7 +58,7 @@ function Resources() {
   const hasResults = relatedSegments && relatedSegments.length > 0;
   const hasSelection = !!debouncedSelectionRange;
   return (
-    <div className="h-full flex flex-col bg-white dark:bg-gray-900">
+    <div className="h-full flex flex-col">
       {/* Content */}
       <div className="flex-1 overflow-y-auto p-4">
         {/* Error State */}
@@ -175,12 +175,14 @@ function Resources() {
 
         {/* Empty State - No Selection */}
         {!hasSelection && !loading && (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <BookOpen className="h-12 w-12 text-gray-400 mb-4" />
-            <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+          <div className="flex flex-col items-center justify-center  text-center">
+            <div className="bg-gray-100 dark:bg-zinc-800 rounded-full p-2">
+              <BookOpen className="h-6 w-6 text-gray-400" />
+            </div>
+            <p className="text-lg text-gray-900 dark:text-white mb-2">
               {t("resources.emptyTitle", "Related Segments")}
-            </h4>
-            <p className="text-gray-600 dark:text-gray-400 max-w-sm">
+            </p>
+            <p className="text-gray-600 dark:text-zinc-400 text-sm">
               {t(
                 "resources.emptyDescription",
                 "Select text in the editor to see related segments from other texts"

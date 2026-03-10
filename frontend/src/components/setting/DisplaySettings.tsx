@@ -44,11 +44,9 @@ const DisplaySettings: React.FC<{}> = ({ }) => {
     ) => void;
   }> = ({ title, typography, onUpdate }) => {
     return (
-      <div className="space-y-3 p-3  border border-neutral-100 dark:border-neutral-700 rounded-lg">
+      <div className="space-y-2 p-2 rounded-lg">
         <div className="text-xs uppercase">{title}</div>
-
         <div className="space-y-3">
-          {/* Font Family - Compact Select */}
           <div className="flex items-center justify-start space-x-2 mb-1">
             <div className="flex items-center justify-between mb-1">
               <span className="text-xs text-neutral-500 dark:text-neutral-400">
@@ -153,9 +151,8 @@ const DisplaySettings: React.FC<{}> = ({ }) => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Line Numbers & Visual Elements */}
-      <div className="space-y-4">
+    <div className="space-y-4">
+      <div className="space-y-2">
         <div className="flex items-center gap-2 text-sm font-medium">
           <Eye className="w-4 h-4" />
           {t("settings.visualElements", "Visual Elements")}
@@ -177,14 +174,12 @@ const DisplaySettings: React.FC<{}> = ({ }) => {
         </div>
       </div>
 
-      {/* Typography */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-2 text-sm font-medium">
+      <div className=" py-2 border-t">
+        <div className="flex items-center gap-2 font-medium">
           <Type className="w-4 h-4" />
           {t("settings.typography", "Typography")}
         </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div>
           <TypographyControl
             title={t("settings.rootEditorTypography", "Root Editor")}
             typography={settings?.rootEditorTypography}

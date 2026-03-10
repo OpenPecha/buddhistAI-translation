@@ -11,7 +11,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 import SyncOptions from "./SyncOptions";
-import ApiCredentials from "./ApiCredentials";
 import UserProfile from "./UserProfile";
 import DisplaySettings from "./DisplaySettings";
 import { useEditor } from "@/hooks/useEditor";
@@ -40,9 +39,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   const scrollHookResult = useScrollHook(quill1, quill2);
   const { syncMode, setSyncMode, syncType, setSyncType } = scrollHookResult || {
     syncMode: "none" as const,
-    setSyncMode: () => {},
+    setSyncMode: () => { },
     syncType: "lineNumber" as const,
-    setSyncType: () => {},
+    setSyncType: () => { },
   };
 
   return (
@@ -69,7 +68,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 
         <div className="mt-4">
           <Tabs defaultValue="sync" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="sync" className="flex items-center gap-2">
                 <Monitor size={16} />
                 <span>{t("settings.sync", "Sync")}</span>
@@ -78,15 +77,6 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                 <Monitor size={16} />
                 <span>{t("settings.display", "Display")}</span>
               </TabsTrigger>
-              {isAuthenticated && (
-                <TabsTrigger
-                  value="apiCredentials"
-                  className="flex items-center gap-2"
-                >
-                  <Key size={16} />
-                  <span>{t("settings.apiKeys", "API Keys")}</span>
-                </TabsTrigger>
-              )}
               {isAuthenticated && (
                 <TabsTrigger
                   value="account"
@@ -101,7 +91,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             <TabsContent value="sync" className="mt-4">
               <div className="gap-2 space-y-4 justify-between items-center">
                 <div>
-                  <p className="text-sm ">
+                  <p>
                     {t(
                       "settings.syncDescription",
                       "synchronization behavior of the editor."
@@ -119,20 +109,13 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             <TabsContent value="display" className="mt-4">
               <div className="space-y-4">
                 <div>
-                  <h3 className="text-lg font-semibold mb-2">
+                  <p className="text-lg font-semibold mb-2">
                     {t("settings.display", "Display Settings")}
-                  </h3>
+                  </p>
                 </div>
                 <DisplaySettings />
               </div>
             </TabsContent>
-
-            {/* API Credentials Tab */}
-            {isAuthenticated && (
-              <TabsContent value="apiCredentials" className="mt-4">
-                <ApiCredentials />
-              </TabsContent>
-            )}
 
             {/* Account Settings Tab */}
             {isAuthenticated && (
