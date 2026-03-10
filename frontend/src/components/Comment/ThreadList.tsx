@@ -106,7 +106,7 @@ const ThreadList = ({ documentId }: { documentId: string }) => {
     startOffset: debouncedSelection?.range?.index,
     endOffset:
       debouncedSelection?.range?.index !== undefined &&
-      debouncedSelection?.range?.length !== undefined
+        debouncedSelection?.range?.length !== undefined
         ? debouncedSelection.range.index + debouncedSelection.range.length
         : undefined,
   });
@@ -196,13 +196,13 @@ const ThreadList = ({ documentId }: { documentId: string }) => {
     return (
       <div className="p-6 text-center space-y-3">
         <div className="flex justify-center">
-          <div className="rounded-full bg-neutral-100 p-3">
+          <div className="rounded-full bg-neutral-100 dark:bg-zinc-800 p-3">
             <MessageSquare size={24} className="text-neutral-400" />
           </div>
         </div>
-        <div className="space-y-1">
-          <p className="text-sm font-medium text-neutral-700">No comments</p>
-          <p className="text-xs text-neutral-500">
+        <div>
+          <p className="font-medium text-neutral-700 dark:text-neutral-300">No comments</p>
+          <p className="text-sm text-neutral-500">
             Select text to see related comments
           </p>
         </div>
@@ -276,7 +276,7 @@ const ThreadList = ({ documentId }: { documentId: string }) => {
                     data-thread-id={thread.id}
                     className={`cursor-pointer w-full border rounded-lg p-2 transition-all ${threadClass}`}
                     onClick={() => handleThreadClick(thread.id)}
-                    onKeyDown={() => {}}
+                    onKeyDown={() => { }}
                   >
                     <div className="flex items-center gap-2 min-w-0">
                       <MessageSquare

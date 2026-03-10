@@ -44,8 +44,8 @@ const WorkflowIndicator: React.FC<WorkflowIndicatorProps> = ({
       status: isTranslating
         ? currentStatus
         : hasTranslationResults
-        ? "Complete"
-        : "Pending",
+          ? "Complete"
+          : "Pending",
     },
     {
       id: "glossary",
@@ -56,8 +56,8 @@ const WorkflowIndicator: React.FC<WorkflowIndicatorProps> = ({
       status: isExtractingGlossary
         ? "Extracting terms..."
         : hasGlossaryResults
-        ? "Complete"
-        : "Pending",
+          ? "Complete"
+          : "Pending",
     },
     {
       id: "standardization",
@@ -84,7 +84,7 @@ const WorkflowIndicator: React.FC<WorkflowIndicatorProps> = ({
   }
 
   return (
-    <div className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3">
+    <div className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-card p-3">
       <div className="space-y-3">
         {/* Progress Overview */}
         <div className="flex items-center justify-between">

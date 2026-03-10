@@ -67,7 +67,7 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({
       {/* Processing indicator */}
       {isProcessing && (
         <div className="flex justify-start mb-4">
-          <div className="bg-gray-100 dark:bg-gray-800 rounded-lg rounded-bl-sm px-4 py-3 shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="bg-gray-100 dark:bg-card rounded-lg rounded-bl-sm px-4 py-3 shadow-sm border border-gray-200 dark:border-gray-700">
             <div className="flex items-center gap-2">
               <div className="flex space-x-1">
                 <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>

@@ -143,11 +143,10 @@ const TranslationItem: React.FC<TranslationItemProps> = ({
           onStartEditing(result);
         }
       },
-      className: `rounded p-1 -m-1 transition-colors w-full text-left ${
-        isClickable
-          ? "cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800"
-          : "cursor-not-allowed opacity-50"
-      }`,
+      className: `rounded p-1 -m-1 transition-colors w-full text-left ${isClickable
+        ? "cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800"
+        : "cursor-not-allowed opacity-50"
+        }`,
       title: isClickable
         ? t("translation.clickToEditTranslation")
         : t("translation.anotherTranslationIsBeingEdited"),
@@ -211,35 +210,8 @@ const TranslationItem: React.FC<TranslationItemProps> = ({
   };
 
   return (
-    <div
-      key={result.id}
-      className="bg-neutral-50 dark:bg-neutral-700 rounded-lg p-3 space-y-2"
-    >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-neutral-800 dark:text-neutral-100">
-            {new Date(result.timestamp).toLocaleTimeString()}
-          </span>
-          {formatLineNumbers(result) && (
-            <button
-              type="button"
-              className="text-xs text-neutral-800 dark:text-neutral-100 bg-neutral-100 dark:bg-neutral-600 px-2 py-1 rounded cursor-pointer hover:bg-gray-200 hover:text-secondary-600 transition-colors"
-              onClick={() => {
-                if (!result.lineNumbers) return;
-                const lineRanges = Object.entries(result.lineNumbers);
-                if (lineRanges.length > 0) {
-                  const [lineKey] = lineRanges[0];
-                  const lineNumber = Number.parseInt(lineKey, 10);
-                  scrollToLineNumber(lineNumber);
-                }
-              }}
-              title="Click to scroll to this line in the editor"
-            >
-              {formatLineNumbers(result)}
-            </button>
-          )}
-        </div>
-
+    <>
+      <div className=" dark:bg-zinc-800  border-b rounded-t-lg p-2">
         <ActionMenu
           result={result}
           currentText={getCurrentText(result)}
@@ -262,87 +234,114 @@ const TranslationItem: React.FC<TranslationItemProps> = ({
           disabled={editingId !== null && editingId !== result.id}
         />
       </div>
-      <div className="space-y-2">
-        <div className="border-l-4 border-gray-300 pl-3">
-          <div className="text-xs text-neutral-700 dark:text-neutral-100 mb-1 font-medium">
-            <span className="text-neutral-800 dark:text-neutral-300">
-              {t("translation.source")}
-            </span>
-          </div>
-          <div className="text-sm text-neutral-800 dark:text-neutral-100 leading-relaxed">
-            {expandedItems.has(index)
-              ? result.originalText
-              : truncateText(result.originalText)}
+      <div
+        key={result.id}
+        className="bg-neutral-50 dark:bg-neutral-800 rounded-b-lg p-3"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {formatLineNumbers(result) && (
+              <button
+                type="button"
+                className="text-xs text-neutral-800 dark:text-neutral-100 bg-neutral-100 dark:bg-neutral-600 px-2 py-1 rounded cursor-pointer hover:bg-gray-200 hover:text-secondary-600 transition-colors"
+                onClick={() => {
+                  if (!result.lineNumbers) return;
+                  const lineRanges = Object.entries(result.lineNumbers);
+                  if (lineRanges.length > 0) {
+                    const [lineKey] = lineRanges[0];
+                    const lineNumber = Number.parseInt(lineKey, 10);
+                    scrollToLineNumber(lineNumber);
+                  }
+                }}
+                title="Click to scroll to this line in the editor"
+              >
+                {formatLineNumbers(result)}
+              </button>
+            )}
           </div>
         </div>
-
-        <div className="border-l-4 border-secondary-300 pl-3">
-          <div className="text-xs text-neutral-700 dark:text-neutral-100 mb-1 font-medium flex items-center justify-between">
-            <div className="flex items-center gap-2">
+        <div className="space-y-2">
+          <div className="border-l-4 border-gray-300 pl-3">
+            <div className="text-xs text-neutral-700 dark:text-neutral-100 mb-1 font-medium">
               <span className="text-neutral-800 dark:text-neutral-300">
-                {isStandardized
-                  ? t("translation.standardizedTranslation")
-                  : t("translation.translation")}
-                :
+                {t("translation.source")}
               </span>
-              {editedTexts[result.id] &&
-                (() => {
-                  const changes = countChanges(
-                    result.translatedText,
-                    editedTexts[result.id]
-                  );
-                  return (
-                    <div className="flex items-center gap-1">
-                      <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full">
-                        {t("translation.edited")}
-                      </span>
-                      {changes.additions > 0 && (
-                        <span className="text-xs bg-green-100 text-green-800 px-1.5 py-0.5 rounded font-medium">
-                          +{changes.additions}
-                        </span>
-                      )}
-                      {changes.deletions > 0 && (
-                        <span className="text-xs bg-red-100 text-red-800 px-1.5 py-0.5 rounded font-medium">
-                          -{changes.deletions}
-                        </span>
-                      )}
-                    </div>
-                  );
-                })()}
-              {result.isUpdated &&
-                result.previousTranslatedText &&
-                (() => {
-                  const changes = countChanges(
-                    result.previousTranslatedText,
-                    result.translatedText
-                  );
-                  return (
-                    <div className="flex items-center gap-1">
-                      <span className="text-xs bg-secondary-100 text-secondary-700 px-2 py-0.5 rounded-full">
-                        {t("translation.updated")}
-                      </span>
-                      {changes.additions > 0 && (
-                        <span className="text-xs bg-green-100 text-green-800 px-1.5 py-0.5 rounded font-medium">
-                          +{changes.additions}
-                        </span>
-                      )}
-                      {changes.deletions > 0 && (
-                        <span className="text-xs bg-red-100 text-red-800 px-1.5 py-0.5 rounded font-medium">
-                          -{changes.deletions}
-                        </span>
-                      )}
-                    </div>
-                  );
-                })()}
+            </div>
+            <div className="text-sm text-neutral-800 dark:text-neutral-100 leading-relaxed">
+              {expandedItems.has(index)
+                ? result.originalText
+                : truncateText(result.originalText)}
             </div>
           </div>
 
-          <div className="text-sm leading-relaxed text-neutral-800 dark:text-neutral-100">
-            {renderTranslationContent()}
+          <div className="border-l-4 border-[#12A7FC] pl-3">
+            <div className="text-xs text-neutral-700 dark:text-neutral-100 mb-1 font-medium flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-neutral-800 dark:text-neutral-300">
+                  {isStandardized
+                    ? t("translation.standardizedTranslation")
+                    : t("translation.translation")}
+                  :
+                </span>
+                {editedTexts[result.id] &&
+                  (() => {
+                    const changes = countChanges(
+                      result.translatedText,
+                      editedTexts[result.id]
+                    );
+                    return (
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full">
+                          {t("translation.edited")}
+                        </span>
+                        {changes.additions > 0 && (
+                          <span className="text-xs bg-green-100 text-green-800 px-1.5 py-0.5 rounded font-medium">
+                            +{changes.additions}
+                          </span>
+                        )}
+                        {changes.deletions > 0 && (
+                          <span className="text-xs bg-red-100 text-red-800 px-1.5 py-0.5 rounded font-medium">
+                            -{changes.deletions}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })()}
+                {result.isUpdated &&
+                  result.previousTranslatedText &&
+                  (() => {
+                    const changes = countChanges(
+                      result.previousTranslatedText,
+                      result.translatedText
+                    );
+                    return (
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs bg-secondary-100 text-secondary-700 px-2 py-0.5 rounded-full">
+                          {t("translation.updated")}
+                        </span>
+                        {changes.additions > 0 && (
+                          <span className="text-xs bg-green-100 text-green-800 px-1.5 py-0.5 rounded font-medium">
+                            +{changes.additions}
+                          </span>
+                        )}
+                        {changes.deletions > 0 && (
+                          <span className="text-xs bg-red-100 text-red-800 px-1.5 py-0.5 rounded font-medium">
+                            -{changes.deletions}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })()}
+              </div>
+            </div>
+
+            <div className="text-sm leading-relaxed text-neutral-800 dark:text-neutral-100">
+              {renderTranslationContent()}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

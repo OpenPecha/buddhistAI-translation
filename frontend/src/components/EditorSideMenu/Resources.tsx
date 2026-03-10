@@ -103,7 +103,7 @@ function Resources() {
                   {Array.from({ length: 2 }, (_, segIndex) => (
                     <div
                       key={`skeleton-segment-${index}-${segIndex}`}
-                      className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+                      className="p-3 bg-gray-50 dark:bg-card rounded-lg border border-gray-200 dark:border-gray-700"
                     >
                       <div className="mb-2">
                         <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/4 animate-pulse" />
@@ -155,7 +155,7 @@ function Resources() {
                         {result.segments.map((segment) => (
                           <div
                             key={segment.segment_id}
-                            className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+                            className="p-3 bg-gray-50 dark:bg-card rounded-lg border border-gray-200 dark:border-gray-700"
                           >
                             <CollapsableDiv>
                               <span className="text-sm font-monlam-2 text-gray-800 dark:text-gray-200 leading-relaxed">
@@ -237,9 +237,8 @@ const CollapsableDiv = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="flex flex-col gap-2 font-monlam-2">
       <div
-        className={`text-sm text-gray-700 dark:text-gray-300 ${
-          !isExpanded && shouldCollapse ? "line-clamp-3" : ""
-        }`}
+        className={`text-sm text-gray-700 dark:text-gray-300 ${!isExpanded && shouldCollapse ? "line-clamp-3" : ""
+          }`}
       >
         {children}
       </div>

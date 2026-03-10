@@ -8,6 +8,7 @@ import {
   Globe,
   X,
   Replace,
+  Languages,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -122,7 +123,7 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
 
   return (
     <div
-      className={`flex-1 flex flex-col min-h-0 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 ${className}`}
+      className={`flex-1 flex flex-col min-h-0 bg-gray-50 dark:bg-card ${className}`}
     >
       {/* Translation Results Panel */}
       {shouldShowTranslationPanel && (
@@ -132,17 +133,16 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
             : ""
             }`}
         >
-          <div className="flex items-center justify-between px-1 py-1 bg-blue-50 dark:bg-blue-950/20">
+          <div className="flex items-center justify-between px-1 py-1 bg-blue-50 dark:bg-zinc-800">
             <Button
               variant="ghost"
-              className="justify-start font-medium hover:bg-blue-100 dark:hover:bg-blue-900/30"
               onClick={() => togglePanel("translation")}
             >
               <div className="flex items-center gap-2">
-                <Globe className="w-4 h-4 text-blue-500" />
+                <Languages className="w-4 h-4 text-blue-500 dark:text-blue-300" />
                 <span>{getPanelTitle("translation")}</span>
                 {isTranslating && (
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                  <div className="w-2 h-2 bg-blue-500 dark:text-blue-300 rounded-full animate-pulse"></div>
                 )}
                 {expandedPanel === "translation" ? (
                   <ChevronUp className="w-4 h-4 ml-2" />
@@ -179,7 +179,7 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
                       onClick={resetTranslations}
                       variant="ghost"
                       size="sm"
-                      className="h-5 w-5 text-blue-600 dark:text-blue-400 hover:bg-red-100 dark:hover:bg-red-900/30"
+                      className="h-5 w-5 text-blue-600 dark:text-blue-400 p-2"
                     >
                       <X className="w-3 h-3" />
                     </Button>
@@ -191,7 +191,7 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
           </div>
 
           {expandedPanel === "translation" && (
-            <div className="flex-1 min-h-0 overflow-y-auto border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+            <div className="flex-1 min-h-0 overflow-y-auto bg-white dark:bg-card">
               <div className="p-3">
                 {isTranslating && (
                   <div className="text-center py-4">
@@ -232,7 +232,7 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
           className={`border-b border-gray-200 dark:border-gray-700 last:border-b-0 ${expandedPanel === "glossary" ? "flex flex-col flex-1 min-h-0" : ""
             }`}
         >
-          <div className="flex items-center justify-between px-1 py-1 bg-gray-100 dark:bg-gray-800">
+          <div className="flex items-center justify-between px-1 py-1 bg-gray-100 dark:bg-card">
             <Button
               variant="ghost"
               className="flex-1 justify-start font-medium hover:bg-gray-200 dark:hover:bg-gray-700"
@@ -316,7 +316,7 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
           </div>
 
           {expandedPanel === "glossary" && (
-            <div className="flex-1 min-h-0 overflow-y-auto border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+            <div className="flex-1 min-h-0 overflow-y-auto border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-card">
               <div className="p-3">
                 {isExtractingGlossary && (
                   <div className="text-center py-4">
@@ -338,7 +338,7 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
 
                 {/* Simplified glossary list without nested header */}
                 {hasGlossaryResults && (
-                  <div className="space-y-2">
+                  <div>
                     {glossaryTerms.map((term, index) => (
                       <div
                         key={`${term.source_term}-${index}`}
@@ -404,7 +404,7 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
           </div>
 
           {expandedPanel === "inconsistency" && (
-            <div className="flex-1 min-h-0 overflow-y-auto border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+            <div className="flex-1 min-h-0 overflow-y-auto border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-card">
               <div className="p-3">
                 {isAnalyzingStandardization && (
                   <div className="text-center py-4">
@@ -416,7 +416,7 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
                 )}
 
                 {hasInconsistentTerms && (
-                  <div className="space-y-2">
+                  <div>
                     {Object.entries(inconsistentTerms).map(([term, data]) => {
                       // Handle both formats: array of strings or InconsistentTermData object
                       const suggestions = Array.isArray(data)
@@ -520,7 +520,7 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
           </div>
 
           {expandedPanel === "standardized" && (
-            <div className="flex-1 min-h-0 overflow-y-auto border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+            <div className="flex-1 min-h-0 overflow-y-auto border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-card">
               <div className="p-3">
                 <TranslationResults
                   results={standardizedTranslationResults}

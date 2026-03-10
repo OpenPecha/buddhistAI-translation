@@ -47,8 +47,8 @@ const ActionButtonGrid: React.FC<ActionButtonGridProps> = ({
           isTranslating
             ? "h-16 flex flex-col items-center justify-center gap-2 relative bg-blue-500 hover:bg-blue-600"
             : hasTranslationResults
-            ? "h-16 flex flex-col items-center justify-center gap-2 relative bg-green-500 hover:bg-green-600"
-            : "h-16 flex flex-col items-center justify-center gap-2 relative bg-blue-500 hover:bg-blue-600"
+              ? "h-16 flex flex-col items-center justify-center gap-2 relative bg-green-500 hover:bg-green-600"
+              : "h-16 flex flex-col items-center justify-center gap-2 relative bg-blue-500 hover:bg-blue-600"
         }
         size="lg"
       >
@@ -95,8 +95,8 @@ const ActionButtonGrid: React.FC<ActionButtonGridProps> = ({
           isExtractingGlossary
             ? "h-16 flex flex-col items-center justify-center gap-2 relative bg-purple-500 hover:bg-purple-600 text-white"
             : hasGlossaryResults
-            ? "h-16 flex flex-col items-center justify-center gap-2 relative bg-purple-500 hover:bg-purple-600 text-white"
-            : "h-16 flex flex-col items-center justify-center gap-2 relative border-purple-300 text-purple-700 hover:bg-purple-50"
+              ? "h-16 flex flex-col items-center justify-center gap-2 relative bg-purple-500 hover:bg-purple-600 text-white"
+              : "h-16 flex flex-col items-center justify-center gap-2 relative border-purple-300 text-purple-700 hover:bg-purple-50"
         }
         size="lg"
       >

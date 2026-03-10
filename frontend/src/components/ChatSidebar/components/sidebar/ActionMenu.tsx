@@ -82,11 +82,10 @@ const ActionMenu: React.FC<ActionMenuProps> = ({
               onClick={onCopy}
               variant="ghost"
               size="sm"
-              className={`h-7 w-7 p-0 transition-colors ${
-                isCopied
+              className={`h-7 w-7 p-0 transition-colors ${isCopied
                   ? "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-400"
-                  : "hover:bg-gray-100 dark:hover:bg-gray-800"
-              }`}
+                  : "hover:bg-gray-100 dark:hover:bg-card"
+                }`}
               disabled={disabled}
             >
               {isCopied ? (

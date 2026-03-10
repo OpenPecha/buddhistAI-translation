@@ -62,58 +62,56 @@ const MetadataContent = ({ documentId }: { documentId: string }) => {
   return (
     <ScrollArea className="h-full">
       <div className="space-y-4 p-3">
-        {/* Basic Information */}
         <div>
-          <h4 className="font-medium text-sm mb-2 text-gray-800 dark:text-gray-200">
+          <p className="font-medium text-lg border-b pb-1  mb-2 text-neutral-800 dark:text-neutral-200">
             {t(`meta.basicInfo`)}
-          </h4>
+          </p>
           <div className="space-y-2">
-            <div className="text-xs">
+            <div className="text-sm">
               <div className="font-medium text-gray-700 dark:text-gray-300">
                 {t(`meta.name`)}
               </div>
-              <div className="text-gray-600 dark:text-gray-400 break-words">
+              <div className="text-gray-600 dark:text-gray-300 break-words">
                 {document.name || "Untitled Document"}
               </div>
             </div>
-            <div className="text-xs">
+            <div className="text-sm">
               <div className="font-medium text-gray-700 dark:text-gray-300">
                 {t(`common.language`)}
               </div>
-              <div className="text-gray-600 dark:text-gray-400">
+              <div className="text-gray-600 dark:text-gray-300">
                 {document.language || "Not specified"}
               </div>
             </div>
-            <div className="text-xs">
+            <div className="text-sm">
               <div className="font-medium text-gray-700 dark:text-gray-300">
                 {t(`meta.type`)}
               </div>
-              <div className="text-gray-600 dark:text-gray-400">
+              <div className="text-gray-600 dark:text-gray-300">
                 {document.isRoot ? "Root Document" : "Translation"}
               </div>
             </div>
           </div>
         </div>
 
-        {/* Dates */}
         <div>
-          <h4 className="font-medium text-sm mb-2 text-gray-800 dark:text-gray-200">
+          <p className="font-medium text-lg border-b pb-1 mb-2 text-neutral-800 dark:text-neutral-200">
             {t(`meta.timeline`)}
-          </h4>
+          </p>
           <div className="space-y-2">
-            <div className="text-xs">
+            <div className="text-sm">
               <div className="font-medium text-gray-700 dark:text-gray-300">
                 {t(`meta.created`)}
               </div>
-              <div className="text-gray-600 dark:text-gray-400">
+              <div className="text-gray-600 dark:text-gray-300">
                 {formatDate(document.createdAt)}
               </div>
             </div>
-            <div className="text-xs">
+            <div className="text-sm">
               <div className="font-medium text-gray-700 dark:text-gray-300">
                 {t(`meta.lastUpdated`)}
               </div>
-              <div className="text-gray-600 dark:text-gray-400">
+              <div className="text-gray-600 dark:text-gray-300">
                 {formatDateTime(document.updatedAt)}
               </div>
             </div>
@@ -123,23 +121,23 @@ const MetadataContent = ({ documentId }: { documentId: string }) => {
         {/* Version Information */}
         {currentVersion && (
           <div>
-            <h4 className="font-medium text-sm mb-2 text-gray-800 dark:text-gray-200">
+            <p className="font-medium text-lg border-b pb-1 mb-2 text-neutral-800 dark:text-neutral-200">
               {t(`meta.currentVersion`)}
-            </h4>
+            </p>
             <div className="space-y-2">
-              <div className="text-xs">
+              <div className="text-sm">
                 <div className="font-medium text-gray-700 dark:text-gray-300">
                   {t(`meta.label`)}
                 </div>
-                <div className="text-gray-600 dark:text-gray-400">
+                <div className="text-gray-600 dark:text-gray-300">
                   {currentVersion.label || "No label"}
                 </div>
               </div>
-              <div className="text-xs">
+              <div className="text-sm">
                 <div className="font-medium text-gray-700 dark:text-gray-300">
                   {t(`meta.versionUpdated`)}
                 </div>
-                <div className="text-gray-600 dark:text-gray-400">
+                <div className="text-gray-600 dark:text-gray-300">
                   {formatDateTime(currentVersion.updatedAt)}
                 </div>
               </div>
@@ -150,23 +148,23 @@ const MetadataContent = ({ documentId }: { documentId: string }) => {
         {/* Project Information */}
         {rootProject && (
           <div>
-            <h4 className="font-medium text-sm mb-2 text-gray-800 dark:text-gray-200">
+            <p className="font-medium text-lg border-b pb-1 mb-2 text-neutral-800 dark:text-neutral-200">
               {t(`meta.project`)}
-            </h4>
+            </p>
             <div className="space-y-2">
-              <div className="text-xs">
+              <div className="text-sm">
                 <div className="font-medium text-gray-700 dark:text-gray-300">
                   {t(`meta.name`)}
                 </div>
-                <div className="text-gray-600 dark:text-gray-400 break-words">
+                <div className="text-gray-600 dark:text-gray-300 break-words">
                   {rootProject.name || "Unnamed Project"}
                 </div>
               </div>
-              <div className="text-xs">
+              <div className="text-sm">
                 <div className="font-medium text-gray-700 dark:text-gray-300">
                   {t(`meta.visibility`)}
                 </div>
-                <div className="text-gray-600 dark:text-gray-400">
+                <div className="text-gray-600 dark:text-gray-300">
                   {rootProject.isPublic ? "Public" : "Private"}
                 </div>
               </div>
@@ -177,24 +175,24 @@ const MetadataContent = ({ documentId }: { documentId: string }) => {
         {/* OpenPecha Information */}
         {openpechaData && (
           <div>
-            <h4 className="font-medium text-sm mb-2 text-gray-800 dark:text-gray-200">
+            <p className="font-medium text-lg border-b pb-1 mb-2 text-neutral-800 dark:text-neutral-200">
               OpenPecha
-            </h4>
+            </p>
             <div className="space-y-2">
-              <div className="text-xs">
+              <div className="text-sm">
                 <div className="font-medium text-gray-700 dark:text-gray-300">
                   {t(`meta.origin`)}
                 </div>
-                <div className="text-gray-600 dark:text-gray-400">
+                <div className="text-gray-600 dark:text-gray-300">
                   {openpechaData.template ? "Yes" : "No"}
                 </div>
               </div>
               {openpechaData.expression_id && (
-                <div className="text-xs">
+                <div className="text-sm">
                   <div className="font-medium text-gray-700 dark:text-gray-300">
                     {t(`meta.expressionId`)}
                   </div>
-                  <div className="text-gray-600 dark:text-gray-400 font-mono text-xs break-all">
+                  <div className="text-gray-600 dark:text-gray-300 font-mono text-xs break-all">
                     {openpechaData.expression_id}
                   </div>
                 </div>
@@ -205,24 +203,24 @@ const MetadataContent = ({ documentId }: { documentId: string }) => {
 
         {/* IDs */}
         <div>
-          <h4 className="font-medium text-sm mb-2 text-gray-800 dark:text-gray-200">
+          <p className="font-medium text-lg border-b pb-1 mb-2 text-neutral-800 dark:text-neutral-200">
             {t(`meta.identifiers`)}
-          </h4>
+          </p>
           <div className="space-y-2">
-            <div className="text-xs">
+            <div className="text-sm">
               <div className="font-medium text-gray-700 dark:text-gray-300">
                 {t(`meta.documentId`)}
               </div>
-              <div className="text-gray-600 dark:text-gray-400 font-mono text-xs break-all">
+              <div className="text-gray-600 dark:text-gray-300 font-mono text-xs break-all">
                 {document.id}
               </div>
             </div>
             {document.identifier && (
-              <div className="text-xs">
+              <div className="text-sm">
                 <div className="font-medium text-gray-700 dark:text-gray-300">
                   {t(`meta.identifier`)}
                 </div>
-                <div className="text-gray-600 dark:text-gray-400">
+                <div className="text-gray-600 dark:text-gray-300">
                   {document.identifier}
                 </div>
               </div>
