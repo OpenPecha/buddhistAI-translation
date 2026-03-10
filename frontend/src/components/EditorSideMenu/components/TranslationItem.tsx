@@ -33,7 +33,7 @@ const TranslationItem: React.FC<TranslationItemProps> = ({ translation }) => {
   const getLanguageInfo = (languageCode: string) => {
     const languageInfo = languages.find((lang) => lang.code === languageCode);
     return (
-      languageInfo || { code: languageCode, name: languageCode, flag: "📄" }
+      languageInfo || { code: languageCode, name: languageCode, colorcode: "#12A7FC" }
     );
   };
 
@@ -118,7 +118,7 @@ const TranslationItem: React.FC<TranslationItemProps> = ({ translation }) => {
         aria-label={`Open translation ${translation.id}`}
         disabled={disabled}
       >
-        <div className="w-3 h-3 bg-[#12A7FC]" />
+        <div className="w-3 h-3" style={{ backgroundColor: getLanguageInfo(translation.language).colorcode }} />
         <div className="flex-1">
           <div className="flex justify-between">
             <div className="truncate">{translation.name}</div>
