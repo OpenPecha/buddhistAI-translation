@@ -211,7 +211,7 @@ const TranslationItem: React.FC<TranslationItemProps> = ({
 
   return (
     <>
-      <div className=" dark:bg-zinc-800  border-b rounded-t-lg p-2">
+      <div className=" dark:bg-zinc-800 bg-neutral-50 border-b rounded-t-lg p-2">
         <ActionMenu
           result={result}
           currentText={getCurrentText(result)}
@@ -236,7 +236,7 @@ const TranslationItem: React.FC<TranslationItemProps> = ({
       </div>
       <div
         key={result.id}
-        className="bg-neutral-50 dark:bg-neutral-800 rounded-b-lg p-3"
+        className="bg-neutral-100 dark:bg-neutral-800 rounded-b-lg p-3"
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
