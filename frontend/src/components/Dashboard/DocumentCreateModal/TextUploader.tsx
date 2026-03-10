@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { useMutation } from "@tanstack/react-query";
 import { createDocument, deleteDocument } from "@/api/document";
 import { MAX_FILE_SIZE, MAX_FILE_SIZE_MB } from "@/utils/Constants";
-import { AlertCircle, FileText, Upload } from "lucide-react";
+import { AlertCircle, FileText } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 interface TextUploaderProps {
@@ -136,21 +136,11 @@ const TextUploader: React.FC<TextUploaderProps> = ({
 
   return (
     <div className="space-y-4">
-      {/* Language validation warning */}
-      {isLanguageDisabled && (
-        <div className="p-3 bg-amber-50 border border-amber-200 rounded-md">
-          <div className="flex items-center gap-2 text-amber-700">
-            <AlertCircle className="h-4 w-4" />
-            <span className="text-sm font-medium">
-              {t("translation.pleaseSelectLanguageAboveToUploadFiles")}
-            </span>
-          </div>
-        </div>
-      )}
+
 
       {!file && (
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
+        <div className="space-y-2">
+          <div className="flex items-center space-x-2">
             <label
               htmlFor="text-file"
               className={`text-sm font-medium ${isLanguageDisabled
@@ -158,7 +148,6 @@ const TextUploader: React.FC<TextUploaderProps> = ({
                 : "text-neutral-700 dark:text-neutral-300"
                 }`}
             >
-              {/* Upload {isRoot ? t(`pecha.root`) : t(`pecha.translation`)} Text (.txt) */}
               {t("documents.uploadText", {
                 type: isRoot ? t("pecha.root") : t("pecha.translation"),
               })}
@@ -176,7 +165,7 @@ const TextUploader: React.FC<TextUploaderProps> = ({
             accept=".txt, .docx"
             onChange={handleFileChange}
             disabled={isFullyDisabled}
-            className="cursor-pointer"
+            className="cursor-pointer w-fit"
           />
         </div>
       )}

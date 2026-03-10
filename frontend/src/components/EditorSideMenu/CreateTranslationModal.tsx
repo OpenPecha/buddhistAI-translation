@@ -103,58 +103,55 @@ const CreateTranslationModal: React.FC<CreateTranslationModalProps> = ({
       variant="fixed"
       size="lg"
     >
-      <div className="space-y-8">
+      <div className="min-h-[400px]">
         {!showPreview ? (
-          <div className="space-y-6">
-            <div className="space-y-4">
-              <UploadMethodTabs
-                activeMethod={uploadMethod}
-                onMethodChange={setUploadMethod}
-                availableMethods={filtered_availableMethods as UploadMethod[]}
-              >
-                {uploadMethod !== "openpecha" && (
-                  <div className="mb-6">
-                    <SelectLanguage
-                      selectedLanguage={language}
-                      setSelectedLanguage={setLanguage}
-                    />
-                  </div>
-                )}
-
-                <TabContentWrapper value="file">
-                  <TextUploader
-                    isRoot={false}
-                    isPublic={false}
+          <div>
+            <UploadMethodTabs
+              activeMethod={uploadMethod}
+              onMethodChange={setUploadMethod}
+              availableMethods={filtered_availableMethods as UploadMethod[]}
+            >
+              {uploadMethod !== "openpecha" && (
+                <div className="mb-6">
+                  <SelectLanguage
                     selectedLanguage={language}
-                    rootId={rootId}
-                    previewMode={true}
-                    onFileLoaded={handleFileLoaded}
-                    disable={!language || language === ""}
-                    setNewDocumentId={setNewDocumentId}
+                    setSelectedLanguage={setLanguage}
                   />
-                  <EmptyDocumentCreator
-                    language={language}
-                    rootId={rootId}
-                    onSuccess={() => {
-                      setIsCreationComplete(true);
-                      onClose();
-                    }}
-                    refetchTranslations={refetchTranslations}
-                  />
-                </TabContentWrapper>
+                </div>
+              )}
+              <TabContentWrapper value="file">
+                <TextUploader
+                  isRoot={false}
+                  isPublic={false}
+                  selectedLanguage={language}
+                  rootId={rootId}
+                  previewMode={true}
+                  onFileLoaded={handleFileLoaded}
+                  disable={!language || language === ""}
+                  setNewDocumentId={setNewDocumentId}
+                />
+                <EmptyDocumentCreator
+                  language={language}
+                  rootId={rootId}
+                  onSuccess={() => {
+                    setIsCreationComplete(true);
+                    onClose();
+                  }}
+                  refetchTranslations={refetchTranslations}
+                />
+              </TabContentWrapper>
 
-                <TabContentWrapper value="openpecha">
-                  <OpenPechaTranslationLoader
-                    rootId={rootId}
-                    onSuccess={() => {
-                      setIsCreationComplete(true);
-                      onClose();
-                    }}
-                    refetchTranslations={refetchTranslations}
-                  />
-                </TabContentWrapper>
-              </UploadMethodTabs>
-            </div>
+              <TabContentWrapper value="openpecha">
+                <OpenPechaTranslationLoader
+                  rootId={rootId}
+                  onSuccess={() => {
+                    setIsCreationComplete(true);
+                    onClose();
+                  }}
+                  refetchTranslations={refetchTranslations}
+                />
+              </TabContentWrapper>
+            </UploadMethodTabs>
           </div>
         ) : (
           <div className="space-y-4">
@@ -247,9 +244,9 @@ const EmptyDocumentCreator = ({
 
       <div className="flex flex-col items-center justify-center py-8 text-center">
         <Button
+          className="w-full bg-secondary-600 hover:bg-secondary-700 text-white transition-colors"
           onClick={handleCreateEmptyDocument}
           disabled={isDisabled}
-          className="px-6 py-2 bg-neutral-900 hover:bg-neutral-800 disabled:bg-gray-300 disabled:text-neutral-500 text-white transition-all duration-200 font-medium"
         >
           {isCreating ? (
             <div className="flex items-center gap-2">
