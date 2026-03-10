@@ -15,7 +15,6 @@ import {
 } from "@/stores/tableOfContentStore";
 import { Dot, ChevronDown, ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import isMobile from "@/lib/isMobile";
 
 interface Heading {
   text: string;
@@ -173,27 +172,17 @@ const TableOfContent: React.FC<TableOfContentProps> = ({ documentId }) => {
     }
   }, [quill, documentId, generateList, updateActiveHeading]);
 
-  const { t } = useTranslation();
   return (
-    <>
-      <div
-        className={cn(
-          isMobile ? "absolute bg-neutral-700 " : "relative",
-          " inset-y-0 left-0 max-w-64 transition-all duration-300 overflow-hidden ease-in-out z-20 translate-x-0"
-        )}
-      >
-        <Toc
-          headings={headings}
-          documentId={documentId}
-          synced={synced}
-          expandedSections={expandedSections}
-          setExpandedSections={setExpandedSections}
-          activeHeadingId={activeHeadingId}
-          setActiveHeadingId={debouncedSetActiveHeadingIdRef.current}
-          updateActiveHeading={updateActiveHeading}
-        />
-      </div>
-    </>
+    <Toc
+      headings={headings}
+      documentId={documentId}
+      synced={synced}
+      expandedSections={expandedSections}
+      setExpandedSections={setExpandedSections}
+      activeHeadingId={activeHeadingId}
+      setActiveHeadingId={debouncedSetActiveHeadingIdRef.current}
+      updateActiveHeading={updateActiveHeading}
+    />
   );
 };
 
@@ -341,7 +330,7 @@ const Toc = React.memo(function Toc({
 
   if (!headings.length) {
     return (
-      <div className="text-sm italic text-gray-500">
+      <div className="text-center h-full flex items-center justify-center text-neutral-500 dark:text-neutral-400">
         {t("editor.noHeadingsFound")}
       </div>
     );
@@ -357,15 +346,12 @@ const Toc = React.memo(function Toc({
           <div
             key={heading.id}
             className={cn(
-              " py-1.5 rounded-md transition-colors",
+              " py-1.5 transition-colors",
               isNested && `ml-${(heading.level - 1) * 3}`,
               isActive
-                ? "bg-secondary-50 text-secondary-700 border-r-2 border-secondary-500 pr-2"
+                ? "bg-secondary-50 dark:bg-zinc-800 text-secondary-700 dark:text-blue-400 border-r-2 border-secondary-500 dark:border-blue-400 pr-2"
                 : "hover:bg-neutral-100 dark:hover:bg-neutral-700"
             )}
-            style={{
-              fontSize: 10,
-            }}
           >
             <div
               className={cn("flex items-center cursor-pointer")}
@@ -389,15 +375,14 @@ const Toc = React.memo(function Toc({
               )}
               {!hasChildren && (
                 <button
-                  className="mr-2 flex items-center justify-center w-5 h-5 rounded-sm hover:bg-secondary-200 text-secondary-700"
+                  className="mr-2 flex items-center justify-center w-5 h-5 rounded-sm hover:bg-blue-300 text-secondary-700"
                   type="button"
                 >
                   <Dot />
                 </button>
               )}
-              {/* {!hasChildren && <div className="mr-2 w-5 h-5" />} */}
               <span
-                className={cn(" truncate flex-1 pt-1 font-monlam-2 text-sm")}
+                className={cn("text-sm truncate")}
               >
                 {heading.text}
               </span>

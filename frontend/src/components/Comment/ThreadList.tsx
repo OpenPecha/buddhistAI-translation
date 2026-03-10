@@ -23,13 +23,12 @@ const ThreadLoadingSkeleton = () => (
     {[1, 2, 3].map((i) => (
       <div
         key={i}
-        className="animate-pulse border border-neutral-200 rounded-lg p-3 space-y-2"
+        className="animate-pulse border border-neutral-200 dark:border-zinc-700 rounded-lg p-3 space-y-2"
       >
         <div className="flex items-center gap-2">
-          <MessageSquare size={16} className="text-neutral-300" />
-          <div className="h-4 bg-neutral-200 rounded flex-1"></div>
+          <div className="h-4 bg-neutral-200 dark:bg-zinc-700 rounded flex-1" />
         </div>
-        <div className="h-3 bg-neutral-100 rounded w-2/3"></div>
+        <div className="h-3 bg-neutral-100 dark:bg-zinc-700 rounded w-2/3" />
       </div>
     ))}
   </div>
@@ -106,7 +105,7 @@ const ThreadList = ({ documentId }: { documentId: string }) => {
     startOffset: debouncedSelection?.range?.index,
     endOffset:
       debouncedSelection?.range?.index !== undefined &&
-      debouncedSelection?.range?.length !== undefined
+        debouncedSelection?.range?.length !== undefined
         ? debouncedSelection.range.index + debouncedSelection.range.length
         : undefined,
   });
@@ -194,15 +193,13 @@ const ThreadList = ({ documentId }: { documentId: string }) => {
 
   if (hasNoData && !isLoading && !hasError) {
     return (
-      <div className="p-6 text-center space-y-3">
-        <div className="flex justify-center">
-          <div className="rounded-full bg-neutral-100 p-3">
+      <div className="p-6 text-center h-full flex items-center justify-center">
+        <div className="flex flex-col items-center justify-center">
+          <div className="rounded-full w-fit bg-neutral-100 dark:bg-zinc-800 p-3">
             <MessageSquare size={24} className="text-neutral-400" />
           </div>
-        </div>
-        <div className="space-y-1">
-          <p className="text-sm font-medium text-neutral-700">No comments</p>
-          <p className="text-xs text-neutral-500">
+          <p className="font-medium text-neutral-700 dark:text-neutral-300">No comments</p>
+          <p className="text-sm text-neutral-500 dark:text-neutral-400">
             Select text to see related comments
           </p>
         </div>
@@ -276,7 +273,7 @@ const ThreadList = ({ documentId }: { documentId: string }) => {
                     data-thread-id={thread.id}
                     className={`cursor-pointer w-full border rounded-lg p-2 transition-all ${threadClass}`}
                     onClick={() => handleThreadClick(thread.id)}
-                    onKeyDown={() => {}}
+                    onKeyDown={() => { }}
                   >
                     <div className="flex items-center gap-2 min-w-0">
                       <MessageSquare

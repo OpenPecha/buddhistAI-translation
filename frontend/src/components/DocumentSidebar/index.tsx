@@ -122,11 +122,7 @@ const DocumentSidebar: React.FC<DocumentSidebarProps> = ({
           {/* Content */}
           <div className="flex-1 overflow-hidden">
             {activeTab === "toc" && (
-              <ScrollArea className="h-full">
-                <div className="p-3">
-                  <TableOfContent documentId={documentId} />
-                </div>
-              </ScrollArea>
+              <TableOfContent documentId={documentId} />
             )}
 
             {activeTab === "metadata" && (

@@ -5,49 +5,40 @@ export const MAX_TEMPLATES = 4;
 type LanguageType = {
 	code: string;
 	name: string;
-	flag?: string;
 };
 
 export const languages: LanguageType[] = [
 	{
 		code: "bo",
 		name: "Tibetan",
-		flag: "🏔️",
 	},
 	{
 		code: "en",
 		name: "English",
-		flag: "🇺🇸",
 	},
 	{
 		code: "hi",
 		name: "Hindi",
-		flag: "🇮🇳",
 	},
 	{
 		code: "it",
 		name: "Italian",
-		flag: "🇮🇹",
 	},
 	{
 		code: "lzh",
 		name: "Literal Chinese",
-		flag: "🇨🇳",
 	},
 	{
 		code: "ru",
 		name: "Russian",
-		flag: "🇷🇺",
 	},
 	{
 		code: "sa",
 		name: "Sanskrit",
-		flag: "🇮🇳",
 	},
 	{
 		code: "zh",
 		name: "Chinese",
-		flag: "🇨🇳",
 	},
 ];
 

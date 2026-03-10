@@ -56,10 +56,10 @@ const AgentSelector: React.FC<AgentSelectorProps> = ({
     }
 
     return (
-        <div className="flex flex-col ">
+        <div className="flex flex-col mr-1">
             <div className="flex items-center gap-1">
                 <Select value={selectedAgent} onValueChange={handleValueChange}>
-                    <SelectTrigger className="w-full max-w-[15vw]">
+                    <SelectTrigger className="w-full ">
                         <SelectValue placeholder="Choose an agent">
                             {selectedAgent && (
                                 <div className="flex items-center gap-2 truncate">

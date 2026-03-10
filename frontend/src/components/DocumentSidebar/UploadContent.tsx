@@ -1,6 +1,5 @@
 import {
   CheckCircle,
-  AlertCircle
 } from "lucide-react";
 import { useFetchDocument } from "@/api/queries/documents";
 import { Button } from "@/components/ui/button";
@@ -101,27 +100,22 @@ const UploadContent = ({
 
   if (!isUploadable) {
     return (
-      <ScrollArea className="h-full">
-        <div className="flex h-full flex-col justify-center gap-4 p-6">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="h-5 w-5 text-amber-500" />
-            <div className="space-y-2">
-              <h3 className="text-base font-medium text-foreground">
-                Upload not available
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                {!sourceDoc
-                  ? "Source document could not be loaded."
-                  : !sourceDoc.metadata?.instanceId && !sourceDoc.metadata?.instance_id
-                    ? "Upload the source document to OpenPecha before publishing this translation."
-                    : translationDoc.metadata?.instanceId || translationDoc.metadata?.instance_id
-                      ? "This translation has already been published to OpenPecha."
-                      : "The source document is missing the required OpenPecha metadata."}
-              </p>
-            </div>
-          </div>
+      <div className="flex h-full flex-col justify-center gap-4 p-6">
+        <div className="flex flex-col items-center justify-center">
+          <p className="text-lg font-medium text-foreground">
+            Upload not available
+          </p>
+          <p className="text-sm text-neutral-500 dark:text-neutral-400">
+            {!sourceDoc
+              ? "Source document could not be loaded."
+              : !sourceDoc.metadata?.instanceId && !sourceDoc.metadata?.instance_id
+                ? "Upload the source document to OpenPecha before publishing this translation."
+                : translationDoc.metadata?.instanceId || translationDoc.metadata?.instance_id
+                  ? "This translation has already been published to OpenPecha."
+                  : "The source document is missing the required OpenPecha metadata."}
+          </p>
         </div>
-      </ScrollArea>
+      </div>
     );
   }
 
@@ -201,7 +195,7 @@ const UploadContent = ({
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="sm:justify-start">
-          <Button
+            <Button
               variant="ghost"
               onClick={() => setShowConfirmDialog(false)}
               disabled={isUploading}

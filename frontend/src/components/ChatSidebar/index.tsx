@@ -1,4 +1,4 @@
-import { EllipsisVertical, Eye, MapPin, MessageSquare, Pencil, Plus, Trash2, X } from "lucide-react";
+import { EllipsisVertical, Eye, MessageSquare, Pencil, Plus, Trash2, X } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useTranslation as useTranslationI18next } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -144,7 +144,7 @@ const ChatSidebarContent: React.FC<{
     <div className="h-full w-full flex flex-col bg-white dark:bg-card">
       {/* Header */}
       <div className="flex items-center justify-between p-2 border-b border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-card">
-        <div className="flex-1 mr-1">
+        <div className=" w-full">
           <AgentSelector
             value={selectedAgentId}
             onValueChange={setSelectedAgentId}
@@ -197,10 +197,9 @@ const ChatSidebarContent: React.FC<{
       {/* Selected Text Display */}
       <TooltipProvider>
         {selectedText && (
-          <div className="border-b border-gray-200 dark:border-gray-700 bg-blue-50 dark:bg-blue-950/20 p-3">
+          <div className="bg-blue-50 dark:bg-zinc-800 p-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 min-w-0 flex-1">
-                <MapPin className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
                 <div className="min-w-0 flex-1">
                   <div className="text-xs text-blue-700 dark:text-blue-300 font-medium mb-1">
                     {t("translation.selectedText")} {selectedLines}
@@ -208,12 +207,12 @@ const ChatSidebarContent: React.FC<{
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div className="text-sm text-blue-800 dark:text-blue-200 truncate">
-                        {selectedText.trim().substring(0, 100)}...
+                        {selectedText}
                       </div>
                     </TooltipTrigger>
                     <TooltipContent
                       side="left"
-                      className="max-w-xs max-h-48 overflow-y-auto bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+                      className="max-w-xs max-h-48 overflow-y-auto bg-white dark:bg-card border border-gray-200 dark:border-gray-700"
                     >
                       <div className="whitespace-pre-wrap break-words text-xs">
                         {selectedText}

@@ -32,7 +32,7 @@ function SelectTranslation() {
 					<Plus className="h-4 w-4" />
 				</Button>
 			</div>
-			<div className="flex flex-col">
+			<div className="flex flex-col space-y-4 w-full ">
 				<TranslationList translations={translations} />
 			</div>
 			{showCreateModal && (

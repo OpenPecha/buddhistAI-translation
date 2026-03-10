@@ -554,7 +554,7 @@ function ExportButton({
 
         <Button
           onClick={exportZip}
-          className="w-full py-6 text-base font-medium transition-all hover:shadow-md text-neutral-800 dark:text-neutral-100 bg-neutral-50 dark:bg-neutral-700 border-neutral-200 dark:border-neutral-400"
+          className="w-full py-6 text-base font-medium transition-all hover:shadow-md text-neutral-800 dark:text-neutral-100 bg-neutral-50 dark:bg-zinc-800 border-neutral-200 dark:border-neutral-400"
           disabled={isPending || isExporting}
         >
           <Download className="w-5 h-5 mr-2" />

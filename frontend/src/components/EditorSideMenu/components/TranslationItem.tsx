@@ -104,7 +104,7 @@ const TranslationItem: React.FC<TranslationItemProps> = ({ translation }) => {
   return (
     <div
       key={translation.id}
-      className="group flex w-full items-center"
+      className="group flex justify-between items-center"
     >
       <Button
         type="button"
@@ -114,12 +114,13 @@ const TranslationItem: React.FC<TranslationItemProps> = ({ translation }) => {
             setSelectedTranslationId(translation.id);
           }
         }}
+        className="pl-0 rounded-none"
         aria-label={`Open translation ${translation.id}`}
         disabled={disabled}
       >
         <div className="w-3 h-3 bg-[#12A7FC]" />
-        <div className="flex-1 overflow-hidden">
-          <div className="flex justify-between gap-2">
+        <div className="flex-1">
+          <div className="flex justify-between">
             <div className="truncate">{translation.name}</div>
           </div>
           <div className="text-xs text-gray-500 flex items-center gap-1">
