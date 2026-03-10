@@ -42,7 +42,7 @@ const TranslationMenu: React.FC<TranslationMenuProps> = ({
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <MoreVertical className="size-4 p-0 opacity-70 group-hover:opacity-100 transition-opacity cursor-pointer" />
+          <MoreVertical className="size-4 p-0 mb-3 opacity-70 group-hover:opacity-100 transition-opacity cursor-pointer" />
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align="end"

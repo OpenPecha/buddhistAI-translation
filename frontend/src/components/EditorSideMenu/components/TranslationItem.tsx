@@ -104,7 +104,7 @@ const TranslationItem: React.FC<TranslationItemProps> = ({ translation }) => {
   return (
     <div
       key={translation.id}
-      className="group flex w-full items-center"
+      className="group flex justify-between items-center"
     >
       <Button
         type="button"
@@ -114,7 +114,7 @@ const TranslationItem: React.FC<TranslationItemProps> = ({ translation }) => {
             setSelectedTranslationId(translation.id);
           }
         }}
-        className="pl-0"
+        className="pl-0 rounded-none"
         aria-label={`Open translation ${translation.id}`}
         disabled={disabled}
       >
