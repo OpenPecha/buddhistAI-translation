@@ -32,7 +32,7 @@ const Navbar = ({ project }: NavbarProps) => {
   return (
     <nav
       className={`${currentLanguage === "bo" && " leading-[normal]"
-        } px-6 pt-2 flex justify-between items-center`}
+        } px-6 pt-2 flex justify-between items-center mb-2`}
     >
       {/* Logo and Brand */}
       <div className="flex gap-2 items-center">
