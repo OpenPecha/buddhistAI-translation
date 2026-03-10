@@ -9,6 +9,7 @@ import {
   CheckCircle,
   Send,
   AlertTriangle,
+  Share,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -265,8 +266,8 @@ const ShareModal: React.FC<ShareModalProps> = ({
         className="flex flex-col"
       >
         <DialogHeader>
-          <DialogTitle className="text-base flex items-center gap-2">
-            <Users className="h-4 w-4" />
+          <DialogTitle className="text-base flex items-center pb-2 border-b gap-2">
+            <Share className="h-4 w-4" />
             {t("common.share")}
           </DialogTitle>
           <DialogDescription>
@@ -292,7 +293,7 @@ const ShareModal: React.FC<ShareModalProps> = ({
             </TabsList>
             <TabsContent
               value="share"
-              className="flex-1 overflow-y-auto space-y-2"
+              className="flex-1 overflow-y-auto space-y-2 py-2"
             >
               <div>
                 <div className="flex items-center gap-2 text-sm">
@@ -380,7 +381,7 @@ const ShareModal: React.FC<ShareModalProps> = ({
                 )}
 
                 {owner && (
-                  <div className="flex items-center gap-2 p-2">
+                  <div className="flex items-center gap-2 p-2 dark:bg-zinc-800 bg-zinc-300 rounded-md">
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-xs truncate">
                         {owner.username}

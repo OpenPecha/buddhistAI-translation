@@ -32,7 +32,7 @@ const Navbar = ({ project }: NavbarProps) => {
   return (
     <nav
       className={`${currentLanguage === "bo" && " leading-[normal]"
-        } px-6 pt-2 flex justify-between items-center`}
+        } px-6 pt-2 flex justify-between items-center mb-2`}
     >
       {/* Logo and Brand */}
       <div className="flex gap-2 items-center">
@@ -45,7 +45,6 @@ const Navbar = ({ project }: NavbarProps) => {
         <ProjectNameWrapper project={project} />
       </div>
 
-      {/* Navigation Menu */}
       <div className="flex items-center gap-2">
         <SettingsButton />
         <NavMenuList permissionsOpen={permissionsOpen} />
@@ -117,6 +116,7 @@ export function NavMenuList({
       <Button
         onClick={permissionsOpen}
         variant="outline"
+        className="rounded-none"
         aria-label="Share document"
       >
         <Share2 />

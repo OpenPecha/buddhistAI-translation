@@ -348,8 +348,7 @@ function ExportButton({
 
   return (
     <TooltipProvider>
-      <div className="flex flex-col w-full gap-y-2 ">
-        {/* Export Mode Selection */}
+      <div className="flex flex-col w-full space-y-2">
         <div className="space-y-2">
           <div className="text-sm font-medium text-neutral-800 dark:text-neutral-100">
             {t("export.exportMode")}
@@ -382,8 +381,7 @@ function ExportButton({
                           {t("export.exportAllDocumentsAsIndividualFiles")}
                         </p>
                       ) : (
-                        // Translation Dropdown replaces the description text for with_translation mode
-                        <div className="">
+                        <div className="py-2">
                           <Select
                             value={
                               translations && translations.length > 0
@@ -514,20 +512,15 @@ function ExportButton({
         {/* MS Word Compatibility Message for Pecha Templates */}
         {(exportFormat === "pecha-template" ||
           exportFormat === "single-pecha-templates") && (
-            <Card className="bg-secondary-50 dark:bg-neutral-800 border-secondary-200 dark:border-neutral-400 !p-3">
-              <CardContent>
-                <div className="flex items-start space-x-2 text-sm text-secondary-800">
-                  <HelpCircle className="w-4 h-4 mt-0.5 text-secondary-600" />
-                  <div>
-                    <div className="text-secondary-700">
-                      {t(
-                        "export.pechaTemplateExportsAreCompatibleWithMicrosoftWordOnly"
-                      )}
-                    </div>
-                  </div>
+            <div className="bg-secondary-50 p-2 rounded-md dark:bg-neutral-800 border-secondary-200 dark:border-neutral-800">
+              <div>
+                <div className="text-secondary-700 text-sm dark:text-secondary-300">
+                  {t(
+                    "export.pechaTemplateExportsAreCompatibleWithMicrosoftWordOnly"
+                  )}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           )}
 
         <div>
@@ -554,10 +547,9 @@ function ExportButton({
 
         <Button
           onClick={exportZip}
-          className="w-full py-6 text-base font-medium transition-all hover:shadow-md text-neutral-800 dark:text-neutral-100 bg-neutral-50 dark:bg-zinc-800 border-neutral-200 dark:border-neutral-400"
+          className=" w-full bg-secondary-600 hover:bg-secondary-700 text-white transition-colors"
           disabled={isPending || isExporting}
         >
-          <Download className="w-5 h-5 mr-2" />
           {isPending || isExporting ? (
             <div className="flex flex-col items-center">
               {exportFormat === "pecha-template" ? (

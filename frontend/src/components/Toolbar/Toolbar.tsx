@@ -223,8 +223,8 @@ const Toolbar = ({
             />
           </span>
         )}
-        <div className="flex items-center gap-2" style={isEnabledStyle}>
-          <span className="ql-formats">
+        <div className="flex items-center" style={isEnabledStyle}>
+          <span className="ql-formats space-x-1">
             <button className="ql-bold" title="Bold" />
             {!isMobile && (
               <>
@@ -234,18 +234,7 @@ const Toolbar = ({
             )}
           </span>
         </div>
-        <select
-          className="ql-background"
-          style={isEnabledStyle}
-          title="Highlight"
-        >
-          <option value=""></option>
-          <option value="#ffff00">Yellow</option>
-          <option value="#ffd700">Gold</option>
-          <option value="#90ee90">Light Green</option>
-          <option value="#add8e6">Light Blue</option>
-        </select>
-        <span className="ql-formats" style={isEnabledStyle}>
+        <span className="ql-formats ml-1 space-x-1" style={isEnabledStyle}>
           <ToolbarButton
             onClick={() => addComment()}
             title="Suggestion"
@@ -276,6 +265,17 @@ const Toolbar = ({
             )}
           </button>
         </span>
+        <select
+          className="ql-background"
+          style={isEnabledStyle}
+          title="Highlight"
+        >
+          <option value=""></option>
+          <option value="#ffff00">Yellow</option>
+          <option value="#ffd700">Gold</option>
+          <option value="#90ee90">Light Green</option>
+          <option value="#add8e6">Light Blue</option>
+        </select>
         {openHistory && (
           <div
             ref={versionRef}

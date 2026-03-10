@@ -322,9 +322,7 @@ const LineNumberVirtualized = ({
 
       <div
         ref={lineNumbersRef}
-        className={`line-numbers mt-[3px] h-full ${
-          isRoot ? "quill-1" : "quill-2"
-        } text-right relative`}
+        className="h-full text-right relative"
         style={{ width: `${maxLineWidth + 2}ch` }}
       >
         {lineNumbers.map((lineNum) => (
@@ -332,11 +330,11 @@ const LineNumberVirtualized = ({
             key={`${documentId}-line-${lineNum.number}`}
             onDoubleClick={() => handleDoubleClick(lineNum.number)}
             style={{
-              top: `${lineNum.top}px`,
+              top: `${lineNum.top + 1}px`,
               height: `${lineNum.height}px`,
             }}
             onClick={handleClickOnLineNumber}
-            className={`line-number relative flex w-full min-w-[3ch] items-center justify-start pl-1 transition-opacity duration-300`}
+            className="line-number w-full"
             id={`${documentId}-line-${lineNum.number}`}
           >
             <span
