@@ -401,12 +401,4 @@ const EditableDocumentName: React.FC<{
   );
 };
 
-export const ToolbarSkeleton = () => {
-  return (
-    <div
-      className="bg-neutral-100 dark:bg-neutral-800/40 my-2 h-10 p-4 "
-    />
-  );
-};
-
 export default Toolbar;

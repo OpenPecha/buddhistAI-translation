@@ -42,9 +42,7 @@ const Navbar = ({ project }: NavbarProps) => {
         >
           <div className="w-3 h-3 bg-[#12A7FC]" />
         </Link>
-        <div className="flex flex-col w-fit items-center -space-y-1">
-          <ProjectNameWrapper project={project} />
-        </div>
+        <ProjectNameWrapper project={project} />
       </div>
 
       {/* Navigation Menu */}

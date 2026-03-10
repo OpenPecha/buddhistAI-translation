@@ -5,14 +5,12 @@ import "../editor.css";
 import { ClientSideSuspense, useRoom } from "@liveblocks/react/suspense";
 import { getYjsProviderForRoom } from "@liveblocks/yjs";
 import { useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import { CommentProvider } from "@/contexts/CommentContext";
 import { FootNoteProvider } from "@/contexts/FootNoteContext";
 import { QuillVersionProvider } from "@/contexts/VersionContext";
 import type { Document } from "@/hooks/useCurrentDoc";
 import { AnnotationProvider } from "@/contexts/AnnotationContext";
 import type { Selection, EditorType } from "@/stores/selectionStore";
-import { ToolbarSkeleton } from "./Toolbar/Toolbar";
 
 export const RealtimeDocumentEditor = ({
   docId,
@@ -94,7 +92,7 @@ export const RealtimeDocumentEditor = ({
       <CommentProvider>
         <AnnotationProvider>
           <FootNoteProvider>
-            <ClientSideSuspense fallback={<LoadingScreen />}>
+            <ClientSideSuspense fallback={<div>Loading…</div>}>
               {!isContentReady ? (
                 <LoadingScreen />
               ) : (
@@ -147,7 +145,7 @@ export const NormalDocumentEditor = ({
       <CommentProvider>
         <AnnotationProvider>
           <FootNoteProvider>
-            <ClientSideSuspense fallback={<LoadingScreen />}>
+            <ClientSideSuspense fallback={<div>Loading…</div>}>
               <Editor
                 isTranslationEditor={isTranslationEditor}
                 documentId={docId}
@@ -208,16 +206,12 @@ const DocumentEditor = ({
 };
 
 function LoadingScreen() {
-  const toolbarContainer = document.getElementById("toolbar-container");
   return (
-    <>
-      {toolbarContainer && createPortal(<ToolbarSkeleton />, toolbarContainer)}
-      <div className="flex items-center justify-center h-full w-full">
-        <div className="flex flex-col items-center gap-4">
-          <p>Loading document...</p>
-        </div>
+    <div className="flex items-center justify-center h-full w-full">
+      <div className="flex flex-col items-center gap-4">
+        <p>Loading document...</p>
       </div>
-    </>
+    </div>
   );
 }
 
