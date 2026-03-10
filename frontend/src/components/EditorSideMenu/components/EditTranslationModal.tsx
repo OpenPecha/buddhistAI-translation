@@ -137,7 +137,6 @@ const EditTranslationModal: React.FC<EditTranslationModalProps> = ({
 								{languages.map((lang) => (
 									<SelectItem key={lang.code} value={lang.code}>
 										<div className="flex items-center gap-2">
-											<span>{lang.flag}</span>
 											<span>{lang.name}</span>
 										</div>
 									</SelectItem>
