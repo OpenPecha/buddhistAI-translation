@@ -4,9 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "./ui/button";
 import { updateProject } from "@/api/project";
 import EditableText from "./ui/EditableText";
-
 import ShareModal from "./ShareModal";
-
 import { Share2 } from "lucide-react";
 import ProfileArea from "./ProfileArea";
 import { useTranslation } from "react-i18next";
@@ -124,7 +122,7 @@ export function NavMenuList({
         aria-label="Share document"
       >
         <Share2 />
-        <span className="capitalize leading-[normal]">
+        <span className="capitalize">
           {t("common.share")}/{t("common.download")}
         </span>
       </Button>

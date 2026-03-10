@@ -1,13 +1,11 @@
 import {
   AlertTriangle,
-  BookText,
   Check,
   ChevronDown,
   ChevronUp,
   Copy,
   FileText,
   Globe,
-  StopCircle,
   X,
   Replace,
 } from "lucide-react";
@@ -50,13 +48,11 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
     startStandardizationAnalysis,
     resetTranslations,
     resetGlossary,
-    startGlossaryExtraction,
     overwriteAllResults,
     standardizedTranslationResults,
     startStandardizationTranslation,
     standardizationSelections,
     setStandardizationSelections,
-    stopTranslation,
   } = useTranslation();
 
   useEffect(() => {
@@ -131,11 +127,10 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
       {/* Translation Results Panel */}
       {shouldShowTranslationPanel && (
         <div
-          className={`border-b border-gray-200 dark:border-gray-700 last:border-b-0 ${
-            expandedPanel === "translation"
-              ? "flex flex-col flex-1 min-h-0"
-              : ""
-          }`}
+          className={`border-b border-gray-200 dark:border-gray-700 last:border-b-0 ${expandedPanel === "translation"
+            ? "flex flex-col flex-1 min-h-0"
+            : ""
+            }`}
         >
           <div className="flex items-center justify-between px-1 py-1 bg-blue-50 dark:bg-blue-950/20">
             <Button
@@ -177,25 +172,6 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
                     </TooltipContent>
                   </Tooltip>
                 )}
-
-              {hasTranslationResults && !isTranslating && (
-                <Tooltip delayDuration={5}>
-                  <TooltipTrigger>
-                    <Button
-                      onClick={startGlossaryExtraction}
-                      variant="ghost"
-                      size="sm"
-                      className="h-5 w-5 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30"
-                    >
-                      <BookText className="w-3 h-3" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    {t("translation.generateGlossary")}
-                  </TooltipContent>
-                </Tooltip>
-              )}
-              {/* Close button for translation */}
               {hasTranslationResults && !isTranslating && (
                 <Tooltip delayDuration={5}>
                   <TooltipTrigger>
@@ -212,14 +188,6 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
                 </Tooltip>
               )}
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-5 w-5 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30"
-              onClick={stopTranslation}
-            >
-              <StopCircle />
-            </Button>
           </div>
 
           {expandedPanel === "translation" && (
@@ -261,9 +229,8 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
       {/* Glossary Results Panel */}
       {shouldShowGlossaryPanel && (
         <div
-          className={`border-b border-gray-200 dark:border-gray-700 last:border-b-0 ${
-            expandedPanel === "glossary" ? "flex flex-col flex-1 min-h-0" : ""
-          }`}
+          className={`border-b border-gray-200 dark:border-gray-700 last:border-b-0 ${expandedPanel === "glossary" ? "flex flex-col flex-1 min-h-0" : ""
+            }`}
         >
           <div className="flex items-center justify-between px-1 py-1 bg-gray-100 dark:bg-gray-800">
             <Button
@@ -313,11 +280,10 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
                     onClick={copyGlossaryTerms}
                     variant="ghost"
                     size="sm"
-                    className={`h-7 px-2 hover:bg-green-100 dark:hover:bg-green-900/30 ${
-                      copiedItems.has("glossary-copy")
-                        ? "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400"
-                        : "text-green-600 dark:text-green-400"
-                    }`}
+                    className={`h-7 px-2 hover:bg-green-100 dark:hover:bg-green-900/30 ${copiedItems.has("glossary-copy")
+                      ? "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400"
+                      : "text-green-600 dark:text-green-400"
+                      }`}
                     title={
                       copiedItems.has("glossary-copy")
                         ? "Copied!"
@@ -411,11 +377,10 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
       {/* Inconsistency Report Panel */}
       {shouldShowInconsistencyPanel && (
         <div
-          className={`border-b border-gray-200 dark:border-gray-700 last:border-b-0 ${
-            expandedPanel === "inconsistency"
-              ? "flex flex-col flex-1 min-h-0"
-              : ""
-          }`}
+          className={`border-b border-gray-200 dark:border-gray-700 last:border-b-0 ${expandedPanel === "inconsistency"
+            ? "flex flex-col flex-1 min-h-0"
+            : ""
+            }`}
         >
           <div className="flex items-center justify-between px-1 py-1 bg-orange-50 dark:bg-orange-950/20">
             <Button
@@ -531,11 +496,10 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
       {/* Standardized Translation Panel */}
       {shouldShowStandardizedPanel && (
         <div
-          className={`border-b border-gray-200 dark:border-gray-700 last:border-b-0 ${
-            expandedPanel === "standardized"
-              ? "flex flex-col flex-1 min-h-0"
-              : ""
-          }`}
+          className={`border-b border-gray-200 dark:border-gray-700 last:border-b-0 ${expandedPanel === "standardized"
+            ? "flex flex-col flex-1 min-h-0"
+            : ""
+            }`}
         >
           <div className="flex items-center justify-between px-1 py-1 bg-purple-50 dark:bg-purple-950/20">
             <Button

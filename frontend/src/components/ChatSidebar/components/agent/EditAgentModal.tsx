@@ -105,7 +105,6 @@ const EditAgentModal: React.FC<EditAgentModalProps> = ({
       >
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Pencil className="size-5" />
             Edit Agent
           </DialogTitle>
         </DialogHeader>

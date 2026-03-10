@@ -34,8 +34,8 @@ export function OpenPechaTranslationLoader({
   const [selectedText, setSelectedText] = useState<{
     id: string;
     title:
-      | string
-      | { bo?: string; en?: string; [key: string]: string | undefined };
+    | string
+    | { bo?: string; en?: string;[key: string]: string | undefined };
     language: string;
   } | null>(null);
 
@@ -492,8 +492,8 @@ export function OpenPechaTranslationLoader({
                     {typeof selectedText.title === "string"
                       ? selectedText.title
                       : selectedText.title.bo ||
-                        selectedText.title.en ||
-                        Object.values(selectedText.title)[0]}
+                      selectedText.title.en ||
+                      Object.values(selectedText.title)[0]}
                   </p>
                 )}
               </div>

@@ -28,7 +28,6 @@ const AgentDetailModal: React.FC<AgentDetailModalProps> = ({
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Bot className="size-5" />
             Agent Details
           </DialogTitle>
         </DialogHeader>
