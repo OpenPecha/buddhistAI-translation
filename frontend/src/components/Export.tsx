@@ -570,7 +570,7 @@ function ExportButton({
               )}
             </div>
           ) : (
-            <span className="capitalize text-neutral-800 dark:text-neutral-100">
+            <span className="capitalizetext-neutral-100">
               {t("common.download")}
             </span>
           )}
