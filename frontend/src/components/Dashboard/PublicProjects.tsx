@@ -71,7 +71,7 @@ const PublicProjects = ({ showAll = false, setShowGalleryButton }: PublicProject
         </div>
       )}
       {projects.length > 0 ? (
-        <div className="w-full space-y-2 sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="w-full space-y-2 sm:space-y-0 p-2 sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {displayProjects.map((project: any) => (
             <ProjectCard key={project.id} project={project} />
           ))}

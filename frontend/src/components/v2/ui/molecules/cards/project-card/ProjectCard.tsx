@@ -35,17 +35,12 @@ export const ProjectCard = ({ project }: ProjectCardProps) => {
             to={rootDocument ? `/documents/${rootDocument.id}` : "#"}
             className="group flex flex-col dark:bg-[#1c1c1c] bg-white rounded-sm overflow-hidden"
         >
-            <div className="flex-1 hidden p-4 md:flex flex-col bg-[#12A7FC]/20 justify-center items-center gap-3">
-                <div className="h-[100px] w-[100px] flex justify-center items-center ">
-                </div>
-            </div>
-
-            <div className="p-2 space-y-2 flex-col bg-muted/30 flex text-muted-foreground">
-                <span className="text-sm capitalize text-foreground text-left line-clamp-2" title={project.name}>
+            <div className="hidden md:flex bg-gradient-to-t from-blue-100  to-blue-300 dark:from-zinc-500 dark:to-zinc-600 h-20" />
+            <div className="p-2 space-y-2 flex justify-between flex-col bg-muted/30 h-full  text-muted-foreground">
+                <span className="text-sm capitalize text-foreground text-left line-clamp-2 min-h-[2.5rem]" title={project.name}>
                     {project.name}
                 </span>
                 <div className="flex text-xs items-center justify-between w-full">
-
                     <div className="flex items-center gap-2 truncate max-w-[70%]">
                         {project.owner?.picture ? (
                             <img
@@ -58,9 +53,8 @@ export const ProjectCard = ({ project }: ProjectCardProps) => {
                         )}
                         <span className="truncate">{project.owner?.username || "Unknown"}</span>
                     </div>
-
                     <div
-                        className="flex items-center gap-1 bg-background px-1.5 py-0.5 rounded-md border"
+                        className="flex items-center gap-1 bg-background px-1.5 py-0.5 rounded-sm border"
                         title={`Access: ${project.publicAccess}`}
                     >
                         {getAccessIcon()}
