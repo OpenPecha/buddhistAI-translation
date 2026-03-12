@@ -63,14 +63,6 @@ const TranslationItem: React.FC<TranslationItemProps> = ({
     return result_text;
   };
 
-  const truncateText = (
-    text: string,
-    maxLength: number = TRUNCATE_LENGTH
-  ): string => {
-    if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength) + "...";
-  };
-
   const formatLineNumbers = (result: TranslationResult): string => {
     if (!result.lineNumbers) return "";
 
