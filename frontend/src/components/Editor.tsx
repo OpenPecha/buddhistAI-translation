@@ -624,19 +624,9 @@ const Editor = ({
           {createPortal(
             <div
               className="flex gap-1 items-center text-sm text-gray-500 px-2 dark:text-neutral-300 hover:text-gray-900"
-              style={{
-                background:
-                  characterCount > MAX_TEXT_LENGTH_FOR_REALTIME_COLLABORATION
-                    ? "red"
-                    : "transparent",
-                color:
-                  characterCount > MAX_TEXT_LENGTH_FOR_REALTIME_COLLABORATION
-                    ? "black"
-                    : undefined,
-              }}
               title={`${characterCount > MAX_TEXT_LENGTH_FOR_REALTIME_COLLABORATION
-                  ? `collaboration limit exceeded , max limit is ${MAX_TEXT_LENGTH_FOR_REALTIME_COLLABORATION} characters`
-                  : ""
+                ? `collaboration limit exceeded , max limit is ${MAX_TEXT_LENGTH_FOR_REALTIME_COLLABORATION} characters`
+                : ""
                 }`}
             >
               <div id={`${counterId}`} className="leading-[normal]">
@@ -649,7 +639,6 @@ const Editor = ({
           )}
           <AnnotationList onVote={handleAnnotationVote} />
         </div>
-        {/* <OverlayLoading isLoading={!isSynced} /> */}
       </div>
     </>
   );
