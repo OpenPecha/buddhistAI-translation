@@ -74,8 +74,16 @@
 
 .ql-editor p {
 cursor:pointer;
-
 z-index: 9999;
+}
+
+.ql-editor p.selected_text_segment {
+	background-color: var(--color-neutral-100);
+	cursor: pointer;
+} 
+
+.dark .ql-editor p.selected_text_segment {
+	background-color: var(--color-zinc-800);
 }
 
 .hide-line-numbers .ql-editor {

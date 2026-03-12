@@ -425,7 +425,7 @@ const NewAgentForm = () => {
                     <Label htmlFor="source_type">Source Type</Label>
                     <Input
                         id="source_type"
-                        placeholder="e.g. translation, summarization..."
+                        placeholder="e.g. root text , commentary text, etc."
                         value={formData.source_type}
                         onChange={(e) => handleInputChange('source_type', e.target.value)}
                     />
