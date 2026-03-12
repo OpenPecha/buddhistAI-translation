@@ -134,12 +134,12 @@ const ChatSidebarContent: React.FC<{
     );
   }
 
-  const selectedLines =
-    getLineRange(selectedTextLineNumbers)?.startLine ===
-      getLineRange(selectedTextLineNumbers)?.endLine
-      ? `(${getLineRange(selectedTextLineNumbers)?.startLine})`
-      : `(${getLineRange(selectedTextLineNumbers)?.startLine} - ${getLineRange(selectedTextLineNumbers)?.endLine
-      })`;
+  const lineRange = getLineRange(selectedTextLineNumbers);
+  const selectedLines = lineRange
+    ? lineRange.startLine === lineRange.endLine
+      ? `(${lineRange.startLine})`
+      : `(${lineRange.startLine} - ${lineRange.endLine})`
+    : null;
   return (
     <div className="h-full w-full flex flex-col bg-white dark:bg-card">
       {/* Header */}
@@ -202,7 +202,7 @@ const ChatSidebarContent: React.FC<{
               <div className="flex items-center gap-2 min-w-0 flex-1">
                 <div className="min-w-0 flex-1">
                   <div className="text-xs text-blue-700 dark:text-blue-300 font-medium mb-1">
-                    {t("translation.selectedText")} {selectedLines}
+                    {t("translation.selectedText")}{selectedLines ? ` ${selectedLines}` : ""}
                   </div>
                   <Tooltip>
                     <TooltipTrigger asChild>
