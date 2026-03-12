@@ -8,7 +8,6 @@ import {
   useMemo,
   useState,
 } from "react";
-import { useParams } from "react-router-dom";
 
 type TextSelectionContextType = {
   selectedText: string;
@@ -62,7 +61,6 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({
   const [quillEditors, setQuillEditors] = useState<Map<string, Quill>>(
     new Map()
   );
-  const { id } = useParams<{ id: string }>();
 
   const [hoveredLineNumber, setHoveredLineNumber] = useState<number | null>(
     null
@@ -117,7 +115,6 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({
         editorElement === event.srcElement?.activeElement;
 
       if (!isActiveSourceEditor) return;
-      // Check if the active element is the first ql-editor in the DOM
       const text = getSelectedText();
       const lineNumbers = getSelectionLineNumbers();
       // Update state only if text or line numbers have actually changed
@@ -148,7 +145,7 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({
     return () => {
       document.removeEventListener("selectionchange", handleSelectionChange);
     };
-  }, [selectedText, activeEditor, getSelectedText]); // Add missing dependency array
+  }, [selectedText, activeEditor, getSelectedText]);
 
   const clearSelection = () => {
     setSelectedText("");
@@ -448,172 +445,10 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({
 
     if (!targetQuill) return null;
 
-    const sourceLineNumbersContainer =
-      editorContainer?.querySelector(".line-numbers");
-    if (!sourceLineNumbersContainer) return null;
-
-    const editorElement = targetQuill.root;
-    const editorRect = editorElement.getBoundingClientRect();
-    const editorScrollTop = editorElement.scrollTop;
-
-    // Get line number elements
-    const lineNumberElements = Array.from(
-      sourceLineNumbersContainer.querySelectorAll(".line-number")
-    );
-
-    if (lineNumberElements.length === 0) return null;
+    const quillRange = targetQuill.getSelection();
+    if (!quillRange) return null;
 
     const result: Record<string, { from: number; to: number }> = {};
-
-    // Handle Quill range object differently from DOM Range
-    let startRect: DOMRect;
-    let endRect: DOMRect;
-
-    if (range instanceof Range) {
-      // DOM Range - existing logic
-      startRect =
-        range.startContainer.nodeType === Node.TEXT_NODE
-          ? (() => {
-              const tempRange = document.createRange();
-              tempRange.setStart(range.startContainer, range.startOffset);
-              tempRange.setEnd(range.startContainer, range.startOffset);
-              return tempRange.getBoundingClientRect();
-            })()
-          : range.getBoundingClientRect();
-
-      endRect =
-        range.endContainer.nodeType === Node.TEXT_NODE
-          ? (() => {
-              const tempRange = document.createRange();
-              tempRange.setStart(range.endContainer, range.endOffset);
-              tempRange.setEnd(range.endContainer, range.endOffset);
-              return tempRange.getBoundingClientRect();
-            })()
-          : range.getBoundingClientRect();
-    } else {
-      // Quill range object { index, length }
-      // Convert to DOM positions
-      const quillRange = range;
-      const [line, offset] = targetQuill.getLine(quillRange.index);
-
-      if (!line) return null;
-
-      // Create DOM ranges for start and end positions
-      const startDomRange = document.createRange();
-      const endDomRange = document.createRange();
-
-      // Get the DOM node for the line
-      const lineDom = line.domNode;
-      if (!lineDom) return null;
-
-      // Set start position
-      if (lineDom.nodeType === Node.TEXT_NODE) {
-        startDomRange.setStart(
-          lineDom,
-          Math.min(offset, lineDom.textContent?.length || 0)
-        );
-        startDomRange.setEnd(
-          lineDom,
-          Math.min(offset, lineDom.textContent?.length || 0)
-        );
-      } else {
-        const textNode = lineDom.firstChild;
-        if (textNode && textNode.nodeType === Node.TEXT_NODE) {
-          startDomRange.setStart(
-            textNode,
-            Math.min(offset, textNode.textContent?.length || 0)
-          );
-          startDomRange.setEnd(
-            textNode,
-            Math.min(offset, textNode.textContent?.length || 0)
-          );
-        } else {
-          startDomRange.setStart(lineDom, 0);
-          startDomRange.setEnd(lineDom, 0);
-        }
-      }
-
-      // Set end position (same as start if length is 0, otherwise calculate)
-      if (quillRange.length === 0) {
-        endDomRange.setStart(
-          startDomRange.startContainer,
-          startDomRange.startOffset
-        );
-        endDomRange.setEnd(startDomRange.endContainer, startDomRange.endOffset);
-      } else {
-        const endIndex = quillRange.index + quillRange.length;
-        const [endLine, endOffset] = targetQuill.getLine(endIndex);
-        if (endLine) {
-          const endLineDom = endLine.domNode;
-          if (endLineDom) {
-            if (endLineDom.nodeType === Node.TEXT_NODE) {
-              endDomRange.setStart(
-                endLineDom,
-                Math.min(endOffset, endLineDom.textContent?.length || 0)
-              );
-              endDomRange.setEnd(
-                endLineDom,
-                Math.min(endOffset, endLineDom.textContent?.length || 0)
-              );
-            } else {
-              const textNode = endLineDom.firstChild;
-              if (textNode && textNode.nodeType === Node.TEXT_NODE) {
-                endDomRange.setStart(
-                  textNode,
-                  Math.min(endOffset, textNode.textContent?.length || 0)
-                );
-                endDomRange.setEnd(
-                  textNode,
-                  Math.min(endOffset, textNode.textContent?.length || 0)
-                );
-              } else {
-                endDomRange.setStart(endLineDom, 0);
-                endDomRange.setEnd(endLineDom, 0);
-              }
-            }
-          }
-        }
-      }
-
-      startRect = startDomRange.getBoundingClientRect();
-      endRect = endDomRange.getBoundingClientRect();
-    }
-
-    const startRelativePosition =
-      startRect.top - editorRect.top + editorScrollTop;
-    const endRelativePosition = endRect.top - editorRect.top + editorScrollTop;
-
-    // Find line numbers that intersect with the selection
-    let startLineNumber: number | null = null;
-    let endLineNumber: number | null = null;
-
-    for (const lineEl of lineNumberElements) {
-      const lineTop = parseFloat((lineEl as HTMLElement).style.top);
-      const spanElement = lineEl.querySelector("span");
-      const lineNumber = spanElement
-        ? parseInt(spanElement.textContent || "0")
-        : 0;
-
-      if (!startLineNumber && lineTop <= startRelativePosition + 10) {
-        startLineNumber = lineNumber;
-      }
-
-      if (lineTop <= endRelativePosition + 10) {
-        endLineNumber = lineNumber;
-      }
-    }
-
-    if (!startLineNumber || !endLineNumber) return null;
-
-    // Get the actual selection range within the Quill editor
-    let quillRange;
-    if (range instanceof Range) {
-      quillRange = targetQuill.getSelection();
-    } else {
-      quillRange = range;
-    }
-
-    if (!quillRange) return null;
 
     // Get the full text of the editor to work with line positions
     const fullText = targetQuill.getText();
@@ -850,12 +685,12 @@ export const EditorProvider: React.FC<{ children: React.ReactNode }> = ({
 
 const EditorContext = createContext<EditorContextType>({
   activeEditor: null,
-  setActiveEditor: () => {},
+  setActiveEditor: () => { },
   activeQuill: null,
-  setActiveQuill: () => {},
+  setActiveQuill: () => { },
   quillEditors: new Map(),
-  registerQuill: () => {},
-  unregisterQuill: () => {},
+  registerQuill: () => { },
+  unregisterQuill: () => { },
   getQuill: () => null,
   getLineNumber: () => null,
   getElementWithLinenumber: () => null,
@@ -863,15 +698,15 @@ const EditorContext = createContext<EditorContextType>({
   getSelectionLineNumbers: () => ({}),
   scrollToLineNumber: () => false,
   hoveredLineNumber: null,
-  setHoveredLineNumber: () => {},
+  setHoveredLineNumber: () => { },
   selectedText: "",
   activeSelectedEditor: null,
-  setSelectedTextTag: () => {},
+  setSelectedTextTag: () => { },
   selectedTextTag: null,
   selectedTextLineNumbers: null,
-  setSelectedText: () => {},
-  clearSelection: () => {},
-  clearUISelection: () => {},
+  setSelectedText: () => { },
+  clearSelection: () => { },
+  clearUISelection: () => { },
   getTranslatedTextForLine: () => null,
   getOriginalTextForLine: () => null,
   getTextPairsByLineNumbers: () => null,

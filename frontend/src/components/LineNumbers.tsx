@@ -14,7 +14,6 @@ import useLocalStorage from "@/hooks/useLocalStorage";
 import { Bookmark, ChevronUp, ChevronDown } from "lucide-react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
-import { useSelectionStore } from "@/stores/selectionStore";
 
 const offsetTop = 0;
 
@@ -29,9 +28,7 @@ const LineNumberVirtualized = ({
 }: LineNumberVirtualizedProps) => {
   const { t } = useTranslation();
   const lineNumbersRef = useRef<HTMLDivElement>(null);
-  const { source } = useSelectionStore();
-  const { getQuill, activeEditor, hoveredLineNumber } = useEditor();
-  const observerRef = useRef<IntersectionObserver | null>(null);
+  const { getQuill, activeEditor } = useEditor();
 
   const [lineNumbers, setLineNumbers] = useState<
     Array<{
@@ -322,7 +319,7 @@ const LineNumberVirtualized = ({
 
       <div
         ref={lineNumbersRef}
-        className="h-full text-right relative"
+        className="line-numbers h-full text-right relative"
         style={{ width: `${maxLineWidth + 2}ch` }}
       >
         {lineNumbers.map((lineNum) => (
