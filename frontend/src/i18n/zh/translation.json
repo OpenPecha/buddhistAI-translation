@@ -25,6 +25,7 @@
   "common.file": "文件",
   "common.info": "信息",
   "common.language": "语言",
+  "common.originalLanguage": "原始语言",
   "common.loading": "加载中...",
   "common.next": "下一步",
   "common.openinnewtab": "在新标签页中打开",

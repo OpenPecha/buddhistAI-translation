@@ -26,7 +26,7 @@ function SelectLanguage({
 	return (
 		<div className="space-y-2">
 			<SearchableDropdown
-				label={t("common.language")}
+				label={t("common.originalLanguage")}
 				placeholder="Select a language..."
 				options={languageOptions}
 				value={selectedLanguage}

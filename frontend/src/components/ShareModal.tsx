@@ -337,10 +337,9 @@ const ShareModal: React.FC<ShareModalProps> = ({
                       </Select>
 
                       <Button
+                        variant="outline"
                         onClick={() => handleAddCollaborator(email)}
                         disabled={!email || addCollaboratorMutation.isPending}
-                        size="sm"
-                        className="h-8 w-8 p-0"
                       >
                         <Send className="h-3 w-3" />
                       </Button>
@@ -381,7 +380,7 @@ const ShareModal: React.FC<ShareModalProps> = ({
                 )}
 
                 {owner && (
-                  <div className="flex items-center gap-2 p-2 dark:bg-zinc-800 bg-zinc-300 rounded-md">
+                  <div className="flex items-center gap-2 p-2 dark:bg-zinc-800 bg-zinc-100 rounded-md">
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-xs truncate">
                         {owner.username}
