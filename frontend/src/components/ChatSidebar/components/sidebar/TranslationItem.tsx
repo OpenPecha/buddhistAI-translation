@@ -108,7 +108,7 @@ const TranslationItem: React.FC<TranslationItemProps> = ({
           <textarea
             value={editedText}
             onChange={(e) => onEditTextChange(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded text-sm resize-vertical min-h-[80px] font-sans"
+            className="w-full p-2 border border-gray-300 rounded text-sm resize-vertical min-h-[180px]"
             placeholder={t("translation.editTranslation")}
           />
           <div className="flex gap-2 justify-end">
@@ -116,19 +116,18 @@ const TranslationItem: React.FC<TranslationItemProps> = ({
               onClick={onSaveEdit}
               variant="default"
               size="sm"
-              className="h-6 text-xs bg-green-600 hover:bg-green-700 text-white"
+              className="bg-green-600 hover:bg-green-700 text-white"
             >
-              <Save className="w-3 h-3 mr-1" />
-              {t("common.save")}
+              <Save className="w-3 h-3" />
+              <span className="font-sans">{t("common.save")}</span>
             </Button>
             <Button
               onClick={onCancelEditing}
               variant="outline"
               size="sm"
-              className="h-6 text-xs"
             >
-              <X className="w-3 h-3 mr-1" />
-              {t("common.cancel")}
+              <X className="w-3 h-3" />
+              <span className="font-sans">{t("common.cancel")}</span>
             </Button>
           </div>
         </div>
@@ -143,7 +142,7 @@ const TranslationItem: React.FC<TranslationItemProps> = ({
           onStartEditing(result);
         }
       },
-      className: `rounded p-1 -m-1 transition-colors w-full text-left ${isClickable
+      className: `rounded p-1 transition-colors w-full text-left ${isClickable
         ? "cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800"
         : "cursor-not-allowed opacity-50"
         }`,
@@ -157,19 +156,10 @@ const TranslationItem: React.FC<TranslationItemProps> = ({
         <button {...commonButtonProps}>
           <DiffText
             oldText={
-              expandedItems.has(index)
-                ? result.translatedText
-                : truncateText(result.translatedText)
+              result.translatedText
             }
             newText={
-              expandedItems.has(index)
-                ? editedTexts[result.id]
-                : truncateText(editedTexts[result.id])
-            }
-            truncated={
-              !expandedItems.has(index) &&
-              (result.translatedText.length > TRUNCATE_LENGTH ||
-                editedTexts[result.id].length > TRUNCATE_LENGTH)
+              editedTexts[result.id]
             }
           />
         </button>
@@ -181,19 +171,10 @@ const TranslationItem: React.FC<TranslationItemProps> = ({
         <button {...commonButtonProps}>
           <DiffText
             oldText={
-              expandedItems.has(index)
-                ? result.previousTranslatedText
-                : truncateText(result.previousTranslatedText)
+              result.previousTranslatedText
             }
             newText={
-              expandedItems.has(index)
-                ? getCurrentText(result)
-                : truncateText(getCurrentText(result))
-            }
-            truncated={
-              !expandedItems.has(index) &&
-              (result.previousTranslatedText.length > TRUNCATE_LENGTH ||
-                getCurrentText(result).length > TRUNCATE_LENGTH)
+              getCurrentText(result)
             }
           />
         </button>
@@ -202,9 +183,7 @@ const TranslationItem: React.FC<TranslationItemProps> = ({
 
     return (
       <button {...commonButtonProps}>
-        {expandedItems.has(index)
-          ? getCurrentText(result)
-          : truncateText(getCurrentText(result))}
+        {getCurrentText(result)}
       </button>
     );
   };
@@ -238,42 +217,35 @@ const TranslationItem: React.FC<TranslationItemProps> = ({
         key={result.id}
         className="bg-neutral-100 dark:bg-neutral-800 rounded-b-lg p-3"
       >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            {formatLineNumbers(result) && (
-              <button
-                type="button"
-                className="text-xs text-neutral-800 dark:text-neutral-100 bg-neutral-100 dark:bg-neutral-600 px-2 py-1 rounded cursor-pointer hover:bg-gray-200 hover:text-secondary-600 transition-colors"
-                onClick={() => {
-                  if (!result.lineNumbers) return;
-                  const lineRanges = Object.entries(result.lineNumbers);
-                  if (lineRanges.length > 0) {
-                    const [lineKey] = lineRanges[0];
-                    const lineNumber = Number.parseInt(lineKey, 10);
-                    scrollToLineNumber(lineNumber);
-                  }
-                }}
-                title="Click to scroll to this line in the editor"
-              >
-                {formatLineNumbers(result)}
-              </button>
-            )}
-          </div>
+        <div className="flex items-center gap-2">
+          {formatLineNumbers(result) && (
+            <button
+              type="button"
+              className="text-xs text-neutral-800 dark:text-neutral-100 bg-neutral-100 dark:bg-neutral-600 px-2 py-1 rounded cursor-pointer hover:bg-gray-200 hover:text-secondary-600 transition-colors"
+              onClick={() => {
+                if (!result.lineNumbers) return;
+                const lineRanges = Object.entries(result.lineNumbers);
+                if (lineRanges.length > 0) {
+                  const [lineKey] = lineRanges[0];
+                  const lineNumber = Number.parseInt(lineKey, 10);
+                  scrollToLineNumber(lineNumber);
+                }
+              }}
+              title="Click to scroll to this line in the editor"
+            >
+              {formatLineNumbers(result)}
+            </button>
+          )}
         </div>
         <div className="space-y-2">
           <div className="border-l-4 border-gray-300 pl-3">
-            <div className="text-xs text-neutral-700 dark:text-neutral-100 mb-1 font-medium">
-              <span className="text-neutral-800 dark:text-neutral-300">
-                {t("translation.source")}
-              </span>
-            </div>
-            <div className="text-sm text-neutral-800 dark:text-neutral-100 leading-relaxed">
-              {expandedItems.has(index)
-                ? result.originalText
-                : truncateText(result.originalText)}
+            <span className="text-neutral-900 text-xs font-medium dark:text-neutral-300">
+              {t("translation.source")}
+            </span>
+            <div className="text-sm text-neutral-800 dark:text-neutral-100 truncate">
+              {result.originalText}
             </div>
           </div>
-
           <div className="border-l-4 border-[#12A7FC] pl-3">
             <div className="text-xs text-neutral-700 dark:text-neutral-100 mb-1 font-medium flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -281,7 +253,6 @@ const TranslationItem: React.FC<TranslationItemProps> = ({
                   {isStandardized
                     ? t("translation.standardizedTranslation")
                     : t("translation.translation")}
-                  :
                 </span>
                 {editedTexts[result.id] &&
                   (() => {
@@ -335,7 +306,7 @@ const TranslationItem: React.FC<TranslationItemProps> = ({
               </div>
             </div>
 
-            <div className="text-sm leading-relaxed text-neutral-800 dark:text-neutral-100">
+            <div className="text-sm font-monlam-2 text-neutral-800 dark:text-neutral-100">
               {renderTranslationContent()}
             </div>
           </div>

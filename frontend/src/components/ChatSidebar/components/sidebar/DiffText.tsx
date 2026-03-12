@@ -10,12 +10,11 @@ interface DiffTextProps {
 const DiffText: React.FC<DiffTextProps> = ({
   oldText,
   newText,
-  truncated = false,
 }) => {
   const differences = diffLines(oldText, newText);
 
   return (
-    <div className="whitespace-pre-wrap font-mono text-sm bg-neutral-50 dark:bg-neutral-800 p-2 rounded">
+    <div className="whitespace-pre-wrap space-y-2 text-sm rounded">
       {differences.map((part, index) => {
         const lines = part.value.split("\\n").map((line, i) => {
           if (line === "") return null;
@@ -51,7 +50,6 @@ const DiffText: React.FC<DiffTextProps> = ({
         });
         return lines;
       })}
-      {truncated && <span className="text-gray-400">...</span>}
     </div>
   );
 };
