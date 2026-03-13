@@ -41,7 +41,7 @@ const AgentSelector: React.FC<AgentSelectorProps> = ({
 
     if (error) {
         return (
-            <div className="flex items-center gap-2 text-destructive text-sm">
+            <div className="flex items-center gap-2 text-destructive w-full justify-center text-sm">
                 <span>Failed to load agents</span>
             </div>
         );
@@ -64,7 +64,7 @@ const AgentSelector: React.FC<AgentSelectorProps> = ({
                             {selectedAgent && (
                                 <div className="flex items-center gap-2 truncate">
                                     <Bot className="size-4" />
-                                    <span className="truncate">
+                                    <span className="truncate w-35">
                                         {agents.find((a) => a.id === selectedAgent)?.name ||
                                             "Select agent"}
                                     </span>

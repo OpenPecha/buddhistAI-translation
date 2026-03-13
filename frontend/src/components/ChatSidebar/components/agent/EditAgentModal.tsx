@@ -10,11 +10,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Trash2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAgentDetail, useUpdateAgent } from "@/api/queries/agents";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AgentContext } from "@/api/agent";
+import ContextManager, {
+  type ContextItem,
+  toContextItems,
+  toApiContexts,
+} from "./ContextManager";
 
 interface EditAgentModalProps {
   agentId: string | undefined;
@@ -37,10 +41,10 @@ const EditAgentModal: React.FC<EditAgentModalProps> = ({
     system_prompt: "",
     system_assistance: false,
   });
-  const [contexts, setContexts] = useState<AgentContext[]>([]);
+  const [contexts, setContexts] = useState<ContextItem[]>([]);
 
   useEffect(() => {
-    if (agent) {
+    if (agent && open) {
       setFormData({
         name: agent.name,
         description: agent.description || "",
@@ -48,27 +52,15 @@ const EditAgentModal: React.FC<EditAgentModalProps> = ({
         system_prompt: agent.system_prompt || "",
         system_assistance: agent.system_assistance,
       });
-      setContexts(agent.contexts ?? []);
+      setContexts(toContextItems(agent.contexts ?? []));
     }
-  }, [agent]);
+  }, [agent, open]);
 
   const handleInputChange = (
     field: keyof typeof formData,
     value: string | boolean
   ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleRemoveContext = (contextId: string) => {
-    setContexts((prev) => prev.filter((ctx) => ctx.id !== contextId));
-  };
-
-  const handleEditContext = (contextId: string, newContent: string) => {
-    setContexts((prev) =>
-      prev.map((ctx) =>
-        ctx.id === contextId ? { ...ctx, content: newContent } : ctx
-      )
-    );
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -81,11 +73,11 @@ const EditAgentModal: React.FC<EditAgentModalProps> = ({
       return;
     }
 
-    const mappedContexts = contexts.map((ctx) => ({
-      content: ctx.content || null,
-      pecha_title: ctx.pecha_title || null,
-      pecha_text_id: ctx.pecha_text_id || null,
-    }));
+    const mappedContexts = toApiContexts(contexts) as {
+      content: string | null;
+      pecha_title: string | null;
+      pecha_text_id: string | null;
+    }[];
 
     updateMutation.mutate(
       {
@@ -198,59 +190,18 @@ const EditAgentModal: React.FC<EditAgentModalProps> = ({
               </Label>
             </div>
 
-            {contexts.length > 0 && (
-              <div className="space-y-2">
-                <Label>Contexts ({contexts.length})</Label>
-                <div className="space-y-2 max-h-40 overflow-y-auto">
-                  {contexts.map((ctx) => (
-                    <div
-                      key={ctx.id}
-                      className="bg-muted rounded-md p-3 text-sm flex gap-2 items-start"
-                    >
-                      <div className="flex-1 min-w-0">
-                        {ctx.pecha_title ? (
-                          <>
-                            <p className="whitespace-pre-wrap break-words line-clamp-3">
-                              {ctx.content}
-                            </p>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {ctx.pecha_title}
-                            </p>
-                          </>
-                        ) : (
-                          <Textarea
-                            value={ctx.content}
-                            onChange={(e) =>
-                              handleEditContext(ctx.id, e.target.value)
-                            }
-                            rows={2}
-                            className="bg-background rounded-md border-none"
-                          />
-                        )}
-                      </div>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="icon"
-                        onClick={() => handleRemoveContext(ctx.id)}
-                      >
-                        <Trash2 className="size-4" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            <ContextManager contexts={contexts} onChange={setContexts} />
 
             <div className="flex justify-end gap-2 pt-4">
               <Button
                 type="button"
                 variant="outline"
+                className="flex-1"
                 onClick={() => onOpenChange(false)}
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={updateMutation.isPending}>
+              <Button className="flex-1 bg-secondary-600 hover:bg-secondary-700 text-white" type="submit" disabled={updateMutation.isPending}>
                 {updateMutation.isPending ? (
                   <>
                     <Loader2 className="size-4 mr-2 animate-spin" />
