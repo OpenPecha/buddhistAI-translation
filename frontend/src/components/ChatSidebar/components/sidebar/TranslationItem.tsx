@@ -23,8 +23,6 @@ export interface TranslationResult {
   lineNumbers?: Record<string, { from: number; to: number }> | null;
 }
 
-const TRUNCATE_LENGTH = 150;
-
 interface TranslationItemProps {
   result: TranslationResult;
   index: number;
@@ -181,7 +179,7 @@ const TranslationItem: React.FC<TranslationItemProps> = ({
   };
 
   return (
-    <>
+    <div>
       <div className=" dark:bg-zinc-800 bg-neutral-50 border-b rounded-t-lg p-2">
         <ActionMenu
           result={result}
@@ -304,7 +302,7 @@ const TranslationItem: React.FC<TranslationItemProps> = ({
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

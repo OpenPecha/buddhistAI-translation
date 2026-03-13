@@ -320,7 +320,6 @@ const LineNumberVirtualized = ({
       <div
         ref={lineNumbersRef}
         className="line-numbers h-full text-right relative"
-        style={{ width: `${maxLineWidth + 2}ch` }}
       >
         {lineNumbers.map((lineNum) => (
           <span

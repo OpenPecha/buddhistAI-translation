@@ -16,7 +16,7 @@ const TranslationResults: React.FC<TranslationResultsProps> = ({
   const translationResults = results || defaultTranslationResults;
 
   return (
-    <div>
+    <div className="space-y-2">
       {translationResults.map((result, index) => (
         <TranslationItem
           key={result.id}
