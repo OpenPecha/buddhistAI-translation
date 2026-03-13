@@ -1,7 +1,5 @@
 import React, { Suspense } from "react";
 import { useDocumentCreateModalContext } from "@/contexts/DocumentCreateModalContext";
-import { useTranslation } from "react-i18next";
-import { AvailableMethodType } from "./types";
 
 const ProjectNameStep = React.lazy(() =>
   import("./ProjectNameStep").then(module => ({
@@ -29,14 +27,6 @@ export const StepRenderer = React.memo(() => {
     closeOnSuccess
   } = useDocumentCreateModalContext();
 
-  const { t } = useTranslation();
-
-  const availableMethods: AvailableMethodType[] = [
-    { type: "empty", label: t("common.emptyText") },
-    { type: "file", label: t("common.file") },
-    { type: "openpecha", label: t("common.openpecha") }
-  ];
-
   const renderStep = () => {
     switch (state.currentStep) {
       case 1:
@@ -52,7 +42,6 @@ export const StepRenderer = React.memo(() => {
           <MethodSelection
             selectedMethod={state.selectedMethod}
             onMethodSelect={setSelectedMethod}
-            availableMethods={availableMethods}
             onDoubleClick={handleNext}
           />
         );

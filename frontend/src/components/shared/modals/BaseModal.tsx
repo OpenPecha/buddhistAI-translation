@@ -55,7 +55,7 @@ export function BaseModal({
 					>
 						<div
 							className={cn(
-								"bg-neutral-50 dark:bg-neutral-900 rounded-sm w-full",
+								"bg-neutral-50 dark:bg-neutral-900 rounded-md border-2 overflow-hidden w-full",
 								sizeClasses[size],
 								className,
 							)}

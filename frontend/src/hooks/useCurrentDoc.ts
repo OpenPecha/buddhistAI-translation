@@ -73,9 +73,9 @@ function writePermissionHandler({
   isPecha,
   hasWritePermission,
 }: WritePermissionHandlerProps) {
-  if (isPecha) {
-    return false;
-  }
+  // if (isPecha) {
+  //   return false;
+  // }
   return isPublic || hasWritePermission;
 }
 
