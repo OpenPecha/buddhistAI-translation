@@ -9,15 +9,18 @@ export const MethodSelection = React.memo(
   ({
     selectedMethod,
     onMethodSelect,
-    availableMethods,
     onDoubleClick,
   }: {
     readonly selectedMethod: UploadMethod | null;
     readonly onMethodSelect: (method: UploadMethod) => void;
-    readonly availableMethods: AvailableMethodType[];
     readonly onDoubleClick: () => void;
   }) => {
     const { t } = useTranslation();
+    const availableMethods: AvailableMethodType[] = [
+      { type: "empty", label: t("common.emptyText") },
+      { type: "file", label: t("common.file") },
+      { type: "openpecha", label: t("common.openpecha") }
+    ];
     const methodConfigs = {
       empty: {
         icon: <FileText size={24} />,
