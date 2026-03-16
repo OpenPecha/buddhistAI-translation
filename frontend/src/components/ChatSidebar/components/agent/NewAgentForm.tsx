@@ -8,6 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { agentsKeys } from '@/api/queries/agents';
+import { getIdToken } from '@/lib/auth';
 import ContextManager, {
     type ContextItem,
     toApiContexts,
@@ -58,7 +59,7 @@ const NewAgentForm = () => {
                 formDataToSend.append('files', file);
             });
 
-            const accessToken = sessionStorage.getItem('id_token');
+            const accessToken = await getIdToken();
             const response = await fetch('/agent/assistant', {
                 method: 'POST',
                 headers: {
