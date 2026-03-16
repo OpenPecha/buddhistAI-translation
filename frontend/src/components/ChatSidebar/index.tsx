@@ -91,15 +91,15 @@ const ChatSidebarContent: React.FC<{
 
   const handleDeleteAgent = useCallback(() => {
     if (!selectedAgentId) return;
-    if (!globalThis.confirm("Are you sure you want to delete this agent? This action cannot be undone.")) return;
+    if (!globalThis.confirm("Are you sure you want to delete this assistant? This action cannot be undone.")) return;
 
     deleteMutation.mutate(selectedAgentId, {
       onSuccess: () => {
-        toast.success("Agent deleted successfully");
+        toast.success("Assistant deleted successfully");
         setSelectedAgentId(undefined);
       },
       onError: (err) => {
-        toast.error(`Failed to delete agent: ${err.message}`);
+        toast.error(`Failed to delete assistant: ${err.message}`);
       },
     });
   }, [selectedAgentId, deleteMutation, setSelectedAgentId]);
@@ -168,7 +168,7 @@ const ChatSidebarContent: React.FC<{
                 variant="outline"
                 size="icon"
                 disabled={!selectedAgentId}
-                title={!selectedAgentId ? "Select an agent first" : "Agent options"}
+                title={!selectedAgentId ? "Select an assistant first" : "Assistant options"}
               >
                 <EllipsisVertical className="size-4" />
               </Button>
