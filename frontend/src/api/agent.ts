@@ -1,3 +1,5 @@
+import { getIdToken } from "@/lib/auth";
+
 export interface Agent {
   id: string;
   name: string;
@@ -71,7 +73,7 @@ const getAgents = async (
 };
 
 export const getAgentDetail = async (agentId: string): Promise<AgentDetail> => {
-  const token = sessionStorage.getItem('id_token');
+  const token = await getIdToken();
   
   const response = await fetch(`/agent/assistant/${agentId}`, {
     headers: {
@@ -103,7 +105,7 @@ export interface UpdateAgentRequest {
 }
 
 export const deleteAgent = async (agentId: string): Promise<void> => {
-  const token = sessionStorage.getItem('id_token');
+  const token = await getIdToken();
 
   const response = await fetch(`/agent/assistant/${agentId}`, {
     method: 'DELETE',
@@ -121,7 +123,7 @@ export const updateAgent = async (
   agentId: string,
   data: UpdateAgentRequest
 ): Promise<AgentDetail> => {
-  const token = sessionStorage.getItem('id_token');
+  const token = await getIdToken();
 
   const response = await fetch(`/agent/assistant/${agentId}`, {
     method: 'PUT',
@@ -142,7 +144,7 @@ export const updateAgent = async (
 export const performAITranslation = async (
   params: AITranslationRequest
 ): Promise<AITranslationResponse> => {
-  const token = sessionStorage.getItem('id_token');
+  const token = await getIdToken();
 
   const response = await fetch('/agent/ai', {
     method: 'POST',

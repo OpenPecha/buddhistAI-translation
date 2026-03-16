@@ -5,7 +5,7 @@ import React, {
   type ReactNode,
 } from "react";
 import { Auth0Provider, useAuth0 } from "@auth0/auth0-react";
-import { setAuthTokenGetter } from "../lib/auth";
+import { setAuthTokenGetter, setIdTokenGetter } from "../lib/auth";
 import { AuthContext } from "./auth-context";
 import type { User } from "./types";
 import { createUser } from "@/api/user";
@@ -29,6 +29,14 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     if (!isAuthenticated || !user?.sub) return;
     setAuthTokenGetter(getAccessTokenSilently);
+    setIdTokenGetter(async () => {
+      const claims = await getIdTokenClaims();
+      if (claims?.__raw) {
+        sessionStorage.setItem("id_token", claims.__raw);
+        return claims.__raw;
+      }
+      return null;
+    });
     const userData = {
       id: user?.sub,
       email: user?.email || "",
