@@ -138,7 +138,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
           onChange={handleInputChange}
           onKeyDown={handleKeyPress}
           placeholder={defaultPlaceholder}
-          disabled={disabled || isProcessing || isTranslating}
+          disabled={disabled || isProcessing || isTranslating || !!selectedText?.trim()}
           className="resize-none"
         />
         <div className="flex justify-between w-full">
