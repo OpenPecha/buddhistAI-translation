@@ -3,7 +3,6 @@ import {
   type KeyboardEvent,
   useCallback,
   useEffect,
-  useRef,
   useState,
 } from "react";
 import { useTranslation as useTranslationI18next } from "react-i18next";
@@ -35,14 +34,11 @@ const ChatInput: React.FC<ChatInputProps> = ({
   const { t } = useTranslationI18next();
   const [input, setInput] = useState("");
   const [shouldStartTranslation, setShouldStartTranslation] = useState(false);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const defaultPlaceholder =
     placeholder || t("translation.typePasteTextPlaceholder");
   const {
     isTranslating,
-    resetTranslations,
-    resetGlossary,
     setManualText,
     setInputMode,
     startTranslation,
@@ -69,8 +65,6 @@ const ChatInput: React.FC<ChatInputProps> = ({
       !isTranslating
     ) {
       setShouldStartTranslation(false);
-      resetTranslations();
-      resetGlossary();
       startTranslation();
     }
   }, [
@@ -78,8 +72,6 @@ const ChatInput: React.FC<ChatInputProps> = ({
     inputMode,
     manualText,
     isTranslating,
-    resetTranslations,
-    resetGlossary,
     startTranslation,
   ]);
   const handleSend = useCallback(() => {
@@ -91,17 +83,11 @@ const ChatInput: React.FC<ChatInputProps> = ({
       setInputMode("manual");
       setManualText(text);
       setShouldStartTranslation(true);
-      setInput("");
-      if (textareaRef.current) {
-        textareaRef.current.style.height = "auto";
-      }
     } else if (selectedText?.trim()) {
       setInputMode("selection");
-      resetTranslations();
-      resetGlossary();
       startTranslation();
     }
-  }, [input, disabled, isTranslating, selectedAgentId, selectedText, setInputMode, setManualText, resetTranslations, resetGlossary, startTranslation]);
+  }, [input, disabled, isTranslating, selectedAgentId, selectedText, setInputMode, setManualText, startTranslation]);
 
   const handleKeyPress = useCallback(
     (e: KeyboardEvent<HTMLTextAreaElement>) => {

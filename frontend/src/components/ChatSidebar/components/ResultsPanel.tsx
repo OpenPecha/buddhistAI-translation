@@ -5,7 +5,6 @@ import {
   ChevronUp,
   Copy,
   FileText,
-  Globe,
   X,
   Replace,
   Languages,

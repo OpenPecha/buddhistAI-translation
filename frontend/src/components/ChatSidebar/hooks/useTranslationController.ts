@@ -222,10 +222,8 @@ export const useTranslationController = ({
       return;
     }
 
-    // Reset all previous results and states
-    resetTranslationsInternal(); // Reset translation list
     resetCopyFeedback();
-    resetGlossaryInternal(); // Reset glossary list
+    resetGlossaryInternal();
     resetStandardization();
     await startTranslationInternal(currentText);
   };
