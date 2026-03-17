@@ -99,9 +99,10 @@ export default function EachProject({
     setShowShareModal(true);
   };
 
+  const firstTranslationId = project.roots?.[1]?.id;
   const url =
     project.roots && project.roots.length > 0
-      ? `/documents/${project.roots[0]?.id}`
+      ? `/documents/${project.roots[0]?.id}${firstTranslationId ? `?translation=${firstTranslationId}` : ""}`
       : "#";
 
   const formattedDate = timeCategory

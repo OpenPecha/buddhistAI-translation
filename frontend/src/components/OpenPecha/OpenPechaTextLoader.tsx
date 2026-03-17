@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createDocumentFromOpenPecha } from "@/api/document";
+import { createDocument, createDocumentFromOpenPecha } from "@/api/document";
 import { ErrorDisplay } from "@/components/shared/modals";
 import { useBdrcSearch, BdrcSearchResult } from "@/hooks/uesBDRC";
 import { Search, AlertCircle, ExternalLink } from "lucide-react";
 import { fetchText } from "@/api/openpecha";
 import { useFetchTexts } from "@/api/queries/openpecha_api";
 import OpenPecha from "@/assets/icon.png";
+import { createEmptyTranslationFormData } from "@/utils/documentUtils";
 
 export function OpenPechaTextLoader({
   projectName,
@@ -58,7 +59,6 @@ export function OpenPechaTextLoader({
     onValidationChange?.(isValid);
   }, [isValid, onValidationChange]);
 
-  // Create project mutation
   const createProjectMutation = useMutation({
     mutationFn: async () => {
       if (!projectName) {
@@ -69,14 +69,21 @@ export function OpenPechaTextLoader({
         throw new Error("No text selected");
       }
 
-      // Use the backend endpoint to create document and project from OpenPecha textId
-      return createDocumentFromOpenPecha(selectedTextId, null);
+      const opResponse = await createDocumentFromOpenPecha(selectedTextId, null);
+      const rootId = opResponse.data.roots?.[0]?.id || opResponse.data.id;
+
+      const translationFormData = createEmptyTranslationFormData(rootId);
+      const translationResponse = await createDocument(translationFormData);
+
+      return {
+        rootId,
+        translationId: translationResponse.data?.id || translationResponse.id,
+      };
     },
-    onSuccess: ({ data }) => {
+    onSuccess: ({ rootId, translationId }) => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       closeModal();
-      const rootId = data.roots?.[0]?.id || data.id;
-      window.location.href = `/documents/${rootId}`;
+      window.location.href = `/documents/${rootId}?translation=${translationId}`;
     },
     onError: (error: Error) => {
       setError(error.message || "Failed to create project");
