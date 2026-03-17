@@ -159,8 +159,7 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
                       <Button
                         onClick={overwriteAllResults}
                         variant="ghost"
-                        size="sm"
-                        className="h-5 w-5 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30"
+                        className=" hover:bg-none hover:text-blue-600 dark:hover:text-blue-400"
                       >
                         <Replace className="w-3 h-3 " />
                       </Button>
