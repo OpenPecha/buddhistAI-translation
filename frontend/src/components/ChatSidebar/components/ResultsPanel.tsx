@@ -46,7 +46,6 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
     copiedItems,
     copyGlossaryTerms,
     startStandardizationAnalysis,
-    resetTranslations,
     resetGlossary,
     overwriteAllResults,
     standardizedTranslationResults,
@@ -171,21 +170,6 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
                     </TooltipContent>
                   </Tooltip>
                 )}
-              {hasTranslationResults && !isTranslating && (
-                <Tooltip delayDuration={5}>
-                  <TooltipTrigger>
-                    <Button
-                      onClick={resetTranslations}
-                      variant="ghost"
-                      size="sm"
-                      className="h-5 w-5 text-blue-600 dark:text-blue-400 p-2"
-                    >
-                      <X className="w-3 h-3" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Clear translation results</TooltipContent>
-                </Tooltip>
-              )}
             </div>
           </div>
 

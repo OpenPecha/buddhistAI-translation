@@ -252,11 +252,22 @@ const ChatSidebarContent: React.FC<{
             onAction={handleAction}
           />
         )}
-        <TargetLanguageSelector
-          config={config}
-          onConfigChange={handleConfigChange}
-          showLabel={false}
-        />
+        <div className="flex items-center gap-2 border-t justify-between p-2">
+          <TargetLanguageSelector
+            config={config}
+            onConfigChange={handleConfigChange}
+            showLabel={false}
+          />
+          {hasTranslationResults && !isTranslating && (
+            <Button
+              onClick={resetTranslations}
+              variant="outline"
+            >
+              Clear
+            </Button>
+          )}
+        </div>
+
         <ChatInput
           isProcessing={
             isTranslating || isExtractingGlossary || isAnalyzingStandardization
