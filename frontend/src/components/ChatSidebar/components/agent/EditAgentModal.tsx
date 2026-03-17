@@ -93,11 +93,11 @@ const EditAgentModal: React.FC<EditAgentModalProps> = ({
       },
       {
         onSuccess: () => {
-          toast.success("Agent updated successfully!");
+          toast.success("Assistant updated successfully!");
           onOpenChange(false);
         },
         onError: (err) => {
-          toast.error(`Failed to update agent: ${err.message}`);
+          toast.error(`Failed to update assistant: ${err.message}`);
         },
       }
     );
@@ -111,7 +111,7 @@ const EditAgentModal: React.FC<EditAgentModalProps> = ({
       >
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            Edit Agent
+            Edit Assistant
           </DialogTitle>
         </DialogHeader>
 
@@ -125,7 +125,7 @@ const EditAgentModal: React.FC<EditAgentModalProps> = ({
 
         {error && (
           <div className="py-4 text-destructive">
-            Failed to load agent details: {error}
+            Failed to load assistant details: {error}
           </div>
         )}
 
@@ -208,7 +208,7 @@ const EditAgentModal: React.FC<EditAgentModalProps> = ({
                     Updating...
                   </>
                 ) : (
-                  "Update Agent"
+                  "Update Assistant"
                 )}
               </Button>
             </div>

@@ -361,21 +361,18 @@ const Editor = ({
         clickedP.classList.add("selected_text_segment");
         setSelectedTextTag(clickedP);
 
-        // Set selectedText from the first .ql-editor instance
+        const currentRange = quillRef.current.getSelection();
+
         const firstQLEditor = document.querySelector(
           ".ql-editor"
         ) as HTMLElement | null;
-        let textSelected = "";
-        if (firstQLEditor && firstQLEditor.contains(clickedP)) {
-          textSelected = clickedP.textContent || "";
-        }
-        setSelectedText(textSelected || "");
 
-        // Get current selection
-        const currentRange = quillRef.current.getSelection();
-
-        // If selection length is 0, use the paragraph's content
         if (!currentRange || currentRange.length === 0) {
+          let textSelected = "";
+          if (firstQLEditor && firstQLEditor.contains(clickedP)) {
+            textSelected = clickedP.textContent || "";
+          }
+          setSelectedText(textSelected || "");
           // Get the blot for the clicked paragraph
           const blot = Quill.find(clickedP);
           if (!blot || blot === quillRef.current) return;
@@ -439,6 +436,7 @@ const Editor = ({
             currentRange.index,
             currentRange.length
           );
+          setSelectedText(text.trim() || "");
 
           // Sync selected_text_segment class to other editors at the same line number
           if (lineNumber) {

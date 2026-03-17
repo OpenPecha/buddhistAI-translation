@@ -92,8 +92,6 @@ export const useTranslationOperations = ({
       return;
     }
 
-    resetTranslations();
-    // Reset segment index counter
     currentSegmentIndexRef.current = 0;
 
     // Capture current line numbers before translation starts
@@ -161,7 +159,7 @@ export const useTranslationOperations = ({
         } as TranslationResult;
       });
 
-      setTranslationResults(results);
+      setTranslationResults(prev => [...prev, ...results]);
       setProgressPercent(100);
       setCurrentStatus("Translation complete");
       setIsTranslating(false);

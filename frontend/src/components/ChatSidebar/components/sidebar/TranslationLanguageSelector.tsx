@@ -33,7 +33,7 @@ const TargetLanguageSelector: React.FC<TargetLanguageProps> = ({
 }: TargetLanguageProps) => {
   const { t } = useTranslation();
   return (
-    <div className="px-2 border-t pt-2">
+    <div>
       {showLabel && (
         <Label className="text-sm font-medium flex items-center gap-2">
           <Languages className="w-3 h-3" />

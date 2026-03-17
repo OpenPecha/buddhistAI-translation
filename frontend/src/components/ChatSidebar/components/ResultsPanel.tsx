@@ -5,7 +5,6 @@ import {
   ChevronUp,
   Copy,
   FileText,
-  Globe,
   X,
   Replace,
   Languages,
@@ -47,7 +46,6 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
     copiedItems,
     copyGlossaryTerms,
     startStandardizationAnalysis,
-    resetTranslations,
     resetGlossary,
     overwriteAllResults,
     standardizedTranslationResults,
@@ -161,8 +159,7 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
                       <Button
                         onClick={overwriteAllResults}
                         variant="ghost"
-                        size="sm"
-                        className="h-5 w-5 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30"
+                        className=" hover:bg-none hover:text-blue-600 dark:hover:text-blue-400"
                       >
                         <Replace className="w-3 h-3 " />
                       </Button>
@@ -172,21 +169,6 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
                     </TooltipContent>
                   </Tooltip>
                 )}
-              {hasTranslationResults && !isTranslating && (
-                <Tooltip delayDuration={5}>
-                  <TooltipTrigger>
-                    <Button
-                      onClick={resetTranslations}
-                      variant="ghost"
-                      size="sm"
-                      className="h-5 w-5 text-blue-600 dark:text-blue-400 p-2"
-                    >
-                      <X className="w-3 h-3" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Clear translation results</TooltipContent>
-                </Tooltip>
-              )}
             </div>
           </div>
 
