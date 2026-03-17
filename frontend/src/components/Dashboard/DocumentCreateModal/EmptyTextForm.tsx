@@ -2,9 +2,10 @@ import React, { useState } from "react";
 import SelectLanguage from "./SelectLanguage";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createProject } from "@/api/project";
-import { createDocumentWithContent } from "@/api/document";
+import { createDocument, createDocumentWithContent } from "@/api/document";
 import { ErrorDisplay } from "@/components/shared/modals";
 import { DEFAULT_LANGUAGE_SELECTED } from "@/config";
+import { createEmptyTranslationFormData } from "@/utils/documentUtils";
 
 interface EmptyTextFormProps {
   readonly projectName: string;
@@ -36,7 +37,6 @@ export function EmptyTextForm({
     mutationFn: async () => {
       if (!projectName) throw new Error("Project name is required");
 
-      // Create empty document first with date-based identifier
       const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
       const documentData = {
         name: "EmptyText",
@@ -44,7 +44,6 @@ export function EmptyTextForm({
         isRoot: true,
         language: selectedLanguage,
         content: "",
-        // Don't send metadata for empty documents
       };
 
       const documentResponse = await createDocumentWithContent(documentData);
@@ -52,8 +51,7 @@ export function EmptyTextForm({
         throw new Error("Failed to create document");
       }
 
-      // Create project with empty document as root
-      return createProject({
+      const projectResponse = await createProject({
         name: projectName,
         identifier: projectName.toLowerCase().replace(/\s+/g, "-"),
         rootId: documentResponse.id,
@@ -62,12 +60,20 @@ export function EmptyTextForm({
           language: selectedLanguage,
         },
       });
+
+      const translationFormData = createEmptyTranslationFormData(documentResponse.id);
+      const translationResponse = await createDocument(translationFormData);
+
+      return {
+        project: projectResponse,
+        translationId: translationResponse.data?.id || translationResponse.id,
+      };
     },
-    onSuccess: ({ data }) => {
+    onSuccess: ({ project, translationId }) => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
-      const rootId = data.roots[0].id;
+      const rootId = project.data.roots[0].id;
       closeOnSuccess();
-      window.location.href = `/documents/${rootId}`;
+      window.location.href = `/documents/${rootId}?translation=${translationId}`;
     },
     onError: (error: Error) => {
       setError(error.message || "Failed to create project");

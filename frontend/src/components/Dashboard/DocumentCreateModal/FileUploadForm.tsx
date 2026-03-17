@@ -3,8 +3,10 @@ import SelectLanguage from "./SelectLanguage";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import TextUploader from "./TextUploader";
 import { createProject } from "@/api/project";
+import { createDocument } from "@/api/document";
 import { ErrorDisplay } from "@/components/shared/modals";
 import { DEFAULT_LANGUAGE_SELECTED } from "@/config";
+import { createEmptyTranslationFormData } from "@/utils/documentUtils";
 
 interface FileUploadFormProps {
   readonly projectName: string;
@@ -40,21 +42,34 @@ export function FileUploadForm({
   }, [rootId, setNewDocumentId]);
 
   const createProjectMutation = useMutation({
-    mutationFn: () => {
+    mutationFn: async () => {
       if (!projectName) {
         throw new Error("Project name is required");
       }
-      return createProject({
+
+      const projectResponse = await createProject({
         name: projectName,
         identifier: projectName.toLowerCase().replace(/\s+/g, "-"),
         rootId: rootId ?? undefined,
       });
+
+      if (!rootId) {
+        throw new Error("Root document ID is required");
+      }
+
+      const translationFormData = createEmptyTranslationFormData(rootId);
+      const translationResponse = await createDocument(translationFormData);
+
+      return {
+        project: projectResponse,
+        translationId: translationResponse.data?.id || translationResponse.id,
+      };
     },
-    onSuccess: ({ data }) => {
+    onSuccess: ({ project, translationId }) => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
-      const rootId = data.roots[0].id;
+      const docId = project.data.roots[0].id;
       closeOnSuccess();
-      window.location.href = `/documents/${rootId}`;
+      window.location.href = `/documents/${docId}?translation=${translationId}`;
     },
     onError: (error: Error) => {
       setError(error.message || "Failed to create project");
