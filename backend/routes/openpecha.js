@@ -9,6 +9,7 @@ const {
   getSegmentRelated,
   getText,
   getSegmentsContent,
+  getRelatedInstances,
 } = require("../apis/openpecha_api");
 const { prisma } = require("../services/db");
 
@@ -251,7 +252,7 @@ router.post(
     try {
       const translation = await uploadTranslationToOpenpecha(
         instance_id,
-        translationData
+        translationData,
       );
       await prisma.docMetadata.create({
         data: {
@@ -273,7 +274,7 @@ router.post(
         details: error.message,
       });
     }
-  }
+  },
 );
 
 /**
@@ -319,7 +320,7 @@ router.get("/instances/:instanceId/segment-related", async (req, res) => {
       instanceId,
       spanStart,
       spanEnd,
-      transferFlag
+      transferFlag,
     );
     res.json(data);
   } catch (error) {
@@ -371,8 +372,39 @@ router.get("/instances/:instanceId/segment-content", async (req, res) => {
   }
 });
 
+router.get("/texts/:text_id/linked-resources", async (req, res) => {
+  const { text_id } = req.params;
+
+  if (!text_id) {
+    return res.status(400).json({ error: "text_id is required" });
+  }
+
+  try {
+    const instances = await getTextInstances(text_id, "critical");
+
+    if (!instances || instances.length === 0) {
+      return res.status(404).json({
+        error: "No critical instances found for this text",
+        text_id,
+      });
+    }
+
+    const criticalInstance = instances[0];
+    const relatedInstances = await getRelatedInstances(criticalInstance.id);
+
+    res.json(relatedInstances);
+  } catch (error) {
+    console.error("Error fetching linked resources:", error);
+    res.status(500).json({
+      error: "Failed to fetch linked resources",
+      text_id,
+      details: error.message,
+    });
+  }
+});
+
 /**
- * POST /openpecha/webhook
+ * POST /openpecha/linked_resources
  * @summary Forward request to n8n webhook
  * @tags Pecha - OpenPecha integration
  * @param {object} request.body.required - Request body with text_id, span_start, and span_end
@@ -382,12 +414,6 @@ router.get("/instances/:instanceId/segment-content", async (req, res) => {
  * @return {object} 200 - Success response from webhook
  * @return {object} 400 - Bad request - Missing required fields
  * @return {object} 500 - Server error
- * @example request - Webhook request
- * {
- *   "text_id": "FedFIyi0p4SuJDiJdg80S",
- *   "span_start": 1,
- *   "span_end": 1000
- * }
  */
 router.post("/linked_resources", async (req, res) => {
   const { text_id, span_start, span_end } = req.body;
@@ -431,7 +457,7 @@ router.post("/linked_resources", async (req, res) => {
 
     if (!response.ok) {
       throw new Error(
-        `Webhook request failed: ${response.status} ${response.statusText}`
+        `Webhook request failed: ${response.status} ${response.statusText}`,
       );
     }
 

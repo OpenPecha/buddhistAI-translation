@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,7 +12,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Brain, Loader2 } from 'lucide-react';
+import { Brain, Loader2, FileText, BookOpen, Languages } from 'lucide-react';
 import { toast } from 'sonner';
 import { agentsKeys } from '@/api/queries/agents';
 import { getIdToken } from '@/lib/auth';
@@ -22,11 +23,31 @@ import ContextManager, {
     getContextFiles,
 } from './ContextManager';
 import { useModels } from '@/api/queries/models';
+import { useCurrentDoc } from '@/hooks/useCurrentDoc';
+import { useFetchLinkedResources } from '@/api/queries/openpecha_api';
+import type { LinkedResource } from '@/api/openpecha';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
 
+
+const RELATIONSHIP_ICONS: Record<string, React.ReactNode> = {
+    commentary: <BookOpen className="size-3.5 shrink-0" />,
+    translation: <Languages className="size-3.5 shrink-0" />,
+};
+
+function getResourceTitle(resource: LinkedResource): string {
+    const titleObj = resource.metadata.title;
+    return Object.values(titleObj)[0] ?? resource.instance_id;
+}
 
 const NewAgentForm = () => {
     const queryClient = useQueryClient();
     const { models } = useModels();
+    const { id: documentId } = useParams<{ id: string }>();
+    const { currentDoc } = useCurrentDoc(documentId);
+    const textId = (currentDoc?.metadata?.textId ?? currentDoc?.metadata?.text_id) as string | undefined;
+    const { data: linkedResources, isLoading: isLoadingResources } = useFetchLinkedResources(textId);
+
     const [formData, setFormData] = useState({
         name: '',
         description: '',
@@ -190,10 +211,48 @@ const NewAgentForm = () => {
                     </div>
                     <ContextManager contexts={contexts} onChange={setContexts} />
                 </div>
-                <div className='flex-1'>
-                    <Label htmlFor="file_resources">File Resources</Label>
-                    <div className=' borders'>
-                        this here we will list the resources
+                <div className='flex-1 space-y-2 px-2'>
+                    <Label>Linked Resources</Label>
+                    <div className="border rounded-md h-[65vh] overflow-y-auto">
+                        {!textId && (
+                            <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
+                                No text linked to this document
+                            </div>
+                        )}
+                        {isLoadingResources && (
+                            <div className="space-y-2 p-3">
+                                {Array.from({ length: 4 }).map((_, i) => (
+                                    <Skeleton key={i} className="h-12 w-full" />
+                                ))}
+                            </div>
+                        )}
+                        {linkedResources && linkedResources.length === 0 && (
+                            <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
+                                No linked resources found
+                            </div>
+                        )}
+                        {linkedResources && linkedResources.length > 0 && (
+                            <ul className="divide-y">
+                                {linkedResources.map((resource) => (
+                                    <li key={resource.instance_id} className="flex items-start gap-3 p-3">
+                                        <div className="min-w-0 flex-1">
+                                            <p className="text-sm font-medium leading-snug line-clamp-2">
+                                                {getResourceTitle(resource)}
+                                            </p>
+                                            <div className="flex items-center gap-2 mt-1">
+                                                <Badge variant="outline" className="text-xs capitalize gap-1">
+                                                    {RELATIONSHIP_ICONS[resource.relationship] ?? <FileText className="size-3" />}
+                                                    {resource.relationship}
+                                                </Badge>
+                                                <span className="text-xs text-muted-foreground uppercase">
+                                                    {resource.metadata.language}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
                     </div>
                 </div>
             </div >

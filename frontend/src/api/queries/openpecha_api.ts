@@ -1,5 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetchInstances, fetchTextContent, fetchTexts } from "../openpecha";
+import {
+  fetchInstances,
+  fetchLinkedResources,
+  fetchTextContent,
+  fetchTexts,
+} from "../openpecha";
 
 interface useFetchTextsParams {
   type?: string;
@@ -40,6 +45,15 @@ export const useFetchTextContent = (instanceId: string) => {
     queryKey: ["textContent", instanceId],
     queryFn: () => fetchTextContent(instanceId),
     enabled: !!instanceId,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 5,
+  });
+};
+
+export const useFetchLinkedResources = (textId: string | undefined) => {
+  return useQuery({
+    queryKey: ["linkedResources", textId],
+    queryFn: () => fetchLinkedResources(textId!),
+    enabled: !!textId,
+    staleTime: 5 * 60 * 1000,
   });
 };

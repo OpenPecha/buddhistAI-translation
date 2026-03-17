@@ -109,6 +109,35 @@ export const fetchAnnotations = async (annotationId: string) => {
   return response.json();
 };
 
+export interface LinkedResource {
+  instance_id: string;
+  metadata: {
+    instance_type: string;
+    source: string;
+    text_id: string;
+    title: Record<string, string>;
+    alt_titles: string[];
+    language: string;
+    contributions: unknown[];
+  };
+  annotation: string | null;
+  relationship: string;
+}
+
+export const fetchLinkedResources = async (
+  textId: string
+): Promise<LinkedResource[]> => {
+  const response = await fetch(
+    `${server_url}/openpecha/texts/${textId}/linked-resources`,
+    { headers: getHeaders() }
+  );
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || "Failed to fetch linked resources");
+  }
+  return response.json();
+};
+
 export interface TranslationPayload {
   language: string;
   content: string;
