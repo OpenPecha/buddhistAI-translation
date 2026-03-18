@@ -8,7 +8,7 @@ import {
 import { useAgentDetail } from "@/api/queries/agents";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Bot, Shield, ScrollText, BookOpen } from "lucide-react";
+import { Shield, BookOpen } from "lucide-react";
 
 interface AgentDetailModalProps {
   agentId: string | undefined;
@@ -64,29 +64,11 @@ const AgentDetailModal: React.FC<AgentDetailModalProps> = ({
                 </p>
               )}
             </div>
-
-            <div className="space-y-1.5">
-              <div className="text-xs font-medium text-muted-foreground">
-                Source Type
-              </div>
-              <Badge variant="secondary">{agent.source_type}</Badge>
-            </div>
-
             <div className="space-y-1.5">
               <div className="text-xs font-medium text-muted-foreground">
                 Created By
               </div>
               <p className="text-sm">{agent.created_by}</p>
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-sm font-medium">
-                <ScrollText className="size-4" />
-                System Prompt
-              </div>
-              <div className="bg-muted rounded-md p-3 text-sm max-h-40 overflow-y-auto">
-                {agent.system_prompt}
-              </div>
             </div>
 
             {agent.contexts && agent.contexts.length > 0 && (

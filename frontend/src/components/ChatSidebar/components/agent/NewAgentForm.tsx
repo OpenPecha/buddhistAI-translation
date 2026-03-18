@@ -11,6 +11,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { Brain, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { agentsKeys } from '@/api/queries/agents';
@@ -25,6 +26,7 @@ import { useModels } from '@/api/queries/models';
 import { useCurrentDoc } from '@/hooks/useCurrentDoc';
 import { useFetchLinkedResources } from '@/api/queries/openpecha_api';
 import PromptTextarea from './PromptTextarea';
+import { extractPromptVariables } from './utils';
 
 
 const NewAgentForm = () => {
@@ -34,12 +36,11 @@ const NewAgentForm = () => {
     const { currentDoc } = useCurrentDoc(documentId);
     const textId = (currentDoc?.metadata?.textId ?? currentDoc?.metadata?.text_id) as string | undefined;
     const { data: linkedResources, isLoading: isLoadingResources } = useFetchLinkedResources(textId);
-
     const [formData, setFormData] = useState({
         name: '',
         description: '',
+        system_prompt: '',
         user_prompt: '',
-        target_language: 'english' as TargetLanguage,
         model_name: '' as ModelName,
         language: '' as TargetLanguage,
     });
@@ -64,13 +65,19 @@ const NewAgentForm = () => {
         setIsSubmitting(true);
 
         try {
+            const variables = extractPromptVariables(formData.user_prompt, linkedResources);
+
             const formDataToSend = new FormData();
             formDataToSend.append('name', formData.name);
-            formDataToSend.append('user_prompt', formData.user_prompt);
+            formDataToSend.append('system_prompt', formData.system_prompt);
             formDataToSend.append('description', formData.description || '');
-            formDataToSend.append('target_language', formData.target_language);
-            formDataToSend.append('model_name', formData.model_name);
             formDataToSend.append('language', formData.language);
+            formDataToSend.append('model', formData.model_name);
+            formDataToSend.append('user_prompt', formData.user_prompt);
+            if (variables.length > 0) {
+                formDataToSend.append('variables', JSON.stringify(variables));
+            }
+            formDataToSend.append('system_assistance', 'false');
             formDataToSend.append('contexts', JSON.stringify(toApiContexts(contexts)));
 
             getContextFiles(contexts).forEach((file) => {
@@ -97,8 +104,8 @@ const NewAgentForm = () => {
             setFormData({
                 name: '',
                 description: '',
+                system_prompt: '',
                 user_prompt: '',
-                target_language: 'english',
                 model_name: '' as ModelName,
                 language: '' as TargetLanguage,
             });
@@ -133,6 +140,17 @@ const NewAgentForm = () => {
                             placeholder="What does this assistant do?"
                             value={formData.description}
                             onChange={(e) => handleInputChange('description', e.target.value)}
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="system_prompt">System Prompt</Label>
+                        <Textarea
+                            id="system_prompt"
+                            placeholder="Define the assistant's behavior and role..."
+                            value={formData.system_prompt}
+                            onChange={(e) => handleInputChange('system_prompt', e.target.value)}
+                            rows={3}
                         />
                     </div>
 
