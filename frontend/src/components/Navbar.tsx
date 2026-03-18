@@ -9,6 +9,7 @@ import { Share2 } from "lucide-react";
 import ProfileArea from "./ProfileArea";
 import { useTranslation } from "react-i18next";
 import SettingsButton from "./setting/SettingsButton";
+import { ModeToggle } from "./v2/ui/molecules/mode-toggle/ModeToggle";
 
 type Project = {
   id: string;
@@ -47,6 +48,7 @@ const Navbar = ({ project }: NavbarProps) => {
 
       <div className="flex items-center gap-2">
         <SettingsButton />
+        <ModeToggle />
         <NavMenuList permissionsOpen={permissionsOpen} />
         <ProfileArea />
       </div>
