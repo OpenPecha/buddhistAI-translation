@@ -1,0 +1,106 @@
+.prompt-mentions {
+    width: 100%;
+    position: relative;
+}
+
+.prompt-mentions__control {
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 112px;
+}
+
+.prompt-mentions__input {
+    min-height: 112px;
+    padding: 8px 12px;
+    margin: 0;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    outline: none;
+    width: 100%;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    background-color: transparent;
+    color: inherit;
+    overflow: auto !important;
+}
+
+.prompt-mentions__input:focus {
+    border-color: var(--ring);
+}
+
+.prompt-mentions__input::placeholder {
+    color: var(--muted-foreground);
+}
+
+.prompt-mentions__highlighter {
+    min-height: 112px;
+    padding: 8px 12px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    overflow: hidden !important;
+}
+
+.prompt-mentions__highlighter__substring {
+    visibility: visible !important;
+}
+
+.prompt-mention-highlight {
+    margin: 0 -2px;
+    background-color: var(--color-gray-100);
+    border-radius: 3px;
+    padding: 3px;
+    position: relative;
+    z-index: 1;
+    font-weight: 500;
+    color: var(--color-secondary-700);
+}
+
+.dark .prompt-mention-highlight {
+    background-color: var(--color-secondary-700);
+    color: var(--color-secondary-200);
+}
+
+.prompt-mentions__suggestions {
+    z-index: 50 !important;
+}
+
+.prompt-mentions__suggestions__list {
+    background-color: var(--popover);
+    color: var(--popover-foreground);
+    border: 1px solid var(--border);
+    max-height: 220px;
+    overflow-y: auto;
+    padding: 4px;
+    min-width: 260px;
+}
+
+.prompt-mentions__suggestions__item {
+    padding: 6px 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.1s ease;
+}
+
+.prompt-mentions__suggestions__item:hover {
+    background-color: var(--accent);
+}
+
+.prompt-mentions__suggestions__item--focused {
+    background-color: var(--accent);
+    color: var(--accent-foreground);
+}
+
+.prompt-mentions__suggestions__item:has(.prompt-mention-placeholder) {
+    pointer-events: none;
+    cursor: default;
+    background-color: transparent;
+}
+
+.prompt-mentions__suggestions__item--focused:has(.prompt-mention-placeholder) {
+    background-color: transparent;
+    color: inherit;
+}
