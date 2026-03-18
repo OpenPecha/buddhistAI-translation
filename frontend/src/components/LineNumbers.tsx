@@ -45,6 +45,7 @@ const LineNumberVirtualized = ({
   );
   const [currentBookmarkIndex, setCurrentBookmarkIndex] = useState<number>(-1);
   const [, setShowBookmarkPopup] = useState(false);
+  const [maxLineWidth, setMaxLineWidth] = useState(3); // Default minimum width
 
   const handleDoubleClick = (lineNumber: number) => {
     if (bookmarks.includes(lineNumber)) {
@@ -137,42 +138,12 @@ const LineNumberVirtualized = ({
       lineHeight?: string;
     }> = [];
 
-    let lineNumber = 0;
-    let needsNewSegment = true;
+    let lineNumber = 1;
     const editorRect = editorElement.getBoundingClientRect();
     const editorScrollTop = editorElement.scrollTop;
 
     Array.from(childs).forEach((child) => {
-      const element = child as HTMLElement;
-      const tagName = element.tagName?.toUpperCase();
-
-      if (tagName === "H1") {
-        lineNumber = 1;
-        needsNewSegment = true;
-
-        const range = document.createRange();
-        range.selectNodeContents(child);
-        const rects = Array.from(range.getClientRects());
-        if (rects.length === 0) return;
-
-        const paraTop =
-          rects[0].top - editorRect.top + editorScrollTop + offsetTop;
-        const paraHeight = rects.reduce((sum, rect) => sum + rect.height, 0);
-
-        newLineNumbers.push({
-          number: lineNumber,
-          top: paraTop,
-          height: paraHeight,
-        });
-        return;
-      }
-
-      if (!child.textContent?.trim()) {
-        if (lineNumber > 0) {
-          needsNewSegment = true;
-        }
-        return;
-      }
+      if (!child.textContent?.trim()) return;
 
       const range = document.createRange();
       range.selectNodeContents(child);
@@ -183,27 +154,23 @@ const LineNumberVirtualized = ({
         rects[0].top - editorRect.top + editorScrollTop + offsetTop;
       const paraHeight = rects.reduce((sum, rect) => sum + rect.height, 0);
 
-      if (needsNewSegment) {
-        lineNumber++;
-        needsNewSegment = false;
-        newLineNumbers.push({
-          number: lineNumber,
-          top: paraTop,
-          height: paraHeight,
-        });
-      } else {
-        const lastEntry = newLineNumbers[newLineNumbers.length - 1];
-        if (lastEntry) {
-          lastEntry.height = paraTop + paraHeight - lastEntry.top;
-        }
-      }
+      newLineNumbers.push({
+        number: lineNumber,
+        top: paraTop,
+        height: paraHeight,
+      });
+      lineNumber++;
     });
 
     if (lineNumbersRef.current) {
       lineNumbersRef.current.style.height = `${editorElement.scrollHeight}px`;
     }
 
+    const totalLines = lineNumber - 1;
+    const digitsRequired =
+      totalLines > 0 ? Math.floor(Math.log10(totalLines)) + 1 : 1;
     startTransition(() => {
+      setMaxLineWidth(Math.max(digitsRequired, 2));
       setLineNumbers(newLineNumbers);
     });
   }, [editorRef]);
@@ -354,9 +321,9 @@ const LineNumberVirtualized = ({
         ref={lineNumbersRef}
         className="line-numbers h-full text-right relative"
       >
-        {lineNumbers.map((lineNum, index) => (
+        {lineNumbers.map((lineNum) => (
           <span
-            key={`${documentId}-line-${index}`}
+            key={`${documentId}-line-${lineNum.number}`}
             onDoubleClick={() => handleDoubleClick(lineNum.number)}
             style={{
               top: `${lineNum.top + 1}px`,
