@@ -110,7 +110,7 @@ const AgentSelector: React.FC<AgentSelectorProps> = ({
                             <Plus className="size-4" />
                         </Button>
                     </DialogTrigger>
-                    <DialogContent className=" min-w-3xl max-md:min-w-screen" onInteractOutside={(e) => e.preventDefault()}>
+                    <DialogContent className=" min-w-5xl max-md:min-w-screen" onInteractOutside={(e) => e.preventDefault()}>
                         <DialogHeader>
                             <DialogTitle>Create New Assistant</DialogTitle>
                             <DialogDescription>

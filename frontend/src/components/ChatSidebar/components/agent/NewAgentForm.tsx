@@ -119,8 +119,8 @@ const NewAgentForm = () => {
 
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
-            <div className='flex max-md:flex-col h-full'>
-                <div className="space-y-4 flex-1 h-[70vh]  overflow-y-auto">
+            <div className='flex max-md:flex-col  gap-x-2 overflow-y-auto'>
+                <div className="space-y-4 flex-2">
                     <div className="space-y-2">
                         <Label htmlFor="name">Name *</Label>
                         <Input
@@ -216,8 +216,8 @@ const NewAgentForm = () => {
                             </Select>
                         </div>
                     </div>
-                    <ContextManager contexts={contexts} onChange={setContexts} />
                 </div>
+                <ContextManager contexts={contexts} onChange={setContexts} />
             </div >
             <div className="flex justify-end gap-2 pt-4">
                 <Button type="submit" className=' w-full bg-secondary-600 hover:bg-secondary-700 text-white' disabled={isSubmitting}>

@@ -16,7 +16,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { Brain, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAgentDetail, useUpdateAgent } from "@/api/queries/agents";
@@ -134,7 +133,7 @@ const EditAgentModal: React.FC<EditAgentModalProps> = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col"
+        className="min-w-5xl max-md:min-w-screen flex flex-col"
         onInteractOutside={(e) => e.preventDefault()}
       >
         <DialogHeader>
@@ -159,117 +158,110 @@ const EditAgentModal: React.FC<EditAgentModalProps> = ({
 
         {agent && (
           <form onSubmit={handleSubmit} className="space-y-4 overflow-y-auto py-2">
-            <div className="space-y-2">
-              <Label htmlFor="edit-name">Name *</Label>
-              <Input
-                id="edit-name"
-                value={formData.name}
-                onChange={(e) => handleInputChange("name", e.target.value)}
-                required
-              />
-            </div>
+            <div className="flex max-md:flex-col gap-x-2 overflow-y-auto">
+              <div className="space-y-4 flex-2">
 
-            <div className="space-y-2">
-              <Label htmlFor="edit-description">Description</Label>
-              <Textarea
-                id="edit-description"
-                value={formData.description}
-                onChange={(e) =>
-                  handleInputChange("description", e.target.value)
-                }
-                rows={2}
-              />
-            </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-name">Name *</Label>
+                  <Input
+                    id="edit-name"
+                    value={formData.name}
+                    onChange={(e) => handleInputChange("name", e.target.value)}
+                    required
+                  />
+                </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="edit-system-prompt">System Prompt</Label>
-              <Textarea
-                id="edit-system-prompt"
-                value={formData.system_prompt}
-                onChange={(e) =>
-                  handleInputChange("system_prompt", e.target.value)
-                }
-                rows={3}
-              />
-            </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-description">Description</Label>
+                  <Textarea
+                    id="edit-description"
+                    value={formData.description}
+                    onChange={(e) =>
+                      handleInputChange("description", e.target.value)
+                    }
+                    rows={2}
+                  />
+                </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="edit-user-prompt">User Prompt *</Label>
-              <PromptTextarea
-                id="edit-user-prompt"
-                placeholder="You are a helpful translation assistant..."
-                value={formData.user_prompt}
-                onChange={(val) => handleInputChange("user_prompt", val)}
-                linkedResources={linkedResources}
-                isLoadingResources={isLoadingResources}
-                rows={4}
-                required
-              />
-            </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-system-prompt">System Prompt</Label>
+                  <Textarea
+                    id="edit-system-prompt"
+                    value={formData.system_prompt}
+                    onChange={(e) =>
+                      handleInputChange("system_prompt", e.target.value)
+                    }
+                    rows={3}
+                  />
+                </div>
 
-            <div className="flex items-center gap-2">
-              <div className="space-y-2">
-                <Label className="text-sm font-medium flex items-center gap-2">
-                  Language
-                </Label>
-                <Select
-                  value={formData.language}
-                  onValueChange={(value: TargetLanguage) =>
-                    handleInputChange("language", value)
-                  }
-                >
-                  <SelectTrigger className="h-9 w-fit">
-                    <SelectValue placeholder="Select language" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TARGET_LANGUAGES.map((lang) => (
-                      <SelectItem key={lang} value={lang}>
-                        {lang.charAt(0).toUpperCase() + lang.slice(1)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-user-prompt">User Prompt *</Label>
+                  <PromptTextarea
+                    id="edit-user-prompt"
+                    placeholder="You are a helpful translation assistant..."
+                    value={formData.user_prompt}
+                    onChange={(val) => handleInputChange("user_prompt", val)}
+                    linkedResources={linkedResources}
+                    isLoadingResources={isLoadingResources}
+                    rows={4}
+                    required
+                  />
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium flex items-center gap-2">
+                      Language
+                    </Label>
+                    <Select
+                      value={formData.language}
+                      onValueChange={(value: TargetLanguage) =>
+                        handleInputChange("language", value)
+                      }
+                    >
+                      <SelectTrigger className="h-9 w-fit">
+                        <SelectValue placeholder="Select language" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {TARGET_LANGUAGES.map((lang) => (
+                          <SelectItem key={lang} value={lang}>
+                            {lang.charAt(0).toUpperCase() + lang.slice(1)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2 w-full">
+                    <Label className="text-sm font-medium flex items-center gap-2">
+                      Model
+                    </Label>
+                    <Select
+                      value={formData.model_name}
+                      onValueChange={(value: ModelName) =>
+                        handleInputChange("model_name", value)
+                      }
+                    >
+                      <SelectTrigger className="h-9 w-fit" disabled={updateMutation.isPending}>
+                        <SelectValue placeholder="Select model" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {models.map((model) => (
+                          <SelectItem key={model.value} value={model.value}>
+                            {model.is_thinking && <Brain className="size-4" />}
+                            {model.name}
+                            <span className="text-xs text-gray-500">{model.provider}</span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
               </div>
-              <div className="space-y-2 w-full">
-                <Label className="text-sm font-medium flex items-center gap-2">
-                  Model
-                </Label>
-                <Select
-                  value={formData.model_name}
-                  onValueChange={(value: ModelName) =>
-                    handleInputChange("model_name", value)
-                  }
-                >
-                  <SelectTrigger className="h-9 w-fit" disabled={updateMutation.isPending}>
-                    <SelectValue placeholder="Select model" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {models.map((model) => (
-                      <SelectItem key={model.value} value={model.value}>
-                        {model.is_thinking && <Brain className="size-4" />}
-                        {model.name}
-                        <span className="text-xs text-gray-500">{model.provider}</span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+              <ContextManager contexts={contexts} onChange={setContexts} />
 
-            <div className="flex items-center gap-2">
-              <Switch
-                id="edit-system-assistance"
-                checked={formData.system_assistance}
-                onCheckedChange={(checked) =>
-                  handleInputChange("system_assistance", checked)
-                }
-              />
-              <Label htmlFor="edit-system-assistance" className="cursor-pointer">
-                System Assistance
-              </Label>
             </div>
-
-            <ContextManager contexts={contexts} onChange={setContexts} />
 
             <div className="flex justify-end gap-2 pt-4">
               <Button
