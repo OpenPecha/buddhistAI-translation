@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useParams } from "react-router-dom";
 import { useAgents } from "@/api/queries/agents";
 import {
     Select,
@@ -19,6 +20,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Bot, Plus, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useCurrentDoc } from "@/hooks/useCurrentDoc";
+import { useFetchLinkedResources } from "@/api/queries/openpecha_api";
 import NewAgentForm from "./NewAgentForm";
 
 interface AgentSelectorProps {
@@ -33,6 +36,11 @@ const AgentSelector: React.FC<AgentSelectorProps> = ({
     const [selectedAgent, setSelectedAgent] = useState<string | undefined>(value);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const { agents, isLoading, error } = useAgents();
+
+    const { id: documentId } = useParams<{ id: string }>();
+    const { currentDoc } = useCurrentDoc(documentId);
+    const textId = (currentDoc?.metadata?.textId ?? currentDoc?.metadata?.text_id) as string | undefined;
+    useFetchLinkedResources(textId);
 
     const handleValueChange = (newValue: string) => {
         setSelectedAgent(newValue);

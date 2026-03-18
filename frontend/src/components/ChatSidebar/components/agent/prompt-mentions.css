@@ -93,14 +93,3 @@
     background-color: var(--accent);
     color: var(--accent-foreground);
 }
-
-.prompt-mentions__suggestions__item:has(.prompt-mention-placeholder) {
-    pointer-events: none;
-    cursor: default;
-    background-color: transparent;
-}
-
-.prompt-mentions__suggestions__item--focused:has(.prompt-mention-placeholder) {
-    background-color: transparent;
-    color: inherit;
-}

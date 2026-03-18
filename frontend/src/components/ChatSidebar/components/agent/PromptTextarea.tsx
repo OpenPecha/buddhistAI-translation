@@ -7,9 +7,6 @@ import './prompt-mentions.css';
 const MentionsInputComponent = MentionsInput as any;
 const MentionComponent = Mention as any;
 
-const PLACEHOLDER_LOADING = '__loading__';
-const PLACEHOLDER_EMPTY = '__empty__';
-
 interface PromptTextareaProps {
     value: string;
     onChange: (value: string) => void;
@@ -38,9 +35,6 @@ interface SuggestionData {
     language: string;
 }
 
-const isPlaceholder = (id: string) =>
-    id === PLACEHOLDER_LOADING || id === PLACEHOLDER_EMPTY;
-
 const PromptTextarea: React.FC<PromptTextareaProps> = ({
     value,
     onChange,
@@ -68,40 +62,29 @@ const PromptTextarea: React.FC<PromptTextareaProps> = ({
         [linkedResources]
     );
 
-    const displayData: SuggestionData[] = useMemo(() => {
-        if (isLoadingResources) {
-            return [{
-                id: PLACEHOLDER_LOADING,
-                display: 'Loading linked resources…',
-                relationship: '',
-                language: '',
-            }];
-        }
-        if (mentionData.length === 0) {
-            return [{
-                id: PLACEHOLDER_EMPTY,
-                display: 'No linked resources available',
-                relationship: '',
-                language: '',
-            }];
-        }
-        return mentionData;
-    }, [isLoadingResources, mentionData]);
+    const hintContent = isLoadingResources ? (
+        <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+            <Loader2 className="size-3 animate-spin" />
+            Loading linked resources…
+        </p>
+    ) : linkedResources.length === 0 ? (
+        <p className="text-xs text-muted-foreground">
+            No linked resources available
+        </p>
+    ) : (
+        <p className="text-xs text-muted-foreground">
+            Type{' '}
+            <code className="bg-muted px-1 rounded text-xs">{'{{'}</code>{' '}
+            to insert a linked resource variable
+        </p>
+    );
 
     return (
         <div className="space-y-1">
             <MentionsInputComponent
                 id={id}
                 value={value}
-                onChange={(_: any, newValue: string) => {
-                    if (
-                        newValue.includes(`{{${PLACEHOLDER_LOADING}}}`) ||
-                        newValue.includes(`{{${PLACEHOLDER_EMPTY}}}`)
-                    ) {
-                        return;
-                    }
-                    onChange(newValue);
-                }}
+                onChange={(_: any, newValue: string) => onChange(newValue)}
                 placeholder={placeholder}
                 className="prompt-mentions"
                 allowSuggestionsAboveCursor
@@ -109,9 +92,8 @@ const PromptTextarea: React.FC<PromptTextareaProps> = ({
                 <MentionComponent
                     trigger="{{"
                     markup="{{__id__}}"
-                    data={displayData}
+                    data={mentionData}
                     displayTransform={(mentionId: string) => {
-                        if (isPlaceholder(mentionId)) return '';
                         const resource = resourceMap.get(mentionId);
                         const title = resource
                             ? getResourceTitle(resource)
@@ -126,56 +108,30 @@ const PromptTextarea: React.FC<PromptTextareaProps> = ({
                         _highlightedDisplay: React.ReactNode,
                         _index: number,
                         focused: boolean
-                    ) => {
-                        if (suggestion.id === PLACEHOLDER_LOADING) {
-                            return (
-                                <div className="prompt-mention-placeholder flex items-center gap-2 py-1 px-1">
-                                    <Loader2 className="size-3.5 shrink-0 animate-spin text-muted-foreground" />
-                                    <span className="text-sm text-muted-foreground">
-                                        {suggestion.display}
-                                    </span>
-                                </div>
-                            );
-                        }
-                        if (suggestion.id === PLACEHOLDER_EMPTY) {
-                            return (
-                                <div className="prompt-mention-placeholder flex items-center gap-2 py-1 px-1">
-                                    <FileText className="size-3.5 shrink-0 text-muted-foreground" />
-                                    <span className="text-sm text-muted-foreground">
-                                        {suggestion.display}
-                                    </span>
-                                </div>
-                            );
-                        }
-                        return (
-                            <div className="flex items-start gap-2">
-                                {RELATIONSHIP_ICONS[suggestion.relationship] ?? (
-                                    <FileText className="size-3.5 mt-0.5 shrink-0" />
-                                )}
-                                <div className="min-w-0 flex-1">
-                                    <p
-                                        className={`font-medium leading-snug line-clamp-1 text-sm ${focused ? 'text-accent-foreground' : ''
-                                            }`}
-                                    >
-                                        {suggestion.display}
-                                    </p>
-                                    <p className="text-xs text-muted-foreground">
-                                        {suggestion.id}
-                                    </p>
-                                </div>
-                                <span className="text-xs text-muted-foreground mt-0.5 shrink-0">
-                                    {suggestion.relationship}
-                                </span>
+                    ) => (
+                        <div className="flex items-start gap-2">
+                            {RELATIONSHIP_ICONS[suggestion.relationship] ?? (
+                                <FileText className="size-3.5 mt-0.5 shrink-0" />
+                            )}
+                            <div className="min-w-0 flex-1">
+                                <p
+                                    className={`font-medium leading-snug line-clamp-1 text-sm ${focused ? 'text-accent-foreground' : ''
+                                        }`}
+                                >
+                                    {suggestion.display}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                    {suggestion.id}
+                                </p>
                             </div>
-                        );
-                    }}
+                            <span className="text-xs text-muted-foreground mt-0.5 shrink-0">
+                                {suggestion.relationship}
+                            </span>
+                        </div>
+                    )}
                 />
             </MentionsInputComponent>
-            <p className="text-xs text-muted-foreground">
-                Type{' '}
-                <code className="bg-muted px-1 rounded text-xs">{'{{'}</code>{' '}
-                to insert a linked resource variable
-            </p>
+            {hintContent}
         </div>
     );
 };
