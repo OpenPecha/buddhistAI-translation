@@ -3,7 +3,6 @@ import {
   useState,
   useEffect,
   useCallback,
-  memo,
   startTransition,
   RefObject,
 } from "react";
@@ -45,7 +44,6 @@ const LineNumberVirtualized = ({
   );
   const [currentBookmarkIndex, setCurrentBookmarkIndex] = useState<number>(-1);
   const [, setShowBookmarkPopup] = useState(false);
-  const [maxLineWidth, setMaxLineWidth] = useState(3); // Default minimum width
 
   const handleDoubleClick = (lineNumber: number) => {
     if (bookmarks.includes(lineNumber)) {
@@ -170,7 +168,6 @@ const LineNumberVirtualized = ({
     const digitsRequired =
       totalLines > 0 ? Math.floor(Math.log10(totalLines)) + 1 : 1;
     startTransition(() => {
-      setMaxLineWidth(Math.max(digitsRequired, 2));
       setLineNumbers(newLineNumbers);
     });
   }, [editorRef]);
