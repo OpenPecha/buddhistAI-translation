@@ -10,6 +10,7 @@ import {
 } from ".";
 import { useEditor } from "@/hooks/useEditor";
 import { useTranslationSettings } from "@/hooks/useTranslationSettings";
+import { findTextSegment } from "../components/agent/utils";
 
 interface UseTranslationControllerProps {
   documentId: string;
@@ -222,10 +223,24 @@ export const useTranslationController = ({
       return;
     }
 
+    let segment: { start: number; end: number } | undefined;
+
+    if (selectedText.trim() !== "") {
+      const editorId = activeSelectedEditor ?? activeEditor;
+      const activeQuill = editorId ? getQuill(editorId) : null;
+      const fullText = activeQuill?.getText()?.trimEnd();
+      if (!fullText) {
+        setError("fail to fetch full text");
+        return;
+      }
+      const segmentResult = findTextSegment(fullText, selectedText);
+      segment = segmentResult ?? undefined;
+    }
+
     resetCopyFeedback();
     resetGlossaryInternal();
     resetStandardization();
-    await startTranslationInternal(currentText);
+    await startTranslationInternal(currentText, segment);
   };
 
   const copyGlossaryTerms = () => {

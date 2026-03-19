@@ -80,7 +80,10 @@ export const useTranslationOperations = ({
     return segmentMappings;
   };
 
-  const startTranslation = async (text: string) => {
+  const startTranslation = async (
+    text: string,
+    segment?: { start: number; end: number }
+  ) => {
     const selectedText = text;
     if (!selectedText.trim()) {
       setError("Please enter text to translate");
@@ -126,12 +129,12 @@ export const useTranslationOperations = ({
 
       setCurrentStatus("Processing with AI agent...");
       setProgressPercent(10);
-
       const response = await performAITranslation({
         assistant_id: selectedAgentId,
-        target_language: config.targetLanguage,
         prompt: textLines,
+        target_language: config.targetLanguage,
         model: config.modelName ?? "claude-3-5-haiku-20241022",
+        segment,
       });
 
       if (response.errors && response.errors.length > 0) {

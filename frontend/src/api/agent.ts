@@ -38,9 +38,13 @@ export interface AgentDetail {
 }
 export interface AITranslationRequest {
   assistant_id: string;
-  target_language: string;
   prompt: string[];
+  target_language: string;
   model: string;
+  segment?: {
+    start: number;
+    end: number;
+  };
 }
 
 export interface AITranslationResult {
