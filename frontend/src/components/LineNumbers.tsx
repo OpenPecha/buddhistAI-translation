@@ -164,9 +164,6 @@ const LineNumberVirtualized = ({
       lineNumbersRef.current.style.height = `${editorElement.scrollHeight}px`;
     }
 
-    const totalLines = lineNumber - 1;
-    const digitsRequired =
-      totalLines > 0 ? Math.floor(Math.log10(totalLines)) + 1 : 1;
     startTransition(() => {
       setLineNumbers(newLineNumbers);
     });
