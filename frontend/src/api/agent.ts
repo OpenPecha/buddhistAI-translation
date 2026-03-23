@@ -29,15 +29,22 @@ export interface AgentDetail {
   source_type: string;
   description: string;
   system_prompt: string;
+  user_prompt: string;
+  language: string;
+  model: string;
   contexts: AgentContext[];
   created_by: string;
   system_assistance: boolean;
 }
 export interface AITranslationRequest {
   assistant_id: string;
-  target_language: string;
   prompt: string[];
+  target_language: string;
   model: string;
+  segments?: {
+    start: number;
+    end: number;
+  };
 }
 
 export interface AITranslationResult {
@@ -93,15 +100,18 @@ export const getAgentDetail = async (agentId: string): Promise<AgentDetail> => {
 
 export interface UpdateAgentRequest {
   name: string;
-  source_type: string;
   description: string;
   system_prompt: string;
+  user_prompt: string;
+  language: string;
+  model: string;
   contexts: {
     content: string | null;
     pecha_title: string | null;
     pecha_text_id: string | null;
   }[];
   system_assistance: boolean;
+  variables?: Record<string, string>[];
 }
 
 export const deleteAgent = async (agentId: string): Promise<void> => {

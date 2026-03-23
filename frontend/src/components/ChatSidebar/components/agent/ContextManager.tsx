@@ -318,7 +318,7 @@ const ContextManager: React.FC<ContextManagerProps> = ({ contexts, onChange }) =
     };
 
     return (
-        <div className="space-y-2">
+        <div className="space-y-2 flex-1">
             <Label>Contexts</Label>
             <p className="text-xs text-muted-foreground">
                 Add context for your assistant (optional)
@@ -335,7 +335,7 @@ const ContextManager: React.FC<ContextManagerProps> = ({ contexts, onChange }) =
                 </SelectContent>
             </Select>
 
-            <div className="space-y-3 mt-3">
+            <div className="space-y-3 mt-3  max-h-[40vh] overflow-y-auto">
                 {contexts.map((context) => (
                     <div
                         key={context.id}

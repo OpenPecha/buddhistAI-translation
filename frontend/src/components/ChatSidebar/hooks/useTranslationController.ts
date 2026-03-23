@@ -10,6 +10,7 @@ import {
 } from ".";
 import { useEditor } from "@/hooks/useEditor";
 import { useTranslationSettings } from "@/hooks/useTranslationSettings";
+import { useSelectionStore } from "@/stores/selectionStore";
 
 interface UseTranslationControllerProps {
   documentId: string;
@@ -50,6 +51,8 @@ export const useTranslationController = ({
     clearUISelection,
     getTranslatedTextForLine,
   } = useEditor();
+
+  const selections = useSelectionStore((state) => state.selections);
 
   // Translation results hook
   const {
@@ -222,10 +225,23 @@ export const useTranslationController = ({
       return;
     }
 
+    let segment: { start: number; end: number } | undefined;
+
+    if (selectedText.trim() !== "") {
+      const editorId = activeSelectedEditor ?? activeEditor;
+      const storedSelection = editorId ? selections[editorId] : null;
+      if (storedSelection?.range) {
+        segment = {
+          start: storedSelection.range.index,
+          end: storedSelection.range.index + storedSelection.range.length - 1,
+        };
+      }
+    }
+
     resetCopyFeedback();
     resetGlossaryInternal();
     resetStandardization();
-    await startTranslationInternal(currentText);
+    await startTranslationInternal(currentText, segment);
   };
 
   const copyGlossaryTerms = () => {
