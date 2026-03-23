@@ -10,7 +10,7 @@ import {
 } from ".";
 import { useEditor } from "@/hooks/useEditor";
 import { useTranslationSettings } from "@/hooks/useTranslationSettings";
-import { findTextSegment } from "../components/agent/utils";
+import { useSelectionStore } from "@/stores/selectionStore";
 
 interface UseTranslationControllerProps {
   documentId: string;
@@ -51,6 +51,8 @@ export const useTranslationController = ({
     clearUISelection,
     getTranslatedTextForLine,
   } = useEditor();
+
+  const selections = useSelectionStore((state) => state.selections);
 
   // Translation results hook
   const {
@@ -227,14 +229,13 @@ export const useTranslationController = ({
 
     if (selectedText.trim() !== "") {
       const editorId = activeSelectedEditor ?? activeEditor;
-      const activeQuill = editorId ? getQuill(editorId) : null;
-      const fullText = activeQuill?.getText()?.trimEnd();
-      if (!fullText) {
-        setError("fail to fetch full text");
-        return;
+      const storedSelection = editorId ? selections[editorId] : null;
+      if (storedSelection?.range) {
+        segment = {
+          start: storedSelection.range.index,
+          end: storedSelection.range.index + storedSelection.range.length - 1,
+        };
       }
-      const segmentResult = findTextSegment(fullText, selectedText);
-      segment = segmentResult ?? undefined;
     }
 
     resetCopyFeedback();

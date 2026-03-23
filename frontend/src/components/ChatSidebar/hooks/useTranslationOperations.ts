@@ -134,7 +134,7 @@ export const useTranslationOperations = ({
         prompt: textLines,
         target_language: config.targetLanguage,
         model: config.modelName ?? "claude-3-5-haiku-20241022",
-        segment,
+        segments:segment,
       });
 
       if (response.errors && response.errors.length > 0) {

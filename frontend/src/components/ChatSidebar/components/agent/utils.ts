@@ -20,20 +20,3 @@ export function extractPromptVariables(
   return variables;
 }
 
-export interface SegmentIndices {
-  start: number;
-  end: number;
-}
-
-export function findTextSegment(fullText: string, selectedText: string): SegmentIndices | null {
-  const startIndex = fullText.indexOf(selectedText);
-  if (startIndex === -1) {
-    return null; 
-  }
-  const endIndex = startIndex + selectedText.length-1;
-
-  return {
-    start: startIndex,
-    end: endIndex,
-  };
-}

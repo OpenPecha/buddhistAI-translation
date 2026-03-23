@@ -41,7 +41,7 @@ export interface AITranslationRequest {
   prompt: string[];
   target_language: string;
   model: string;
-  segment?: {
+  segments?: {
     start: number;
     end: number;
   };
