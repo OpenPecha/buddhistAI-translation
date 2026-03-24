@@ -79,10 +79,6 @@ function DocumentsWrapperContent() {
   if (!id) return null;
 
   const renderContent = () => {
-    if (isEditable === undefined) {
-      return <Loader show />;
-    }
-
     const isSplitView = !!selectedTranslationId;
 
     return (
@@ -227,43 +223,5 @@ function TranslationEditor({
     </div>
   );
 }
-
-
-export function Loader({ show }: { show: boolean }) {
-  if (!show) return null;
-
-  return (
-    <div className="absolute inset-0 z-50 flex bg-background/80 backdrop-blur-sm">
-      <div className="flex-1 p-6 space-y-4">
-        <Skeleton className="h-10 w-3/4 mb-8" />
-
-        <Skeleton className="h-6 w-full" />
-        <Skeleton className="h-6 w-5/6" />
-        <Skeleton className="h-6 w-4/6" />
-        <Skeleton className="h-6 w-5/6" />
-        <Skeleton className="h-6 w-3/6" />
-
-        <Skeleton className="h-64 w-full mt-6" />
-        <Skeleton className="h-24 w-full mt-4" />
-      </div>
-
-      <div className="w-20 h-full border-l border-border p-4 space-y-4">
-        <Skeleton className="h-8 w-3/4" />
-
-        <Skeleton className="h-4 w-5/6 mt-6" />
-        <Skeleton className="h-4 w-4/6 mt-2" />
-        <Skeleton className="h-4 w-5/6 mt-2" />
-        <Skeleton className="h-4 w-3/6 mt-2" />
-
-        <div className="mt-8 space-y-3">
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
 
 export default DocumentsWrapper;

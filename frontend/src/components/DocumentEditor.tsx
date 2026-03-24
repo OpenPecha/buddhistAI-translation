@@ -93,20 +93,17 @@ export const RealtimeDocumentEditor = ({
         <AnnotationProvider>
           <FootNoteProvider>
             <ClientSideSuspense fallback={<div>Loading…</div>}>
-              {!isContentReady ? (
-                <LoadingScreen />
-              ) : (
-                <Editor
-                  isTranslationEditor={isTranslationEditor}
-                  documentId={docId}
-                  isEditable={isEditable}
-                  currentDoc={currentDoc}
-                  yText={yText}
-                  provider={yProvider}
-                  onManualSelect={onManualSelect}
-                  onLineFocus={onLineFocus}
-                />
-              )}
+              <Editor
+                isTranslationEditor={isTranslationEditor}
+                documentId={docId}
+                isEditable={isEditable}
+                currentDoc={currentDoc}
+                yText={yText}
+                provider={yProvider}
+                onManualSelect={onManualSelect}
+                onLineFocus={onLineFocus}
+                isContentReady={isContentReady}
+              />
             </ClientSideSuspense>
           </FootNoteProvider>
         </AnnotationProvider>
@@ -204,15 +201,5 @@ const DocumentEditor = ({
     />
   );
 };
-
-function LoadingScreen() {
-  return (
-    <div className="flex items-center justify-center h-full w-full">
-      <div className="flex flex-col items-center gap-4">
-        <p>Loading document...</p>
-      </div>
-    </div>
-  );
-}
 
 export default DocumentEditor;

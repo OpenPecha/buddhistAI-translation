@@ -56,6 +56,7 @@ const Editor = ({
   provider,
   onManualSelect,
   onLineFocus,
+  isContentReady = true,
 }: {
   isTranslationEditor: boolean;
   documentId?: string;
@@ -65,6 +66,7 @@ const Editor = ({
   provider: any | undefined;
   onManualSelect: (editorId: EditorId, selection: Selection) => void;
   onLineFocus: (lineNumber: number, editorId: EditorId) => void;
+  isContentReady?: boolean;
 }) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const toolbarId =
@@ -612,10 +614,9 @@ const Editor = ({
               }}
             />
 
-            {/* Skeleton Overlay */}
-            {transitionPhase === "skeleton" && (
-              <div className="absolute inset-0 bg-white z-10 p-4 overflow-y-auto">
-                <SkeletonLoader className="version-skeleton-loader" />
+            {!isContentReady && (
+              <div className="absolute inset-0 bg-white z-10 flex items-center justify-center">
+                <p className="text-gray-500">Loading document...</p>
               </div>
             )}
           </div>
