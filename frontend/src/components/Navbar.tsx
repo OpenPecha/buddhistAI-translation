@@ -118,7 +118,6 @@ export function NavMenuList({
       <Button
         onClick={permissionsOpen}
         variant="outline"
-        className="rounded-none"
         aria-label="Share document"
       >
         <Share2 />

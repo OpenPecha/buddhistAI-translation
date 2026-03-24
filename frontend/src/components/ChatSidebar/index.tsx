@@ -1,5 +1,5 @@
 import { EllipsisVertical, Eye, MessageSquare, Pencil, Plus, Trash2, X } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation as useTranslationI18next } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,7 +28,8 @@ import { useChatFlow } from "./hooks/useChatFlow";
 import AgentSelector from "./components/agent/AgentSelector";
 import AgentDetailModal from "./components/agent/AgentDetailModal";
 import EditAgentModal from "./components/agent/EditAgentModal";
-import { useDeleteAgent } from "@/api/queries/agents";
+import { useDeleteAgent, useAgentDetail } from "@/api/queries/agents";
+import type { TargetLanguage, ModelName } from "@/api/translate";
 
 interface ChatSidebarProps {
   documentId: string;
@@ -43,6 +44,7 @@ const ChatSidebarContent: React.FC<{
   const [isAgentDetailModalOpen, setIsAgentDetailModalOpen] = useState(false);
   const [isEditAgentModalOpen, setIsEditAgentModalOpen] = useState(false);
   const deleteMutation = useDeleteAgent();
+  const { agent: selectedAgentDetail } = useAgentDetail(selectedAgentId);
 
   const { messages, clearHistory, messageCount, handleAction } = useChatFlow();
   const {
@@ -61,6 +63,17 @@ const ChatSidebarContent: React.FC<{
     inconsistentTerms,
     inputMode,
   } = useTranslation();
+  useEffect(() => {
+    if (selectedAgentDetail) {
+      if (selectedAgentDetail.language) {
+        handleConfigChange("targetLanguage", selectedAgentDetail.language as TargetLanguage);
+      }
+      if (selectedAgentDetail.model) {
+        handleConfigChange("modelName", selectedAgentDetail.model as ModelName);
+      }
+    }
+  }, [selectedAgentDetail]);
+
   const hasTranslationResults = translationResults.length > 0;
   const hasGlossaryResults = glossaryTerms.length > 0;
   const hasInconsistentTerms = Object.keys(inconsistentTerms).length > 0;

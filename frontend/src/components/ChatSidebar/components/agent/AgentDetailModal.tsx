@@ -6,7 +6,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useAgentDetail } from "@/api/queries/agents";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Shield, BookOpen } from "lucide-react";
 
@@ -21,7 +20,7 @@ const AgentDetailModal: React.FC<AgentDetailModalProps> = ({
   open,
   onOpenChange,
 }) => {
-  const { agent, isLoading, error } = useAgentDetail(agentId);
+  const { agent, error } = useAgentDetail(agentId);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -31,14 +30,6 @@ const AgentDetailModal: React.FC<AgentDetailModalProps> = ({
             Assistant Details
           </DialogTitle>
         </DialogHeader>
-
-        {isLoading && (
-          <div className="space-y-4 py-4">
-            <Skeleton className="h-8 w-3/4" />
-            <Skeleton className="h-20 w-full" />
-            <Skeleton className="h-32 w-full" />
-          </div>
-        )}
 
         {error && (
           <div className="py-4 text-destructive">
@@ -50,7 +41,7 @@ const AgentDetailModal: React.FC<AgentDetailModalProps> = ({
           <div className="space-y-4 overflow-y-auto py-2">
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <h3 className="text-xl font-semibold">{agent.name}</h3>
+                <p className="text-lg font-semibold">{agent.name}</p>
                 {agent.system_assistance && (
                   <Badge variant="outline" className="text-xs">
                     <Shield className="size-3 mr-1" />

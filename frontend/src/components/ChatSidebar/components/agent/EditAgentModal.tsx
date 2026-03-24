@@ -184,7 +184,7 @@ const EditAgentModal: React.FC<EditAgentModalProps> = ({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="edit-system-prompt">System Prompt</Label>
+                  <Label htmlFor="edit-system-prompt">System Prompt *</Label>
                   <Textarea
                     id="edit-system-prompt"
                     value={formData.system_prompt}
