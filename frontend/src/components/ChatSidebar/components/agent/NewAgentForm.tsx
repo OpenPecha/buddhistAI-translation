@@ -12,7 +12,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Brain, Loader2 } from 'lucide-react';
+import { Brain, Loader2, WandSparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { agentsKeys } from '@/api/queries/agents';
 import { getIdToken } from '@/lib/auth';
@@ -143,7 +143,12 @@ const NewAgentForm = () => {
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="system_prompt">System Prompt</Label>
+                        <div className='flex items-center justify-between gap-2 w-full'>
+                            <Label htmlFor="system_prompt">System Prompt</Label>
+                            <Button variant="outline" size="icon">
+                                <WandSparkles className=' text-gray-500 dark:text-gray-300' />
+                            </Button>
+                        </div>
                         <Textarea
                             id="system_prompt"
                             placeholder="Define the assistant's behavior and role..."
