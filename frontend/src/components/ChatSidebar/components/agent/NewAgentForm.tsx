@@ -128,7 +128,8 @@ const NewAgentForm = () => {
         },
     });
 
-    const handleGenerateSystemPrompt = () => {
+    const handleGenerateSystemPrompt = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
         enhanceMutation.mutate(formData.system_prompt);
     };
 
