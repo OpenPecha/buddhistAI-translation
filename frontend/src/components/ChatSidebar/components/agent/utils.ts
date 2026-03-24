@@ -13,8 +13,7 @@ export function extractPromptVariables(
       (r) => r.instance_id === instanceId
     );
     if (resource) {
-      const textId = resource.metadata.text_id;
-      variables.push({ textId, instanceId });
+      variables.push({ instanceId });
     }
   }
   return variables;

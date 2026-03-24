@@ -30,6 +30,7 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (!isAuthenticated || !user?.sub) return;
     setAuthTokenGetter(getAccessTokenSilently);
     setIdTokenGetter(async () => {
+      await getAccessTokenSilently();
       const claims = await getIdTokenClaims();
       if (claims?.__raw) {
         sessionStorage.setItem("id_token", claims.__raw);

@@ -66,7 +66,6 @@ const NewAgentForm = () => {
 
         try {
             const variables = extractPromptVariables(formData.user_prompt, linkedResources);
-
             const formDataToSend = new FormData();
             formDataToSend.append('name', formData.name);
             formDataToSend.append('system_prompt', formData.system_prompt);

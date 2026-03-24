@@ -80,14 +80,14 @@ const AgentSelector: React.FC<AgentSelectorProps> = ({
                             )}
                         </SelectValue>
                     </SelectTrigger>
-                    <SelectContent className="max-h-[90vh] overflow-y-auto max-w-[20vw]">
+                    <SelectContent className="max-h-[90vh] overflow-y-auto w-xs ">
                         {agents.map((agent) => (
                             <SelectItem key={agent.id} value={agent.id}>
                                 <div className="flex items-center gap-2">
                                     <div className="flex flex-col">
                                         <span className="font-medium">{agent.name}</span>
                                         {agent.description && (
-                                            <span className="text-xs text-muted-foreground line-clamp-1">
+                                            <span className="text-xs text-muted-foreground">
                                                 {agent.description}
                                             </span>
                                         )}
