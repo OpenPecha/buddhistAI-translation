@@ -186,4 +186,30 @@ export const performAITranslation = async (
   return data;
 };
 
+export interface EnhancePromptResponse {
+  enhanced_prompt: string;
+}
+
+export const enhanceSystemPrompt = async (
+  prompt: string
+): Promise<EnhancePromptResponse> => {
+  const token = await getIdToken();
+
+  const response = await fetch('/agent/ai/enhance', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ prompt }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.detail?.message || error.detail || 'Failed to enhance prompt');
+  }
+
+  return response.json();
+};
+
 export default getAgents;
