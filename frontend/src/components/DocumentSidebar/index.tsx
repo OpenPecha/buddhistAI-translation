@@ -1,5 +1,4 @@
 import {
-  Info,
   MessageCircle,
   BookOpen,
   FileText,
@@ -15,10 +14,10 @@ import { ScrollArea } from "../ui/scroll-area";
 import { useCommentStore } from "@/stores/commentStore";
 import { useSelectionStore } from "@/stores/selectionStore";
 import ChatSidebar from "../ChatSidebar";
-import MetadataContent from "./MetadataContent";
 import UploadContent from "./UploadContent";
 import SidebarTabs from "./SidebarTabs";
 import SidebarHeader from "./SidebarHeader";
+import { useCurrentDoc } from "@/hooks/useCurrentDoc";
 
 interface DocumentSidebarProps {
   documentId: string;
@@ -32,6 +31,8 @@ const DocumentSidebar: React.FC<DocumentSidebarProps> = ({
   const { tabs: editorTabs, setTabs, toggleTab } = useEditorSidebarStore();
   const activeTab = editorTabs[documentId];
   const { t } = useTranslation();
+  const { currentDoc } = useCurrentDoc(documentId);
+  const isFromPecha = !!(currentDoc?.metadata?.textId ?? currentDoc?.metadata?.text_id);
   const { getSidebarView, setSidebarView, setActiveThreadId } =
     useCommentStore();
   const setLineFocus = useSelectionStore((state) => state.setLineFocus);
@@ -45,27 +46,21 @@ const DocumentSidebar: React.FC<DocumentSidebarProps> = ({
       shortLabel: "Contents",
     },
     {
-      id: "metadata",
-      icon: Info,
-      label: t(`meta.documentInfo`),
-      shortLabel: "Info",
-    },
-    {
       id: "comments",
       icon: MessageCircle,
       label: t(`common.comments`),
       shortLabel: "Comments",
     },
-    ...(isTranslationEditor
-      ? []
-      : [
+    ...(!isTranslationEditor && isFromPecha
+      ? [
         {
           id: "resources",
           icon: FileText,
           label: t(`common.resources`),
           shortLabel: "Resources",
         },
-      ]),
+      ]
+      : []),
     ...(isTranslationEditor
       ? [
         {
@@ -123,10 +118,6 @@ const DocumentSidebar: React.FC<DocumentSidebarProps> = ({
           <div className="flex-1 overflow-hidden">
             {activeTab === "toc" && (
               <TableOfContent documentId={documentId} />
-            )}
-
-            {activeTab === "metadata" && (
-              <MetadataContent documentId={documentId} />
             )}
 
             {activeTab === "comments" && (
