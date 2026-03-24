@@ -207,7 +207,7 @@ const Toolbar = ({
           <button className="ql-undo" title="Undo" />
           <button className="ql-redo" title="Redo" />
         </span>
-        <span className="ql-formats" style={isEnabledStyle}>
+        <span className="ql-formats z-10" style={isEnabledStyle}>
           <select className="ql-font" title="Font" defaultValue="sans-serif">
             <option value="sans-serif">Sans-serif</option>
             <option value="serif">Serif</option>
