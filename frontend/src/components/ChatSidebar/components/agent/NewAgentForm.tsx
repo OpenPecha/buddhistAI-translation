@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,9 +12,10 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Brain, Loader2 } from 'lucide-react';
+import { Brain, Loader2, WandSparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { agentsKeys } from '@/api/queries/agents';
+import { enhanceSystemPrompt } from '@/api/agent';
 import { getIdToken } from '@/lib/auth';
 import { ModelName, TARGET_LANGUAGES, type TargetLanguage } from '@/api/translate';
 import ContextManager, {
@@ -116,40 +117,66 @@ const NewAgentForm = () => {
         }
     };
 
+    const enhanceMutation = useMutation({
+        mutationFn: (prompt: string) => enhanceSystemPrompt(prompt),
+        onSuccess: (data) => {
+            setFormData(prev => ({ ...prev, system_prompt: data.enhanced_prompt }));
+            toast.success('System prompt enhanced!');
+        },
+        onError: (error: Error) => {
+            toast.error(`Failed to enhance prompt: ${error.message}`);
+        },
+    });
+
+    const handleGenerateSystemPrompt = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+        enhanceMutation.mutate(formData.system_prompt);
+    };
+
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
             <div className='flex max-md:flex-col  gap-x-2 overflow-y-auto'>
                 <div className="space-y-4 flex-2">
-                    <div className="space-y-2">
-                        <Label htmlFor="name">Name *</Label>
-                        <Input
-                            id="name"
-                            placeholder="My Translation Assistant"
-                            value={formData.name}
-                            className='w-fit'
-                            onChange={(e) => handleInputChange('name', e.target.value)}
-                            required
-                        />
+                    <div className='flex gap-2'>
+                        <div className="space-y-2">
+                            <Label htmlFor="name">Name *</Label>
+                            <Input
+                                id="name"
+                                placeholder="My Translation Assistant"
+                                value={formData.name}
+                                className='w-fit'
+                                onChange={(e) => handleInputChange('name', e.target.value)}
+                                required
+                            />
+                        </div>
+                        <div className="space-y-2 w-full">
+                            <Label htmlFor="description">Description</Label>
+                            <Input
+                                id="description"
+                                placeholder="What does this assistant do?"
+                                value={formData.description}
+                                className='w-full'
+                                onChange={(e) => handleInputChange('description', e.target.value)}
+                            />
+                        </div>
                     </div>
-
                     <div className="space-y-2">
-                        <Label htmlFor="description">Description</Label>
-                        <Input
-                            id="description"
-                            placeholder="What does this assistant do?"
-                            value={formData.description}
-                            onChange={(e) => handleInputChange('description', e.target.value)}
-                        />
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="system_prompt">System Prompt</Label>
+                        <div className='flex items-center justify-between gap-2 w-full'>
+                            <Label htmlFor="system_prompt">System Prompt</Label>
+                            <Button onClick={handleGenerateSystemPrompt} variant="outline" size="icon" disabled={formData.system_prompt.trim() === '' || enhanceMutation.isPending}>
+                                {enhanceMutation.isPending ? (
+                                    <Loader2 className="size-4 animate-spin" />
+                                ) : (
+                                    <WandSparkles className='text-gray-500 dark:text-gray-300' />
+                                )}
+                            </Button>
+                        </div>
                         <Textarea
                             id="system_prompt"
                             placeholder="Define the assistant's behavior and role..."
                             value={formData.system_prompt}
                             onChange={(e) => handleInputChange('system_prompt', e.target.value)}
-                            rows={3}
+                            rows={7}
                         />
                     </div>
 
