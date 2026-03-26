@@ -67,8 +67,14 @@ const getAgents = async (
   skip: number = 0,
   limit: number = 10
 ): Promise<AgentsResponse> => {
+  const token = await getIdToken();
   const response = await fetch(
-    `/agent/assistant?skip=${skip}&limit=${limit}`
+    `/agent/assistant?skip=${skip}&limit=${limit}`,
+    {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    }
   );
 
   if (!response.ok) {
