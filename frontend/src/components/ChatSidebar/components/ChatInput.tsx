@@ -1,4 +1,4 @@
-import { Brain, Send } from "lucide-react";
+import { Brain, Send, X } from "lucide-react";
 import {
   type KeyboardEvent,
   useCallback,
@@ -49,6 +49,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
     handleConfigChange,
     selectedAgentId,
     selectedText,
+    clearSelection,
   } = useTranslation();
 
   const {
@@ -79,13 +80,19 @@ const ChatInput: React.FC<ChatInputProps> = ({
 
     const text = input.trim();
 
-    if (text) {
+    if (selectedText?.trim()) {
+      const combined = text
+        ? `${selectedText}\n\n${text}`
+        : selectedText;
+      setInputMode("manual");
+      setManualText(combined);
+      setShouldStartTranslation(true);
+      setInput("");
+    } else if (text) {
       setInputMode("manual");
       setManualText(text);
       setShouldStartTranslation(true);
-    } else if (selectedText?.trim()) {
-      setInputMode("selection");
-      startTranslation();
+      setInput("");
     }
   }, [input, disabled, isTranslating, selectedAgentId, selectedText, setInputMode, setManualText, startTranslation]);
 
@@ -118,15 +125,31 @@ const ChatInput: React.FC<ChatInputProps> = ({
   return (
     <div className="p-2">
       <div className="flex gap-2 items-center flex-col">
-        <Textarea
-          value={input}
-          onFocus={handleFocus}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyPress}
-          placeholder={defaultPlaceholder}
-          disabled={disabled || isProcessing || isTranslating || !!selectedText?.trim()}
-          className="resize-none"
-        />
+        <div className="w-full rounded-md border border-input bg-background focus-within:ring-1 focus-within:ring-ring">
+          {selectedText && (
+            <div className="flex items-center gap-1 px-2 pt-2 flex-wrap">
+              <span className="inline-flex items-center gap-1 max-w-[90%] bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200 text-xs rounded-md px-2 py-1">
+                <span className="truncate max-w-[200px]">{selectedText}</span>
+                <button
+                  type="button"
+                  onClick={clearSelection}
+                  className="hover:text-red-500 flex-shrink-0 cursor-pointer"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </span>
+            </div>
+          )}
+          <Textarea
+            value={input}
+            onFocus={handleFocus}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyPress}
+            placeholder={selectedText ? "Add instructions (optional)..." : defaultPlaceholder}
+            disabled={disabled || isProcessing || isTranslating}
+            className="resize-none border-0 focus-visible:ring-0 shadow-none"
+          />
+        </div>
         <div className="flex justify-between w-full">
           <Select
             value={config.modelName}

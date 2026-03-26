@@ -1,6 +1,5 @@
-import { EllipsisVertical, Eye, MessageSquare, Pencil, Plus, Trash2, X } from "lucide-react";
+import { EllipsisVertical, Eye, MessageSquare, Pencil, Plus, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { useTranslation as useTranslationI18next } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -9,12 +8,6 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import TargetLanguageSelector from "./components/sidebar/TranslationLanguageSelector";
 import {
@@ -39,7 +32,6 @@ const ChatSidebarContent: React.FC<{
   selectedAgentId: string | undefined;
   setSelectedAgentId: (id: string | undefined) => void;
 }> = ({ selectedAgentId, setSelectedAgentId }) => {
-  const { t } = useTranslationI18next();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isAgentDetailModalOpen, setIsAgentDetailModalOpen] = useState(false);
   const [isEditAgentModalOpen, setIsEditAgentModalOpen] = useState(false);
@@ -49,13 +41,10 @@ const ChatSidebarContent: React.FC<{
   const { messages, clearHistory, messageCount, handleAction } = useChatFlow();
   const {
     config,
-    selectedText,
     handleConfigChange,
     isTranslating,
     isExtractingGlossary,
     isAnalyzingStandardization,
-    selectedTextLineNumbers,
-    clearSelection,
     resetTranslations,
     resetGlossary,
     translationResults,
@@ -85,22 +74,6 @@ const ChatSidebarContent: React.FC<{
     isExtractingGlossary ||
     isAnalyzingStandardization;
 
-  // Helper function to extract start and end line numbers from selectedTextLineNumbers
-  const getLineRange = (
-    lineNumbers: Record<string, { from: number; to: number }> | null
-  ): { startLine: number; endLine: number } | null => {
-    if (!lineNumbers) return null;
-
-    const lineNums = Object.keys(lineNumbers)
-      .map(Number)
-      .sort((a, b) => a - b);
-    if (lineNums.length === 0) return null;
-
-    return {
-      startLine: lineNums[0],
-      endLine: lineNums.at(-1)!,
-    };
-  };
 
   const handleDeleteAgent = useCallback(() => {
     if (!selectedAgentId) return;
@@ -147,12 +120,6 @@ const ChatSidebarContent: React.FC<{
     );
   }
 
-  const lineRange = getLineRange(selectedTextLineNumbers);
-  const selectedLines = lineRange
-    ? lineRange.startLine === lineRange.endLine
-      ? `(${lineRange.startLine})`
-      : `(${lineRange.startLine} - ${lineRange.endLine})`
-    : null;
   return (
     <div className="h-full w-full flex flex-col bg-white dark:bg-card">
       {/* Header */}
@@ -207,49 +174,6 @@ const ChatSidebarContent: React.FC<{
           </DropdownMenu>
         </div>
       </div>
-      {/* Selected Text Display */}
-      <TooltipProvider>
-        {selectedText && (
-          <div className="bg-blue-50 dark:bg-zinc-800 p-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 min-w-0 flex-1">
-                <div className="min-w-0 flex-1">
-                  <div className="text-xs text-blue-700 dark:text-blue-300 font-medium mb-1">
-                    {t("translation.selectedText")}{selectedLines ? ` ${selectedLines}` : ""}
-                  </div>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div className="text-sm text-blue-800 dark:text-blue-200 truncate">
-                        {selectedText}
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent
-                      side="left"
-                      className="max-w-xs max-h-48 overflow-y-auto bg-white dark:bg-card border border-gray-200 dark:border-gray-700"
-                    >
-                      <div className="whitespace-pre-wrap break-words text-xs">
-                        {selectedText}
-                      </div>
-                    </TooltipContent>
-                  </Tooltip>
-                </div>
-              </div>
-              <div className="flex items-center gap-1">
-                <Button
-                  onClick={clearSelection}
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 px-1 text-blue-600 dark:text-blue-400 hover:bg-red-100 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400"
-                  title="Clear selected text"
-                >
-                  <X className="w-3 h-3" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
-      </TooltipProvider>
-
       <div className="flex-1 flex flex-col min-h-0">
         {showPanel ? (
           <ResultsPanel inputMode={inputMode} />
