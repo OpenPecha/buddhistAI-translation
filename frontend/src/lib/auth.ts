@@ -1,6 +1,5 @@
 // Centralized auth token management
 let getAccessTokenSilently: (() => Promise<string>) | null = null;
-let idTokenGetter: (() => Promise<string | null>) | null = null;
 
 /**
  * Sets the auth token getter function that all API modules will use
@@ -8,10 +7,6 @@ let idTokenGetter: (() => Promise<string | null>) | null = null;
  */
 export const setAuthTokenGetter = (tokenGetter: () => Promise<string>) => {
   getAccessTokenSilently = tokenGetter;
-};
-
-export const setIdTokenGetter = (getter: () => Promise<string | null>) => {
-  idTokenGetter = getter;
 };
 
 /**
@@ -58,15 +53,4 @@ export const getAccessToken = async (): Promise<string | null> => {
     }
   }
   return null;
-};
-
-export const getIdToken = async (): Promise<string | null> => {
-  if (idTokenGetter) {
-    try {
-      return await idTokenGetter();
-    } catch (error) {
-      console.error("Error getting ID token:", error);
-    }
-  }
-  return sessionStorage.getItem("id_token");
 };

@@ -1,4 +1,4 @@
-import { getIdToken } from "@/lib/auth";
+import { getAccessToken } from "@/lib/auth";
 
 export interface Agent {
   id: string;
@@ -62,17 +62,28 @@ export interface AITranslationResponse {
   errors: string[];
 }
 
+const getAuthHeader = async (): Promise<Record<string, string>> => {
+  const token = await getAccessToken();
+  if (!token) {
+    throw new Error("Authentication token unavailable. Please log in again.");
+  }
+
+  return {
+    Authorization: `Bearer ${token}`,
+  };
+};
+
 
 const getAgents = async (
   skip: number = 0,
   limit: number = 10
 ): Promise<AgentsResponse> => {
-  const token = await getIdToken();
+  const authHeader = await getAuthHeader();
   const response = await fetch(
     `/agent/assistant?skip=${skip}&limit=${limit}`,
     {
       headers: {
-        'Authorization': `Bearer ${token}`,
+        ...authHeader,
       },
     }
   );
@@ -86,11 +97,11 @@ const getAgents = async (
 };
 
 export const getAgentDetail = async (agentId: string): Promise<AgentDetail> => {
-  const token = await getIdToken();
+  const authHeader = await getAuthHeader();
   
   const response = await fetch(`/agent/assistant/${agentId}`, {
     headers: {
-      'Authorization': `Bearer ${token}`,
+      ...authHeader,
       'Content-Type': 'application/json',
     },
   });
@@ -121,12 +132,12 @@ export interface UpdateAgentRequest {
 }
 
 export const deleteAgent = async (agentId: string): Promise<void> => {
-  const token = await getIdToken();
+  const authHeader = await getAuthHeader();
 
   const response = await fetch(`/agent/assistant/${agentId}`, {
     method: 'DELETE',
     headers: {
-      'Authorization': `Bearer ${token}`,
+      ...authHeader,
     },
   });
 
@@ -139,12 +150,12 @@ export const updateAgent = async (
   agentId: string,
   data: UpdateAgentRequest
 ): Promise<AgentDetail> => {
-  const token = await getIdToken();
+  const authHeader = await getAuthHeader();
 
   const response = await fetch(`/agent/assistant/${agentId}`, {
     method: 'PUT',
     headers: {
-      'Authorization': `Bearer ${token}`,
+      ...authHeader,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(data),
@@ -160,12 +171,12 @@ export const updateAgent = async (
 export const performAITranslation = async (
   params: AITranslationRequest
 ): Promise<AITranslationResponse> => {
-  const token = await getIdToken();
+  const authHeader = await getAuthHeader();
 
   const response = await fetch('/agent/ai', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${token}`,
+      ...authHeader,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(params),
@@ -199,12 +210,12 @@ export interface EnhancePromptResponse {
 export const enhanceSystemPrompt = async (
   prompt: string
 ): Promise<EnhancePromptResponse> => {
-  const token = await getIdToken();
+  const authHeader = await getAuthHeader();
 
   const response = await fetch('/agent/ai/enhance', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${token}`,
+      ...authHeader,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ prompt }),
