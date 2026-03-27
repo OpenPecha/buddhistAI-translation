@@ -27,6 +27,7 @@ export const useTranslationController = ({
   // Manual input state with character limit
   const CHARACTER_LIMIT = 5000; // Set character limit for manual input
   const [manualText, setManualText] = useState<string>("");
+  const [instruction, setInstruction] = useState<string>("");
   const [inputMode, setInputMode] = useState<"selection" | "manual">(
     "selection"
   );
@@ -238,10 +239,13 @@ export const useTranslationController = ({
       }
     }
 
+    const currentInstruction = instruction.trim() || undefined;
+
     resetCopyFeedback();
     resetGlossaryInternal();
     resetStandardization();
-    await startTranslationInternal(currentText, segment);
+    await startTranslationInternal(currentText, segment, currentInstruction);
+    setInstruction("");
   };
 
   const copyGlossaryTerms = () => {
@@ -326,6 +330,8 @@ export const useTranslationController = ({
     getCurrentLineNumbers,
     setManualText: handleManualTextChange,
     setInputMode,
+    instruction,
+    setInstruction,
     clearSelection,
     clearUISelection,
     getTranslatedTextForLine,

@@ -5,7 +5,7 @@ import React, {
   type ReactNode,
 } from "react";
 import { Auth0Provider, useAuth0 } from "@auth0/auth0-react";
-import { setAuthTokenGetter, setIdTokenGetter } from "../lib/auth";
+import { setAuthTokenGetter } from "../lib/auth";
 import { AuthContext } from "./auth-context";
 import type { User } from "./types";
 import { createUser } from "@/api/user";
@@ -20,7 +20,6 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isLoading,
     user,
     getAccessTokenSilently,
-    getIdTokenClaims,
     loginWithRedirect,
     logout: auth0Logout,
     error,
@@ -29,15 +28,6 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     if (!isAuthenticated || !user?.sub) return;
     setAuthTokenGetter(getAccessTokenSilently);
-    setIdTokenGetter(async () => {
-      await getAccessTokenSilently();
-      const claims = await getIdTokenClaims();
-      if (claims?.__raw) {
-        sessionStorage.setItem("id_token", claims.__raw);
-        return claims.__raw;
-      }
-      return null;
-    });
     const userData = {
       id: user?.sub,
       email: user?.email || "",
@@ -45,19 +35,7 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({ children }) => {
       picture: user?.picture || "",
     };
     createUser(userData as User);
-
-    const storeIdToken = async () => {
-      try {
-        const idTokenClaims = await getIdTokenClaims();
-        if (idTokenClaims?.__raw) {
-          sessionStorage.setItem("id_token", idTokenClaims.__raw);
-        }
-      } catch (err) {
-        console.error("Error storing ID token:", err);
-      }
-    };
-    storeIdToken();
-  }, [isAuthenticated, user, getAccessTokenSilently, getIdTokenClaims]);
+  }, [isAuthenticated, user, getAccessTokenSilently]);
 
   const getToken = useCallback(async (): Promise<string | null> => {
     try {
@@ -84,7 +62,6 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const logout = useCallback(() => {
     localStorage.removeItem("auth_token");
     localStorage.removeItem("access_token");
-    sessionStorage.removeItem("id_token");
     auth0Logout({
       logoutParams: {
         returnTo: `${import.meta.env.VITE_WORKSPACE_URL}/logout`,

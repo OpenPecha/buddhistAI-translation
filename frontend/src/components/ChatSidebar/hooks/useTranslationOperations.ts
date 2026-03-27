@@ -82,7 +82,8 @@ export const useTranslationOperations = ({
 
   const startTranslation = async (
     text: string,
-    segment?: { start: number; end: number }
+    segment?: { start: number; end: number },
+    instruction?: string
   ) => {
     const selectedText = text;
     if (!selectedText.trim()) {
@@ -134,7 +135,8 @@ export const useTranslationOperations = ({
         prompt: textLines,
         target_language: config.targetLanguage,
         model: config.modelName ?? "claude-3-5-haiku-20241022",
-        segments:segment,
+        segments: segment,
+        instruction,
       });
 
       if (response.errors && response.errors.length > 0) {

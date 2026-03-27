@@ -16,7 +16,7 @@ import { Brain, Loader2, WandSparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { agentsKeys } from '@/api/queries/agents';
 import { enhanceSystemPrompt } from '@/api/agent';
-import { getIdToken } from '@/lib/auth';
+import { getAccessToken } from '@/lib/auth';
 import { ModelName, TARGET_LANGUAGES, type TargetLanguage } from '@/api/translate';
 import ContextManager, {
     type ContextItem,
@@ -84,7 +84,10 @@ const NewAgentForm = () => {
                 formDataToSend.append('files', file);
             });
 
-            const accessToken = await getIdToken();
+            const accessToken = await getAccessToken();
+            if (!accessToken) {
+                throw new Error('Authentication token unavailable. Please log in again.');
+            }
             const response = await fetch('/agent/assistant', {
                 method: 'POST',
                 headers: {
