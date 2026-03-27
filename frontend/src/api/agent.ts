@@ -45,6 +45,7 @@ export interface AITranslationRequest {
     start: number;
     end: number;
   };
+  instruction?: string;
 }
 
 export interface AITranslationResult {

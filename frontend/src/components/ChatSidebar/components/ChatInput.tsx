@@ -44,6 +44,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
     selectedAgentId,
     selectedText,
     clearSelection,
+    setInstruction,
   } = useTranslation();
 
   const {
@@ -72,16 +73,16 @@ const ChatInput: React.FC<ChatInputProps> = ({
   const handleSend = useCallback(() => {
     if (disabled || isTranslating || !selectedAgentId || !selectedText?.trim()) return;
 
-    const instructions = input.trim();
-    const combined = instructions
-      ? `${selectedText}\n\n${instructions}`
-      : selectedText;
+    const instructionText = input.trim();
+    if (instructionText) {
+      setInstruction(instructionText);
+    }
 
     setInputMode("manual");
-    setManualText(combined);
+    setManualText(selectedText);
     setShouldStartTranslation(true);
     setInput("");
-  }, [input, disabled, isTranslating, selectedAgentId, selectedText, setInputMode, setManualText, startTranslation]);
+  }, [input, disabled, isTranslating, selectedAgentId, selectedText, setInputMode, setManualText, setInstruction, startTranslation]);
 
   const handleKeyPress = useCallback(
     (e: KeyboardEvent<HTMLTextAreaElement>) => {
