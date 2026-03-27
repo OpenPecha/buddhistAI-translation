@@ -23,20 +23,15 @@ import { Textarea } from "@/components/ui/textarea";
 interface ChatInputProps {
   isProcessing?: boolean;
   disabled?: boolean;
-  placeholder?: string;
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({
   isProcessing = false,
   disabled = false,
-  placeholder,
 }) => {
   const { t } = useTranslationI18next();
   const [input, setInput] = useState("");
   const [shouldStartTranslation, setShouldStartTranslation] = useState(false);
-
-  const defaultPlaceholder =
-    placeholder || t("translation.typePasteTextPlaceholder");
   const {
     isTranslating,
     setManualText,
@@ -44,7 +39,6 @@ const ChatInput: React.FC<ChatInputProps> = ({
     startTranslation,
     manualText,
     inputMode,
-    clearUISelection,
     config,
     handleConfigChange,
     selectedAgentId,
@@ -76,24 +70,17 @@ const ChatInput: React.FC<ChatInputProps> = ({
     startTranslation,
   ]);
   const handleSend = useCallback(() => {
-    if (disabled || isTranslating || !selectedAgentId) return;
+    if (disabled || isTranslating || !selectedAgentId || !selectedText?.trim()) return;
 
-    const text = input.trim();
+    const instructions = input.trim();
+    const combined = instructions
+      ? `${selectedText}\n\n${instructions}`
+      : selectedText;
 
-    if (selectedText?.trim()) {
-      const combined = text
-        ? `${selectedText}\n\n${text}`
-        : selectedText;
-      setInputMode("manual");
-      setManualText(combined);
-      setShouldStartTranslation(true);
-      setInput("");
-    } else if (text) {
-      setInputMode("manual");
-      setManualText(text);
-      setShouldStartTranslation(true);
-      setInput("");
-    }
+    setInputMode("manual");
+    setManualText(combined);
+    setShouldStartTranslation(true);
+    setInput("");
   }, [input, disabled, isTranslating, selectedAgentId, selectedText, setInputMode, setManualText, startTranslation]);
 
   const handleKeyPress = useCallback(
@@ -118,10 +105,6 @@ const ChatInput: React.FC<ChatInputProps> = ({
     },
     []
   );
-  const handleFocus = () => {
-    clearUISelection();
-  };
-
   return (
     <div className="p-2">
       <div className="flex gap-2 items-center flex-col">
@@ -142,11 +125,10 @@ const ChatInput: React.FC<ChatInputProps> = ({
           )}
           <Textarea
             value={input}
-            onFocus={handleFocus}
             onChange={handleInputChange}
             onKeyDown={handleKeyPress}
-            placeholder={selectedText ? "Add instructions (optional)..." : defaultPlaceholder}
-            disabled={disabled || isProcessing || isTranslating}
+            placeholder={selectedText ? "Add instructions (optional)..." : t("translation.selectTextPlaceholder", "Select text to translate...")}
+            disabled={disabled || isProcessing || isTranslating || !selectedText}
             className="resize-none border-0 focus-visible:ring-0 shadow-none"
           />
         </div>
@@ -181,7 +163,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
             onClick={handleSend}
             variant="outline"
             disabled={
-              disabled || (!input.trim() && !selectedText?.trim()) || isProcessing || isTranslating || !selectedAgentId
+              disabled || !selectedText?.trim() || isProcessing || isTranslating || !selectedAgentId
             }
             size="icon"
             title="Translate text (Enter)"
