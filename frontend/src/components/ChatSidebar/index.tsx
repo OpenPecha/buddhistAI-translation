@@ -50,7 +50,6 @@ const ChatSidebarContent: React.FC<{
     translationResults,
     glossaryTerms,
     inconsistentTerms,
-    inputMode,
   } = useTranslation();
   useEffect(() => {
     if (selectedAgentDetail) {
@@ -176,7 +175,7 @@ const ChatSidebarContent: React.FC<{
       </div>
       <div className="flex-1 flex flex-col min-h-0">
         {showPanel ? (
-          <ResultsPanel inputMode={inputMode} />
+          <ResultsPanel />
         ) : (
 
           <ChatHistory
