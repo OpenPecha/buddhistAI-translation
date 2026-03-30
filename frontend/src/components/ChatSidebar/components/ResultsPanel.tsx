@@ -24,14 +24,12 @@ import { useTranslation as useTranslationI18next } from "react-i18next";
 
 interface ResultsPanelProps {
   className?: string;
-  inputMode: "selection" | "manual";
 }
 
 type PanelType = "translation" | "glossary" | "inconsistency" | "standardized";
 
 const ResultsPanel: React.FC<ResultsPanelProps> = ({
   className = "",
-  inputMode,
 }) => {
   const { t } = useTranslationI18next();
   const [expandedPanel, setExpandedPanel] = useState<PanelType | null>(null);
@@ -151,9 +149,7 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({
             </Button>
 
             <div className="flex items-center gap-2">
-              {hasTranslationResults &&
-                !isTranslating &&
-                inputMode === "selection" && (
+              {hasTranslationResults && !isTranslating && (
                   <Tooltip delayDuration={5}>
                     <TooltipTrigger>
                       <Button

@@ -24,13 +24,7 @@ export const useTranslationController = ({
   const [analysisSourceItems, setAnalysisSourceItems] = useState<
     GlossaryItem[]
   >([]);
-  // Manual input state with character limit
-  const CHARACTER_LIMIT = 5000; // Set character limit for manual input
-  const [manualText, setManualText] = useState<string>("");
   const [instruction, setInstruction] = useState<string>("");
-  const [inputMode, setInputMode] = useState<"selection" | "manual">(
-    "selection"
-  );
 
   // Get translation settings
   const { config, updateConfig, isSidebarCollapsed, setIsSidebarCollapsed } =
@@ -87,20 +81,9 @@ export const useTranslationController = ({
     scrollToLineNumber,
   });
 
-  // Handle manual text input with character limit
-  const handleManualTextChange = useCallback(
-    (text: string) => {
-      if (text.length <= CHARACTER_LIMIT) {
-        setManualText(text);
-      }
-    },
-    [CHARACTER_LIMIT]
-  );
-
-  // Get current line numbers (only for selection mode)
   const getCurrentLineNumbers = useCallback(() => {
-    return inputMode === "selection" ? selectedTextLineNumbers : null;
-  }, [inputMode, selectedTextLineNumbers]);
+    return selectedTextLineNumbers;
+  }, [selectedTextLineNumbers]);
   // Translation operations hook
   const {
     isTranslating,
@@ -118,10 +101,7 @@ export const useTranslationController = ({
     selectedTextLineNumbers: getCurrentLineNumbers(),
     selectedAgentId,
     onStreamComplete: (finalResults) => {
-      // Clear UI selection but keep line numbers for replace functionality
-      if (inputMode === "selection") {
-        clearUISelection();
-      }
+      clearUISelection();
 
       const items = finalResults.map((r) => ({
         original_text: r.originalText,
@@ -212,14 +192,8 @@ export const useTranslationController = ({
   ) => {
     updateConfig(key, value);
   };
-  function getTextToTranslate() {
-    if (selectedText.trim() !== "") {
-      return selectedText;
-    }
-    return manualText.trim();
-  }
-  const startTranslation = async () => {
-    const currentText = getTextToTranslate();
+  const startTranslation = async (directInstruction?: string) => {
+    const currentText = selectedText.trim();
 
     if (!currentText) {
       setError("Please select text or enter text to translate");
@@ -228,18 +202,16 @@ export const useTranslationController = ({
 
     let segment: { start: number; end: number } | undefined;
 
-    if (selectedText.trim() !== "") {
-      const editorId = activeSelectedEditor ?? activeEditor;
-      const storedSelection = editorId ? selections[editorId] : null;
-      if (storedSelection?.range) {
-        segment = {
-          start: storedSelection.range.index,
-          end: storedSelection.range.index + storedSelection.range.length - 1,
-        };
-      }
+    const editorId = activeSelectedEditor ?? activeEditor;
+    const storedSelection = editorId ? selections[editorId] : null;
+    if (storedSelection?.range) {
+      segment = {
+        start: storedSelection.range.index,
+        end: storedSelection.range.index + storedSelection.range.length - 1,
+      };
     }
 
-    const currentInstruction = instruction.trim() || undefined;
+    const currentInstruction = directInstruction?.trim() || instruction.trim() || undefined;
 
     resetCopyFeedback();
     resetGlossaryInternal();
@@ -319,17 +291,12 @@ export const useTranslationController = ({
     setIsSidebarCollapsed,
     selectedAgentId,
 
-    // Text input (selection + manual)
+    // Text input (selection)
     selectedText,
     setSelectedText,
     activeSelectedEditor,
     selectedTextLineNumbers,
-    manualText,
-    inputMode,
-    CHARACTER_LIMIT,
     getCurrentLineNumbers,
-    setManualText: handleManualTextChange,
-    setInputMode,
     instruction,
     setInstruction,
     clearSelection,

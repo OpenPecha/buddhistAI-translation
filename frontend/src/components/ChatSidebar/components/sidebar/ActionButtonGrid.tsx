@@ -13,14 +13,12 @@ import { useTranslation } from "../../contexts/TranslationContext";
 
 interface ActionButtonGridProps {
   hasInputText: boolean;
-  inputMode?: "selection" | "manual";
   onTranslate: () => void;
   onGlossaryExtract: () => void;
 }
 
 const ActionButtonGrid: React.FC<ActionButtonGridProps> = ({
   hasInputText,
-  inputMode = "selection",
   onTranslate,
   onGlossaryExtract,
 }) => {
@@ -71,11 +69,6 @@ const ActionButtonGrid: React.FC<ActionButtonGridProps> = ({
             <Languages className="w-5 h-5" />
             <span className="text-xs font-medium">
               {t("translation.translate")}
-              {inputMode === "manual" && (
-                <span className="block text-[10px] opacity-75">
-                  Manual Input
-                </span>
-              )}
             </span>
           </>
         )}

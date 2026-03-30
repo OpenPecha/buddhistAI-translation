@@ -2,7 +2,6 @@ import { Brain, Send, X } from "lucide-react";
 import {
   type KeyboardEvent,
   useCallback,
-  useEffect,
   useState,
 } from "react";
 import { useTranslation as useTranslationI18next } from "react-i18next";
@@ -31,20 +30,14 @@ const ChatInput: React.FC<ChatInputProps> = ({
 }) => {
   const { t } = useTranslationI18next();
   const [input, setInput] = useState("");
-  const [shouldStartTranslation, setShouldStartTranslation] = useState(false);
   const {
     isTranslating,
-    setManualText,
-    setInputMode,
     startTranslation,
-    manualText,
-    inputMode,
     config,
     handleConfigChange,
     selectedAgentId,
     selectedText,
     clearSelection,
-    setInstruction,
   } = useTranslation();
 
   const {
@@ -52,37 +45,13 @@ const ChatInput: React.FC<ChatInputProps> = ({
     isLoading: isLoadingModels,
   } = useModels();
 
-  // Effect to start translation when manual text is set from ChatInput
-  useEffect(() => {
-    if (
-      shouldStartTranslation &&
-      inputMode === "manual" &&
-      manualText.trim() &&
-      !isTranslating
-    ) {
-      setShouldStartTranslation(false);
-      startTranslation();
-    }
-  }, [
-    shouldStartTranslation,
-    inputMode,
-    manualText,
-    isTranslating,
-    startTranslation,
-  ]);
   const handleSend = useCallback(() => {
     if (disabled || isTranslating || !selectedAgentId || !selectedText?.trim()) return;
 
     const instructionText = input.trim();
-    if (instructionText) {
-      setInstruction(instructionText);
-    }
-
-    setInputMode("manual");
-    setManualText(selectedText);
-    setShouldStartTranslation(true);
+    startTranslation(instructionText || undefined);
     setInput("");
-  }, [input, disabled, isTranslating, selectedAgentId, selectedText, setInputMode, setManualText, setInstruction, startTranslation]);
+  }, [input, disabled, isTranslating, selectedAgentId, selectedText, startTranslation]);
 
   const handleKeyPress = useCallback(
     (e: KeyboardEvent<HTMLTextAreaElement>) => {
