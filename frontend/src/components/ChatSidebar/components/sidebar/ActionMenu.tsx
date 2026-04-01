@@ -2,29 +2,18 @@ import { useTranslation } from "react-i18next";
 import {
   Check,
   Copy,
-  MoreHorizontal,
-  RotateCcw,
-  Edit3,
-  Eye,
-  EyeOff,
   Replace,
 } from "lucide-react";
 import type React from "react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { TooltipWrapper } from "@/components/TooltipWrapper";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+
+import type { FuzzyMatch } from "@/api/agent";
 
 interface TranslationResult {
   id: string;
@@ -39,6 +28,8 @@ interface TranslationResult {
   previousTranslatedText?: string;
   isUpdated?: boolean;
   lineNumbers?: Record<string, { from: number; to: number }> | null;
+  fromMemory?: boolean;
+  fuzzyMatches?: FuzzyMatch[];
 }
 
 interface ActionMenuProps {
@@ -83,8 +74,8 @@ const ActionMenu: React.FC<ActionMenuProps> = ({
               variant="ghost"
               size="sm"
               className={`h-7 w-7 p-0 transition-colors ${isCopied
-                  ? "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-400"
-                  : "hover:bg-gray-100 dark:hover:bg-card"
+                ? "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-400"
+                : "hover:bg-gray-100 dark:hover:bg-card"
                 }`}
               disabled={disabled}
             >
