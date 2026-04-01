@@ -263,18 +263,9 @@ const TranslationItem: React.FC<TranslationItemProps> = ({
                     : t("translation.translation")}
                 </span>
                 {result.fromMemory && (
-                  <TooltipProvider>
-                    <Tooltip delayDuration={5}>
-                      <TooltipTrigger asChild>
-                        <span className="inline-flex items-center gap-1 text-xs bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300 px-1.5 py-0.5 rounded-full">
-                          <BrainCircuit className="w-3 h-3" />
-                        </span>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        {t("translation.fromMemory", "From translation memory")}
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                  <span className="inline-flex items-center gap-1 text-xs bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300 p-2 rounded-sm">
+                    <BrainCircuit className="w-3 h-3" />Translation Memory
+                  </span>
                 )}
                 {editedTexts[result.id] &&
                   (() => {
@@ -367,11 +358,10 @@ const TranslationItem: React.FC<TranslationItemProps> = ({
                                 <button
                                   type="button"
                                   onClick={() => copyFuzzyMatch(match.target_text, matchId)}
-                                  className={`inline-flex items-center justify-center h-6 w-6 rounded transition-colors ${
-                                    isCopied
-                                      ? "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-400"
-                                      : "hover:bg-amber-200 dark:hover:bg-amber-800 text-amber-600 dark:text-amber-400"
-                                  }`}
+                                  className={`inline-flex items-center justify-center h-6 w-6 rounded transition-colors ${isCopied
+                                    ? "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-400"
+                                    : "hover:bg-amber-200 dark:hover:bg-amber-800 text-amber-600 dark:text-amber-400"
+                                    }`}
                                 >
                                   {isCopied ? (
                                     <Check className="w-3 h-3" />
