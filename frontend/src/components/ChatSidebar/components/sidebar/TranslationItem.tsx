@@ -379,7 +379,7 @@ const TranslationItem: React.FC<TranslationItemProps> = ({
                         <div className="text-neutral-600 dark:text-neutral-400 truncate">
                           {match.source_text}
                         </div>
-                        <div className="text-neutral-900 dark:text-neutral-100 font-monlam-2 mt-0.5">
+                        <div className="text-neutral-900 dark:text-neutral-100 font-monlam-2 mt-2">
                           {match.target_text}
                         </div>
                       </div>
