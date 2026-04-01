@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { performAITranslation } from "@/api/agent";
+import type { FuzzyMatch } from "@/api/agent";
 import { useTranslation } from "react-i18next";
 import type { TranslationConfig } from "@/hooks/useTranslationSettings";
 
@@ -16,6 +17,8 @@ export interface TranslationResult {
   previousTranslatedText?: string;
   isUpdated?: boolean;
   lineNumbers?: Record<string, { from: number; to: number }> | null;
+  fromMemory?: boolean;
+  fuzzyMatches?: FuzzyMatch[];
 }
 
 interface UseTranslationOperationsProps {
@@ -161,6 +164,8 @@ export const useTranslationOperations = ({
             processing_time: response.metadata.total_processing_time,
           },
           lineNumbers: segmentLineNumbers,
+          fromMemory: result.from_memory,
+          fuzzyMatches: result.fuzzy_matches,
         } as TranslationResult;
       });
 

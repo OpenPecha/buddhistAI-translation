@@ -48,8 +48,16 @@ export interface AITranslationRequest {
   instruction?: string;
 }
 
+export interface FuzzyMatch {
+  source_text: string;
+  target_text: string;
+  score: number;
+}
+
 export interface AITranslationResult {
   output_text: string;
+  from_memory: boolean;
+  fuzzy_matches: FuzzyMatch[];
 }
 
 export interface AITranslationResponse {
