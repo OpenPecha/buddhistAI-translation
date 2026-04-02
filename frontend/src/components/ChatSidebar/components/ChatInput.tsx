@@ -138,7 +138,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
             size="icon"
             title="Translate text (Enter)"
           >
-            <Send className="size-4 text-gray-600" />
+            <Send className="size-4 text-gray-600 dark:text-gray-400" />
           </Button>
         </div>
       </div>

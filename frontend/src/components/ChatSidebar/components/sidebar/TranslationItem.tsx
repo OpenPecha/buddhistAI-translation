@@ -262,11 +262,6 @@ const TranslationItem: React.FC<TranslationItemProps> = ({
                     ? t("translation.standardizedTranslation")
                     : t("translation.translation")}
                 </span>
-                {result.fromMemory && (
-                  <span className="inline-flex items-center gap-1 text-xs bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300 p-2 rounded-sm">
-                    <BrainCircuit className="w-3 h-3" />Translation Memory
-                  </span>
-                )}
                 {editedTexts[result.id] &&
                   (() => {
                     const changes = countChanges(
@@ -336,7 +331,8 @@ const TranslationItem: React.FC<TranslationItemProps> = ({
                 ) : (
                   <ChevronDown className="w-3 h-3" />
                 )}
-                {t("translation.fuzzyMatches", "Fuzzy Matches")} ({result.fuzzyMatches.length})
+                <BrainCircuit className="w-3 h-3" />Translation Memory
+                ({result.fuzzyMatches.length})
               </button>
               {fuzzyExpanded && (
                 <div className="mt-1.5 space-y-2">
@@ -391,7 +387,7 @@ const TranslationItem: React.FC<TranslationItemProps> = ({
           )}
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 
