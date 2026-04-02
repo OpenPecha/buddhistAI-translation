@@ -345,9 +345,16 @@ const TranslationItem: React.FC<TranslationItemProps> = ({
                         className="rounded-md bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 p-2 text-xs"
                       >
                         <div className="flex items-center justify-between mb-1">
-                          <span className="text-amber-600 dark:text-amber-400 font-medium">
-                            {Math.round(match.score * 100)}% {t("translation.match", "match")}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-amber-600 dark:text-amber-400 font-medium">
+                              {Math.round(match.score * 100)}% {t("translation.match", "match")}
+                            </span>
+                            {match.model_name && (
+                              <span className="text-amber-600 dark:text-amber-400 text-xs bg-amber-100 dark:bg-amber-900/50 px-1.5 py-0.5 rounded">
+                                {match.model_name}
+                              </span>
+                            )}
+                          </div>
                           <TooltipProvider>
                             <Tooltip delayDuration={5}>
                               <TooltipTrigger asChild>

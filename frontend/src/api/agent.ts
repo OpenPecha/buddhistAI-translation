@@ -52,6 +52,7 @@ export interface FuzzyMatch {
   source_text: string;
   target_text: string;
   score: number;
+  model_name?: string;
 }
 
 export interface AITranslationResult {
