@@ -321,7 +321,7 @@ const ContextManager: React.FC<ContextManagerProps> = ({ contexts, onChange }) =
         <div className="space-y-2 flex-1">
             <Label>Contexts</Label>
             <p className="text-xs text-muted-foreground">
-                Add context for your assistant (optional)
+                Add context for your Skill (optional)
             </p>
 
             <Select onValueChange={(value) => addContext(value as ContextItem['type'])}>

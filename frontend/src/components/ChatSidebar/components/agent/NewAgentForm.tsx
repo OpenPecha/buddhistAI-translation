@@ -101,7 +101,7 @@ const NewAgentForm = () => {
                 throw new Error(error.detail?.message || error.detail || 'Request failed');
             }
 
-            toast.success('Assistant created successfully!');
+            toast.success('Skill created successfully!');
             await queryClient.invalidateQueries({ queryKey: agentsKeys.lists() });
 
             setFormData({
@@ -124,10 +124,10 @@ const NewAgentForm = () => {
         mutationFn: (prompt: string) => enhanceSystemPrompt(prompt),
         onSuccess: (data) => {
             setFormData(prev => ({ ...prev, system_prompt: data.enhanced_prompt }));
-            toast.success('System prompt enhanced!');
+            toast.success('System Prompt enhanced!');
         },
         onError: (error: Error) => {
-            toast.error(`Failed to enhance prompt: ${error.message}`);
+            toast.error(`Failed to enhance System Prompt: ${error.message}`);
         },
     });
 
@@ -145,7 +145,7 @@ const NewAgentForm = () => {
                             <Label htmlFor="name">Name *</Label>
                             <Input
                                 id="name"
-                                placeholder="My Translation Assistant"
+                                placeholder="My Translation Skill"
                                 value={formData.name}
                                 className='w-fit'
                                 onChange={(e) => handleInputChange('name', e.target.value)}
@@ -156,7 +156,7 @@ const NewAgentForm = () => {
                             <Label htmlFor="description">Description</Label>
                             <Input
                                 id="description"
-                                placeholder="What does this assistant do?"
+                                placeholder="What does this skill do?"
                                 value={formData.description}
                                 className='w-full'
                                 onChange={(e) => handleInputChange('description', e.target.value)}
@@ -176,7 +176,7 @@ const NewAgentForm = () => {
                         </div>
                         <Textarea
                             id="system_prompt"
-                            placeholder="Define the assistant's behavior and role..."
+                            placeholder="Define the Skill's behavior and role..."
                             value={formData.system_prompt}
                             onChange={(e) => handleInputChange('system_prompt', e.target.value)}
                             rows={7}
@@ -187,7 +187,7 @@ const NewAgentForm = () => {
                         <Label htmlFor="user_prompt">User Prompt *</Label>
                         <PromptTextarea
                             id="user_prompt"
-                            placeholder="You are a helpful translation assistant..."
+                            placeholder="Select a commentary / translation from .."
                             value={formData.user_prompt}
                             onChange={(val) => handleInputChange('user_prompt', val)}
                             linkedResources={linkedResources}
@@ -256,7 +256,7 @@ const NewAgentForm = () => {
                             Creating...
                         </>
                     ) : (
-                        'Create Assistant'
+                        'Create Skill'
                     )}
                 </Button>
             </div>

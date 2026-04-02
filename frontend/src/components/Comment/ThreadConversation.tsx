@@ -276,9 +276,8 @@ const ThreadConversation = ({
               return (
                 <div
                   key={comment.id}
-                  className={`flex items-start gap-3 ${
-                    isCurrentUser ? "justify-end" : ""
-                  }`}
+                  className={`flex items-start gap-3 ${isCurrentUser ? "justify-end" : ""
+                    }`}
                 >
                   {!isCurrentUser && (
                     <Avatar className="w-5 h-5">
@@ -295,33 +294,30 @@ const ThreadConversation = ({
                     </Avatar>
                   )}
                   <div
-                    className={`flex flex-col max-w-[calc(100%-44px)] ${
-                      isCurrentUser ? "items-end" : "items-start"
-                    }`}
+                    className={`flex flex-col max-w-[calc(100%-44px)] ${isCurrentUser ? "items-end" : "items-start"
+                      }`}
                   >
                     <div
-                      className={`flex items-baseline space-x-2 ${
-                        isCurrentUser ? "flex-row-reverse space-x-reverse" : ""
-                      }`}
+                      className={`flex items-baseline space-x-2 ${isCurrentUser ? "flex-row-reverse space-x-reverse" : ""
+                        }`}
                     >
                       <p className="font-semibold text-[10px]">
                         {isCurrentUser
                           ? "You"
                           : isSystem
-                          ? "AI Assistant"
-                          : comment.user.username}
+                            ? "AI Skill"
+                            : comment.user.username}
                       </p>
                     </div>
                     <div
-                      className={`px-2 py-1 rounded-lg mt-1 ${
-                        isCurrentUser
-                          ? "bg-blue-500 text-white"
-                          : isSystem
+                      className={`px-2 py-1 rounded-lg mt-1 ${isCurrentUser
+                        ? "bg-blue-500 text-white"
+                        : isSystem
                           ? hasError
                             ? "bg-red-100"
                             : "bg-gray-100"
                           : "bg-gray-200"
-                      }`}
+                        }`}
                     >
                       <div
                         className={`text-sm ${hasError ? "text-red-700" : ""}`}

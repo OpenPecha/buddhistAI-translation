@@ -27,13 +27,13 @@ const AgentDetailModal: React.FC<AgentDetailModalProps> = ({
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            Assistant Details
+            Skill Details
           </DialogTitle>
         </DialogHeader>
 
         {error && (
           <div className="py-4 text-destructive">
-            Failed to load assistant details: {error}
+            Failed to load skill details: {error}
           </div>
         )}
 

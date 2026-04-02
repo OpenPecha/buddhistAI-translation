@@ -120,11 +120,11 @@ const EditAgentModal: React.FC<EditAgentModalProps> = ({
       },
       {
         onSuccess: () => {
-          toast.success("Assistant updated successfully!");
+          toast.success("Skill updated successfully!");
           onOpenChange(false);
         },
         onError: (err) => {
-          toast.error(`Failed to update assistant: ${err.message}`);
+          toast.error(`Failed to update skill: ${err.message}`);
         },
       }
     );
@@ -138,7 +138,7 @@ const EditAgentModal: React.FC<EditAgentModalProps> = ({
       >
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            Edit Assistant
+            Edit Skill
           </DialogTitle>
         </DialogHeader>
 
@@ -152,7 +152,7 @@ const EditAgentModal: React.FC<EditAgentModalProps> = ({
 
         {error && (
           <div className="py-4 text-destructive">
-            Failed to load assistant details: {error}
+            Failed to load skill details: {error}
           </div>
         )}
 
@@ -199,7 +199,7 @@ const EditAgentModal: React.FC<EditAgentModalProps> = ({
                   <Label htmlFor="edit-user-prompt">User Prompt *</Label>
                   <PromptTextarea
                     id="edit-user-prompt"
-                    placeholder="You are a helpful translation assistant..."
+                    placeholder="Select a commentary / translation from .."
                     value={formData.user_prompt}
                     onChange={(val) => handleInputChange("user_prompt", val)}
                     linkedResources={linkedResources}
@@ -279,7 +279,7 @@ const EditAgentModal: React.FC<EditAgentModalProps> = ({
                     Updating...
                   </>
                 ) : (
-                  "Update Assistant"
+                  "Update Skill"
                 )}
               </Button>
             </div>

@@ -76,15 +76,15 @@ const ChatSidebarContent: React.FC<{
 
   const handleDeleteAgent = useCallback(() => {
     if (!selectedAgentId) return;
-    if (!globalThis.confirm("Are you sure you want to delete this assistant? This action cannot be undone.")) return;
+    if (!globalThis.confirm("Are you sure you want to delete this skill? This action cannot be undone.")) return;
 
     deleteMutation.mutate(selectedAgentId, {
       onSuccess: () => {
-        toast.success("Assistant deleted successfully");
+        toast.success("Skill deleted successfully");
         setSelectedAgentId(undefined);
       },
       onError: (err) => {
-        toast.error(`Failed to delete assistant: ${err.message}`);
+        toast.error(`Failed to delete skill: ${err.message}`);
       },
     });
   }, [selectedAgentId, deleteMutation, setSelectedAgentId]);
@@ -110,7 +110,7 @@ const ChatSidebarContent: React.FC<{
             variant="ghost"
             size="icon"
             className="w-8 h-8 hover:bg-gray-100 dark:hover:bg-gray-700"
-            title="Open Chat Assistant"
+            title="Open Chat Skill"
           >
             <MessageSquare className="w-4 h-4" />
           </Button>
@@ -147,7 +147,7 @@ const ChatSidebarContent: React.FC<{
                 variant="outline"
                 size="icon"
                 disabled={!selectedAgentId}
-                title={!selectedAgentId ? "Select an assistant first" : "Assistant options"}
+                title={!selectedAgentId ? "Select a Skill first" : "Skill options"}
               >
                 <EllipsisVertical className="size-4" />
               </Button>

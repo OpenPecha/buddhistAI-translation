@@ -68,13 +68,13 @@ const AgentSelector: React.FC<AgentSelectorProps> = ({
             <div className="flex items-center gap-1">
                 <Select value={selectedAgent} onValueChange={handleValueChange}>
                     <SelectTrigger className="w-full ">
-                        <SelectValue placeholder="Choose an Assistant">
+                        <SelectValue placeholder="Choose a Skill">
                             {selectedAgent && (
                                 <div className="flex items-center gap-2 truncate">
                                     <Bot className="size-4" />
                                     <span className="truncate w-35">
                                         {agents.find((a) => a.id === selectedAgent)?.name ||
-                                            "Select Assistant"}
+                                            "Select Skill"}
                                     </span>
                                 </div>
                             )}
@@ -112,9 +112,9 @@ const AgentSelector: React.FC<AgentSelectorProps> = ({
                     </DialogTrigger>
                     <DialogContent className=" min-w-5xl max-md:min-w-screen" onInteractOutside={(e) => e.preventDefault()}>
                         <DialogHeader>
-                            <DialogTitle>Create New Assistant</DialogTitle>
+                            <DialogTitle>Create New Skill</DialogTitle>
                             <DialogDescription>
-                                Create a new assistant with custom Prompt and Contexts.
+                                Create a new skill with custom Prompt and Contexts.
                             </DialogDescription>
                         </DialogHeader>
                         <div className="py-4">

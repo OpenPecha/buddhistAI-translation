@@ -615,8 +615,8 @@ const Editor = ({
             />
 
             {!isContentReady && (
-              <div className="absolute inset-0 bg-white z-10 flex items-center justify-center">
-                <p className="text-gray-500">Loading document...</p>
+              <div className="absolute inset-0 bg-white dark:bg-neutral-900 z-10 flex items-center justify-center">
+                <p className="text-gray-500 dark:text-neutral-300">Loading document...</p>
               </div>
             )}
           </div>
