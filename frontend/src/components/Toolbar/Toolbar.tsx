@@ -200,7 +200,7 @@ const Toolbar = ({
         opacity: showToolbar ? 1 : 0, // Add isEditable check
         position: "relative",
       }}
-      className={`bg-neutral-100 dark:bg-neutral-800/40  flex-wrap`}
+      className={`bg-neutral-50 dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-700 flex-wrap`}
     >
       <div className="flex items-center flex-1 h-full self-center">
         <span className="ql-formats" style={isEnabledStyle}>
@@ -239,13 +239,13 @@ const Toolbar = ({
             onClick={() => addComment()}
             title="Suggestion"
           >
-            <MessageSquarePlus size={28} />
+            <MessageSquarePlus size={16} />
           </ToolbarButton>
           <ToolbarButton
             title="Versions"
             onClick={() => setOpenHistory(!openHistory)}
           >
-            <History />
+            <History size={16} />
           </ToolbarButton>
           <span className="ql-formats" style={isEnabledStyle}>
             <button className="ql-footnote" title="footnote" />
@@ -344,7 +344,7 @@ export const ToolbarButton = ({
       onClick={onClick}
       variant="ghost"
       title={title}
-
+      className="w-[30px] h-[30px] p-0 rounded-md"
     >
       {children}
     </Button>
