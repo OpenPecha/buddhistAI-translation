@@ -2,7 +2,6 @@ import {
   MessageCircle,
   BookOpen,
   FileText,
-  Upload,
   Sparkles,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -11,12 +10,8 @@ import Resources from "../EditorSideMenu/Resources";
 import { useEditorSidebarStore } from "@/stores/editorSidebarStore";
 import CommentSidebar from "../Comment/CommentSidebar";
 import { ScrollArea } from "../ui/scroll-area";
-import { useCommentStore } from "@/stores/commentStore";
-import { useSelectionStore } from "@/stores/selectionStore";
 import ChatSidebar from "../ChatSidebar";
-import UploadContent from "./UploadContent";
 import SidebarTabs from "./SidebarTabs";
-import SidebarHeader from "./SidebarHeader";
 import { useCurrentDoc } from "@/hooks/useCurrentDoc";
 import { useTranslationSidebarParams } from "@/hooks/useQueryParams";
 
@@ -35,10 +30,6 @@ const DocumentSidebar: React.FC<DocumentSidebarProps> = ({
   const { currentDoc } = useCurrentDoc(documentId);
   const { clearSelectedTranslationId } = useTranslationSidebarParams();
   const isFromPecha = !!(currentDoc?.metadata?.textId ?? currentDoc?.metadata?.text_id);
-  const { getSidebarView, setSidebarView, setActiveThreadId } =
-    useCommentStore();
-  const setLineFocus = useSelectionStore((state) => state.setLineFocus);
-  const sidebarView = getSidebarView(documentId);
 
   const tabs = [
     {
@@ -70,13 +61,7 @@ const DocumentSidebar: React.FC<DocumentSidebarProps> = ({
           icon: Sparkles,
           label: t(`translation.aiTranslation`),
           shortLabel: "Skill",
-        },
-        {
-          id: "upload",
-          icon: Upload,
-          label: "Upload to OpenPecha",
-          shortLabel: "Upload",
-        },
+        }
       ]
       : []),
   ];
@@ -86,37 +71,23 @@ const DocumentSidebar: React.FC<DocumentSidebarProps> = ({
       className={`flex h-full ${isTranslationEditor ? "flex-row-reverse" : ""
         } border-r border-l overflow-hidden`}
     >
-      {!activeTab && (
-        <div
-          role="toolbar"
-          className=" bg-gray-50/50 dark:bg-card flex flex-col"
-        >
-          <SidebarTabs
-            tabs={tabs}
-            onTabClick={(tabId) => toggleTab(documentId, tabId)}
-            onClose={isTranslationEditor ? clearSelectedTranslationId : undefined}
-          />
-        </div>
-      )}
+      <div
+        role="toolbar"
+        className="bg-gray-50/50 dark:bg-card flex flex-col border-r dark:border-zinc-700"
+      >
+        <SidebarTabs
+          tabs={tabs}
+          activeTab={activeTab}
+          onTabClick={(tabId) => toggleTab(documentId, tabId)}
+          onClose={isTranslationEditor ? clearSelectedTranslationId : undefined}
+        />
+      </div>
 
       {/* Content Panel */}
       {activeTab && (
         <div
-          className={`w-80 bg-white dark:bg-card flex flex-col transition-all duration-300`}
+          className=" w-80 bg-white dark:bg-card flex flex-col border-r dark:border-zinc-700/60"
         >
-          <SidebarHeader
-            tabs={tabs}
-            activeTab={activeTab}
-            onTabClick={(tabId) => toggleTab(documentId, tabId)}
-            onClose={() => setTabs(documentId, null)}
-            isTranslationEditor={isTranslationEditor}
-            sidebarView={sidebarView}
-            onBack={() => {
-              setSidebarView(documentId, "list");
-              setActiveThreadId(documentId, null);
-              setLineFocus(documentId, null);
-            }}
-          />
           {/* Content */}
           <div className="flex-1 overflow-hidden">
             {activeTab === "toc" && (
@@ -142,13 +113,6 @@ const DocumentSidebar: React.FC<DocumentSidebarProps> = ({
               <div className="h-full">
                 <ChatSidebar documentId={documentId} />
               </div>
-            )}
-
-            {activeTab === "upload" && isTranslationEditor && (
-              <UploadContent
-                documentId={documentId}
-                onClose={() => setTabs(documentId, null)}
-              />
             )}
           </div>
         </div>

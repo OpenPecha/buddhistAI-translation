@@ -20,7 +20,7 @@ export const useEditorSidebarStore = create<EditorSidebarState>((set, get) => ({
   set((state) => ({
     tabs: {
       ...state.tabs,
-      [documentId]: tabId,
+      [documentId]: state.tabs[documentId] === tabId ? null : tabId,
     },
   }));
  },

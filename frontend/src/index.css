@@ -296,11 +296,6 @@
 }
 
 
-button[aria-label="Close translation view"] {
-	z-index: 99 !important;
-}
-
-
 ::-webkit-scrollbar,
 html::-webkit-scrollbar,
 body::-webkit-scrollbar,
