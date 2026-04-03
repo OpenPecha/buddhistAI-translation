@@ -13,9 +13,11 @@ const SettingsButton: React.FC = () => {
       translationId={selectedTranslationId || undefined}
     >
       <Button
-        variant="secondary"
+        variant="ghost"
+        size="icon"
+        className="text-muted-foreground hover:text-foreground"
       >
-        <Settings size={14} />
+        <Settings size={16} />
       </Button>
     </SettingsModal>
   );

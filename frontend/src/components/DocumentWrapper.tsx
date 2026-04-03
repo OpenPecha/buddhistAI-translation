@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
 import { createPortal } from "react-dom";
-import { ChevronRight } from "lucide-react";
+import { PanelRightClose } from "lucide-react";
 import { useParams } from "react-router-dom";
 import Split from "react-split";
 import { EditorProvider } from "@/contexts/EditorContext";
@@ -85,14 +84,14 @@ function DocumentsWrapperContent() {
       <div className="group h-full w-full">
         {isSplitView && (
           <button
-            className="absolute z-50 bg-neutral-50 dark:bg-neutral-600 border-2 border-gray-300 dark:border-neutral-700 cursor-pointer rounded-full p-2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-neutral-700 dark:text-neutral-300 text-xl opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-hover/translation:opacity-100 duration-200 shadow-lg hover:shadow-xl hover:border-gray-400 transition-opacity "
+            className="absolute z-50 bg-white dark:bg-zinc-700 border border-gray-200 dark:border-zinc-600 cursor-pointer rounded-md px-1.5 py-1 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-zinc-600 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-hover/translation:opacity-100 duration-200 shadow-sm hover:shadow-md transition-all"
             onClick={clearSelectedTranslationId}
             aria-label="Close translation view"
             title="Close translation view"
             type="button"
             style={{ left: isMobile ? "97%" : `${splitPosition}%` }}
           >
-            <ChevronRight />
+            <PanelRightClose className="size-4" />
           </button>
         )}
         <Split

@@ -46,10 +46,12 @@ const Navbar = ({ project }: NavbarProps) => {
         <ProjectNameWrapper project={project} />
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1">
         <SettingsButton />
         <ModeToggle />
+        <div className="w-px h-5 bg-border mx-2" />
         <NavMenuList permissionsOpen={permissionsOpen} />
+        <div className="w-px h-5 bg-border mx-2" />
         <ProfileArea />
       </div>
       {showPermissionsModal && (
@@ -114,18 +116,16 @@ export function NavMenuList({
 }) {
   const { t } = useTranslation();
   return (
-    <div className="flex gap-3 font-google-sans">
-      <Button
-        onClick={permissionsOpen}
-        variant="outline"
-        aria-label="Share document"
-      >
-        <Share2 />
-        <span className="capitalize">
-          {t("common.share")}/{t("common.download")}
-        </span>
-      </Button>
-    </div>
+    <Button
+      onClick={permissionsOpen}
+      variant="outline"
+      size="sm"
+      className="gap-1.5 font-medium rounded-sm"
+      aria-label="Share document"
+    >
+      <Share2 size={14} />
+      <span className="capitalize">{t("common.share")}</span>
+    </Button>
   );
 }
 
