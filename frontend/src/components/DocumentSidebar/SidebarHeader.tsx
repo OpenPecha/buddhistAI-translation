@@ -23,7 +23,7 @@ const SidebarHeader = ({
 }: SidebarHeaderProps) => {
   return (
     <div
-      className="flex items-center justify-between p-2 border-b bg-gray-50/50 dark:bg-zinc-800/50">
+      className="flex items-center justify-between px-2 py-1.5 border-b bg-gray-50/50 dark:bg-zinc-800/50">
       <div
         className="flex items-center gap-1"
       >
@@ -50,12 +50,17 @@ const SidebarHeader = ({
               return (
                 <Button
                   key={tab.id}
-                  variant={isActive ? "outline" : "ghost"}
+                  variant="ghost"
                   size="icon"
                   onClick={() => onTabClick(tab.id)}
                   title={tab.label}
+                  className={
+                    isActive
+                      ? "bg-gray-100 dark:bg-zinc-700 text-gray-900 dark:text-gray-100"
+                      : "text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                  }
                 >
-                  <Icon className={isActive ? "text-amber-500" : "text-gray-500 dark:text-gray-400"} />
+                  <Icon className="size-4" />
                 </Button>
               );
             })}

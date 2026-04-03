@@ -450,6 +450,6 @@
   "comment": {
     "comments": "Comments",
     "noCommentsYet": "No comments yet",
-    "editor.tableOfContents": "Table of Contents"
+    "tableOfContents": "Table of Contents"
   }
 }

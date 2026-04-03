@@ -42,7 +42,7 @@ const DocumentSidebar: React.FC<DocumentSidebarProps> = ({
     {
       id: "toc",
       icon: BookOpen,
-      label: t(`editor.tableOfContents`),
+      label: t(`tableOfContents`),
       shortLabel: "Contents",
     },
     {

@@ -1,33 +1,40 @@
-import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface SidebarTabsProps {
   tabs: any[];
   onTabClick: (tabId: string) => void;
 }
 
-const SidebarTabs = ({
-  tabs,
-  onTabClick,
-}: SidebarTabsProps) => {
+const SidebarTabs = ({ tabs, onTabClick }: SidebarTabsProps) => {
   return (
-    <div className="flex flex-col gap-1 p-2">
-      {tabs.map((tab) => {
-        const Icon = tab.icon;
-        return (
-          <Button
-            key={tab.id}
-            variant="ghost"
-            onClick={() => onTabClick(tab.id)}
-            className="flex items-center justify-start"
-          >
-            <Icon className="size-4" />
-            <p className="text-sm whitespace-nowrap">
-              {tab.shortLabel}
-            </p>
-          </Button>
-        );
-      })}
-    </div>
+    <TooltipProvider delayDuration={300}>
+      <div className="flex flex-col items-center gap-1 px-1.5 py-2">
+        {tabs.map((tab) => {
+          const Icon = tab.icon;
+          return (
+            <Tooltip key={tab.id}>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => onTabClick(tab.id)}
+                  className="flex items-center justify-center w-8 h-8 rounded-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-zinc-700 transition-colors"
+                  aria-label={tab.label}
+                >
+                  <Icon className="size-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="left" className="text-xs shadow-sm rounded-sm">
+                {tab.label}
+              </TooltipContent>
+            </Tooltip>
+          );
+        })}
+      </div>
+    </TooltipProvider>
   );
 };
 

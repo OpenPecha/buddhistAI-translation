@@ -174,7 +174,7 @@
   "meta.documentId": "文档ID",
   "common.comments": "评论",
   "common.noCommentsYet": "暂无评论",
-  "editor.tableOfContents": "目录",
+  "tableOfContents": "目录",
   "documents.emptyText": "空白文档",
   "documents.startEmptyDocument": "从空白文档开始",
   "translation.welcomeToTranslator": "欢迎使用翻译器",
