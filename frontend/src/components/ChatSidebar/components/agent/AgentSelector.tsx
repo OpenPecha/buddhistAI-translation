@@ -123,7 +123,7 @@ const AgentSelector: React.FC<AgentSelectorProps> = ({
                     </DialogContent>
                 </Dialog>
             </div>
-        </div>
+        </div >
     );
 };
 

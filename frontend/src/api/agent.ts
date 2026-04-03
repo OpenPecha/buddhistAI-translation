@@ -239,4 +239,32 @@ export const enhanceSystemPrompt = async (
   return response.json();
 };
 
+export const exportAgent = async (agentId: string): Promise<void> => {
+  const authHeader = await getAuthHeader();
+
+  const response = await fetch(`/agent/assistant/${agentId}/export`, {
+    headers: {
+      ...authHeader,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to export agent: ${response.statusText}`);
+  }
+
+  const disposition = response.headers.get("Content-Disposition");
+  const filenameMatch = disposition?.match(/filename="(.+)"/);
+  const filename = filenameMatch?.[1] ?? `skill.md`;
+
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+};
+
 export default getAgents;
