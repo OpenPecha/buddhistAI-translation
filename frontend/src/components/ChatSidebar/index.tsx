@@ -22,6 +22,7 @@ import AgentSelector from "./components/agent/AgentSelector";
 import AgentDetailModal from "./components/agent/AgentDetailModal";
 import EditAgentModal from "./components/agent/EditAgentModal";
 import { useDeleteAgent, useAgentDetail } from "@/api/queries/agents";
+import { exportAgent } from "@/api/agent";
 import type { TargetLanguage, ModelName } from "@/api/translate";
 
 interface ChatSidebarProps {
@@ -88,6 +89,16 @@ const ChatSidebarContent: React.FC<{
       },
     });
   }, [selectedAgentId, deleteMutation, setSelectedAgentId]);
+
+  const handleExportAgent = useCallback(async () => {
+    if (!selectedAgentId) return;
+    try {
+      await exportAgent(selectedAgentId);
+      toast.success("Skill exported successfully");
+    } catch (err) {
+      toast.error(`Failed to export skill: ${err instanceof Error ? err.message : "Unknown error"}`);
+    }
+  }, [selectedAgentId]);
 
   const handleClearChat = useCallback(() => {
     if (
@@ -161,7 +172,7 @@ const ChatSidebarContent: React.FC<{
                 <Pencil className="size-4" />
                 Edit
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => {/* TODO: Implement export */ }}>
+              <DropdownMenuItem onClick={handleExportAgent}>
                 <FolderDown className="size-4" />
                 Export
               </DropdownMenuItem>
