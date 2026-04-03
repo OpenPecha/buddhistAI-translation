@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Brain, Loader2, WandSparkles } from 'lucide-react';
+import { Brain, Import, Loader2, WandSparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { agentsKeys } from '@/api/queries/agents';
 import { enhanceSystemPrompt } from '@/api/agent';
@@ -48,7 +48,43 @@ const NewAgentForm = () => {
 
     const [contexts, setContexts] = useState<ContextItem[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
+    const handleImportSkill = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const content = event.target?.result as string;
+            if (!content) return;
+
+            const frontmatterRegex = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/;
+            const match = content.match(frontmatterRegex);
+
+            if (!match) {
+                setFormData(prev => ({ ...prev, system_prompt: content.trim() }));
+                toast.info('No frontmatter found — imported file content as System Prompt.');
+                return;
+            }
+
+            const rawFrontmatter = match[1];
+            const body = match[2];
+            const nameMatch = rawFrontmatter.match(/name:\s*(.+)/i);
+            const descMatch = rawFrontmatter.match(/description:\s*(.+)/i);
+
+            setFormData(prev => ({
+                ...prev,
+                name: nameMatch ? nameMatch[1].trim().replace(/^['"]|['"]$/g, '') : prev.name,
+                description: descMatch ? descMatch[1].trim().replace(/^['"]|['"]$/g, '') : prev.description,
+                system_prompt: body.trim(),
+            }));
+
+            toast.success('Skill file imported!');
+        };
+        reader.readAsText(file);
+        e.target.value = '';
+    };
     const handleInputChange = (
         field: keyof typeof formData,
         value: string | boolean
@@ -138,6 +174,22 @@ const NewAgentForm = () => {
 
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
+            <input
+                ref={fileInputRef}
+                type="file"
+                accept=".md"
+                className="hidden"
+                onChange={handleImportSkill}
+            />
+            <Button
+                type="button"
+                variant="outline"
+                className="shrink-0 w-fit"
+                onClick={() => fileInputRef.current?.click()}
+            >
+                <Import className="size-4" />
+                Import Skill
+            </Button>
             <div className='flex max-md:flex-col  gap-x-2 overflow-y-auto'>
                 <div className="space-y-4 flex-2">
                     <div className='flex gap-2'>

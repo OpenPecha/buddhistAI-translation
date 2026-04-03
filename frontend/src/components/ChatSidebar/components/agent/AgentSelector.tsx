@@ -117,10 +117,6 @@ const AgentSelector: React.FC<AgentSelectorProps> = ({
                                 Create a new skill with custom Prompt and Contexts.
                             </DialogDescription>
                         </DialogHeader>
-                        <Button variant="outline" className="shrink-0 w-fit">
-                            Import Skill
-                        </Button>
-
                         <div className="py-4">
                             <NewAgentForm />
                         </div>
