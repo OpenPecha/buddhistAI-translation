@@ -9,13 +9,13 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog";
+    Sheet,
+    SheetContent,
+    SheetDescription,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
+} from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Bot, Plus, Shield } from "lucide-react";
@@ -104,24 +104,24 @@ const AgentSelector: React.FC<AgentSelectorProps> = ({
                     </SelectContent>
                 </Select>
 
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                    <DialogTrigger asChild>
+                <Sheet open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    <SheetTrigger asChild>
                         <Button variant="outline" size="icon" className="shrink-0">
                             <Plus className="size-4" />
                         </Button>
-                    </DialogTrigger>
-                    <DialogContent className=" min-w-5xl max-md:min-w-screen" onInteractOutside={(e) => e.preventDefault()}>
-                        <DialogHeader>
-                            <DialogTitle>Create New Skill</DialogTitle>
-                            <DialogDescription>
+                    </SheetTrigger>
+                    <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto">
+                        <SheetHeader>
+                            <SheetTitle>Create New Skill</SheetTitle>
+                            <SheetDescription>
                                 Create a new skill with custom Prompt and Contexts.
-                            </DialogDescription>
-                        </DialogHeader>
-                        <div className="py-4">
+                            </SheetDescription>
+                        </SheetHeader>
+                        <div className="px-6 pb-6">
                             <NewAgentForm />
                         </div>
-                    </DialogContent>
-                </Dialog>
+                    </SheetContent>
+                </Sheet>
             </div>
         </div >
     );

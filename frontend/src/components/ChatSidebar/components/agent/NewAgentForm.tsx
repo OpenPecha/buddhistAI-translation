@@ -298,7 +298,7 @@ const NewAgentForm = () => {
                         </div>
                     </div>
                 </div>
-                <ContextManager contexts={contexts} onChange={setContexts} />
+                {/* <ContextManager contexts={contexts} onChange={setContexts} /> */}
             </div >
             <div className="flex justify-end gap-2 pt-4">
                 <Button type="submit" className=' w-full bg-secondary-600 hover:bg-secondary-700 text-white' disabled={isSubmitting}>
