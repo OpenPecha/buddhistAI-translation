@@ -18,6 +18,7 @@ import UploadContent from "./UploadContent";
 import SidebarTabs from "./SidebarTabs";
 import SidebarHeader from "./SidebarHeader";
 import { useCurrentDoc } from "@/hooks/useCurrentDoc";
+import { useTranslationSidebarParams } from "@/hooks/useQueryParams";
 
 interface DocumentSidebarProps {
   documentId: string;
@@ -32,6 +33,7 @@ const DocumentSidebar: React.FC<DocumentSidebarProps> = ({
   const activeTab = editorTabs[documentId];
   const { t } = useTranslation();
   const { currentDoc } = useCurrentDoc(documentId);
+  const { clearSelectedTranslationId } = useTranslationSidebarParams();
   const isFromPecha = !!(currentDoc?.metadata?.textId ?? currentDoc?.metadata?.text_id);
   const { getSidebarView, setSidebarView, setActiveThreadId } =
     useCommentStore();
@@ -92,6 +94,7 @@ const DocumentSidebar: React.FC<DocumentSidebarProps> = ({
           <SidebarTabs
             tabs={tabs}
             onTabClick={(tabId) => toggleTab(documentId, tabId)}
+            onClose={isTranslationEditor ? clearSelectedTranslationId : undefined}
           />
         </div>
       )}

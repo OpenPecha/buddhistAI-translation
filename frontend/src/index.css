@@ -222,18 +222,60 @@
 }
 
 .gutter {
-	background-color: #F5F5F5;
+	background-color: #EFEFEF;
 	background-repeat: no-repeat;
 	background-position: 50%;
+	transition: background-color 0.15s ease;
+	position: relative;
 }
 
 .dark .gutter {
-	background-color: #1E1E1E;
+	background-color: #252525;
 }
 
+.gutter:hover {
+	background-color: #E0E0FF;
+}
+
+.dark .gutter:hover {
+	background-color: #2A2A3A;
+}
 
 .gutter.gutter-horizontal {
 	cursor: col-resize;
+	/* Grip dots indicator */
+	background-image: radial-gradient(circle, #AAAAAA 1.5px, transparent 1.5px),
+	                  radial-gradient(circle, #AAAAAA 1.5px, transparent 1.5px),
+	                  radial-gradient(circle, #AAAAAA 1.5px, transparent 1.5px);
+	background-size: 4px 4px;
+	background-position: center calc(50% - 6px), center 50%, center calc(50% + 6px);
+	background-repeat: no-repeat, no-repeat, no-repeat;
+	border-left: 1px solid #E0E0E0;
+	border-right: 1px solid #E0E0E0;
+}
+
+.dark .gutter.gutter-horizontal {
+	background-image: radial-gradient(circle, #666 1.5px, transparent 1.5px),
+	                  radial-gradient(circle, #666 1.5px, transparent 1.5px),
+	                  radial-gradient(circle, #666 1.5px, transparent 1.5px);
+	border-left-color: #333;
+	border-right-color: #333;
+}
+
+.gutter.gutter-horizontal:hover {
+	background-image: radial-gradient(circle, #7B7BFF 1.5px, transparent 1.5px),
+	                  radial-gradient(circle, #7B7BFF 1.5px, transparent 1.5px),
+	                  radial-gradient(circle, #7B7BFF 1.5px, transparent 1.5px);
+	border-left-color: #C5C5FF;
+	border-right-color: #C5C5FF;
+}
+
+.dark .gutter.gutter-horizontal:hover {
+	background-image: radial-gradient(circle, #9999EE 1.5px, transparent 1.5px),
+	                  radial-gradient(circle, #9999EE 1.5px, transparent 1.5px),
+	                  radial-gradient(circle, #9999EE 1.5px, transparent 1.5px);
+	border-left-color: #444466;
+	border-right-color: #444466;
 }
 
 .gutter.gutter-vertical {

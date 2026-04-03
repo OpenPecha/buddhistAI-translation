@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
-import { PanelRightClose } from "lucide-react";
 import { useParams } from "react-router-dom";
 import Split from "react-split";
 import { EditorProvider } from "@/contexts/EditorContext";
@@ -29,8 +28,7 @@ function DocumentsWrapperContent() {
   useDevToolsStatus();
 
   const { currentDoc, isEditable } = useCurrentDoc(id);
-  const { selectedTranslationId, clearSelectedTranslationId } =
-    useTranslationSidebarParams();
+  const { selectedTranslationId } = useTranslationSidebarParams();
   const [splitPosition, setSplitPosition] = useState<number>(50);
   const { setManualSelection, setLineFocus } = useSelectionStore();
   const { getQuill, getTextByLineNumber } = useEditor();
@@ -82,18 +80,6 @@ function DocumentsWrapperContent() {
 
     return (
       <div className="group h-full w-full">
-        {isSplitView && (
-          <button
-            className="absolute z-50 bg-white dark:bg-zinc-700 border border-gray-200 dark:border-zinc-600 cursor-pointer rounded-md px-1.5 py-1 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-zinc-600 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-hover/translation:opacity-100 duration-200 shadow-sm hover:shadow-md transition-all"
-            onClick={clearSelectedTranslationId}
-            aria-label="Close translation view"
-            title="Close translation view"
-            type="button"
-            style={{ left: isMobile ? "97%" : `${splitPosition}%` }}
-          >
-            <PanelRightClose className="size-4" />
-          </button>
-        )}
         <Split
           sizes={isSplitView ? [splitPosition, 100 - splitPosition] : [100, 0]}
           minSize={isSplitView ? [300, 400] : [100, 0]}
@@ -144,7 +130,6 @@ function DocumentsWrapperContent() {
             {isSplitView && selectedTranslationId && (
               <TranslationEditor
                 selectedTranslationId={selectedTranslationId}
-                isEditable={!!isEditable}
                 sourceDocId={id}
                 onManualSelect={handleManualSelect}
                 onLineFocus={handleLineFocus}
