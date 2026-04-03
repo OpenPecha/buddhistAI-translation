@@ -1,4 +1,4 @@
-import { EllipsisVertical, Eye, MessageSquare, Pencil, Plus, Trash2 } from "lucide-react";
+import { FolderDown, EllipsisVertical, Eye, MessageSquare, Pencil, Plus, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -160,6 +160,10 @@ const ChatSidebarContent: React.FC<{
               <DropdownMenuItem onClick={() => setIsEditAgentModalOpen(true)}>
                 <Pencil className="size-4" />
                 Edit
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => {/* TODO: Implement export */ }}>
+                <FolderDown className="size-4" />
+                Export
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
