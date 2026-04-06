@@ -124,7 +124,13 @@ const ContextManager: React.FC<ContextManagerProps> = ({ contexts, onChange }) =
 
         try {
             const response = await fetch(
-                `/pecha/texts?limit=20&offset=0&title=${encodeURIComponent(query)}`
+                `/pecha/texts?limit=20&offset=0&title=${encodeURIComponent(query)}`,
+                {
+                    headers: {
+                        'accept': 'application/json',
+                        'X-API-Key': import.meta.env.VITE_API_KEY_HEADER,
+                    },
+                }
             );
             if (!response.ok) throw new Error('Search failed');
 
