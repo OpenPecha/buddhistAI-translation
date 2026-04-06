@@ -44,12 +44,12 @@ function DocumentCreateModalContent() {
       size="lg"
       variant="fixed"
     >
-      <div className="flex flex-col h-full">
-        <div className="flex-1 overflow-y-auto">
-          <StepIndicator
-            currentStep={state.currentStep}
-            totalSteps={totalSteps}
-          />
+      <div className="flex flex-col h-full px-2">
+        <StepIndicator
+          currentStep={state.currentStep}
+          totalSteps={totalSteps}
+        />
+        <div className="flex-1 overflow-y-auto mt-2">
           <StepRenderer />
         </div>
         <ModalNavigation />

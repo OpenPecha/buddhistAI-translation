@@ -1,15 +1,8 @@
 import { cn } from "@/lib/utils";
+import { Check } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
-// Helper function for step indicator styling
-function getStepIndicatorClass(step: number, currentStep: number): string {
-  if (step === currentStep) {
-    return "bg-green-100 text-green-500 border-green-600 dark:bg-green-900 dark:text-green-400 dark:border-green-600";
-  } else if (step < currentStep) {
-    return "bg-green-600 text-white border-green-600 dark:bg-green-900 dark:text-green-400 dark:border-green-600";
-  } else {
-    return "bg-white text-gray-500 border-gray-300 dark:bg-neutral-800 dark:text-neutral-400 dark:border-neutral-700";
-  }
-}
+const stepKeys = ["projects.details", "projects.method", "projects.configure"] as const;
 
 // Step indicator component
 export function StepIndicator({
@@ -19,38 +12,58 @@ export function StepIndicator({
   readonly currentStep: number;
   readonly totalSteps: number;
 }) {
+  const { t } = useTranslation();
+
   return (
-    <div className="flex items-center justify-center">
-      {Array.from({ length: totalSteps }, (_, index) => (
-        <div key={index} className="flex items-center">
-          <div
-            className={cn(
-              "w-8 h-8 rounded-full flex items-center justify-center text-xs  transition-all duration-300 border-2",
-              getStepIndicatorClass(index + 1, currentStep)
-            )}
-          >
-            {index + 1 < currentStep ? (
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fillRule="evenodd"
-                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            ) : (
-              index + 1
+    <div className="flex items-center justify-center gap-1 py-2">
+      {Array.from({ length: totalSteps }, (_, index) => {
+        const step = index + 1;
+        const isActive = step === currentStep;
+        const isCompleted = step < currentStep;
+
+        return (
+          <div key={index} className="flex items-center">
+            <div className="flex flex-col items-center gap-1.5">
+              <div
+                className={cn(
+                  "w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-all duration-300",
+                  isCompleted &&
+                    "bg-green-600 text-white shadow-sm dark:bg-green-600",
+                  isActive &&
+                    "bg-green-50 text-green-700 ring-2 ring-green-600 dark:bg-green-950 dark:text-green-400 dark:ring-green-500",
+                  !isActive &&
+                    !isCompleted &&
+                    "bg-neutral-100 text-neutral-400 dark:bg-neutral-800 dark:text-neutral-500"
+                )}
+              >
+                {isCompleted ? <Check className="w-4 h-4" /> : step}
+              </div>
+              <span
+                className={cn(
+                  "text-[11px] font-medium transition-colors duration-300",
+                  isActive && "text-green-700 dark:text-green-400",
+                  isCompleted && "text-neutral-600 dark:text-neutral-400",
+                  !isActive &&
+                    !isCompleted &&
+                    "text-neutral-400 dark:text-neutral-500"
+                )}
+              >
+                {t(stepKeys[index] ?? "")}
+              </span>
+            </div>
+            {index < totalSteps - 1 && (
+              <div
+                className={cn(
+                  "w-12 h-0.5 mx-2 mb-5 rounded-full transition-colors duration-300",
+                  isCompleted
+                    ? "bg-green-500"
+                    : "bg-neutral-200 dark:bg-neutral-700"
+                )}
+              />
             )}
           </div>
-          {index < totalSteps - 1 && (
-            <div
-              className={cn(
-                "w-10 h-0.5  transition-colors duration-300",
-                index + 1 < currentStep ? "bg-green-500" : "bg-gray-300 dark:bg-neutral-700 dark:border-neutral-600"
-              )}
-            />
-          )}
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

@@ -14,19 +14,19 @@ export const ProjectNameStep = React.memo(
     const { t } = useTranslation();
 
     return (
-      <div className="space-y-3 m-2">
-        <div className="text-left">
-          <p className="text-base font-medium text-neutral-900 dark:text-neutral-100">
+      <div className="space-y-5 pt-2 px-1">
+        <div className="text-left space-y-1">
+          <p className="text-base font-semibold text-neutral-900 dark:text-neutral-100">
             {t(`projects.projectDetails`)}
           </p>
-          <p className="text-sm text-neutral-600 dark:text-neutral-500">
+          <p className="text-sm text-neutral-500 dark:text-neutral-400">
             {t(`projects.enterProjectName`)}
           </p>
         </div>
         <div className="space-y-2">
           <Label
             htmlFor="projectName"
-            className="text-sm font-medium text-neutral-700 dark:text-neutral-200"
+            className="text-sm font-medium text-neutral-700 dark:text-neutral-300"
           >
             {t(`projects.projectName`)}
           </Label>
@@ -40,6 +40,7 @@ export const ProjectNameStep = React.memo(
               }
             }}
             placeholder={t(`projects.enterProjectName`)}
+            className="h-11"
             autoFocus
           />
         </div>

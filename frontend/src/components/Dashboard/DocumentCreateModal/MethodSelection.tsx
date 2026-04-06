@@ -43,19 +43,20 @@ export const MethodSelection = React.memo(
     };
 
     return (
-      <div className="space-y-2">
-        <div className="text-left">
-          <p className="font-medium text-neutral-900 dark:text-neutral-200">
+      <div className="space-y-4 pt-2 px-1">
+        <div className="text-left space-y-1">
+          <p className="text-base font-semibold text-neutral-900 dark:text-neutral-200">
             {t(`projects.chooseInputMethod`)}
           </p>
-          <p className="text-sm text-neutral-600 dark:text-neutral-500">
+          <p className="text-sm text-neutral-500 dark:text-neutral-400">
             {t(`projects.selectHowYouWantToCreateYourProject`)}
           </p>
         </div>
 
-        <div className="grid gap-2">
+        <div className="grid gap-3">
           {availableMethods.map((method) => {
             const config = methodConfigs[method.type];
+            const isSelected = selectedMethod === method.type;
             return (
               <Button
                 variant="outline"
@@ -70,33 +71,34 @@ export const MethodSelection = React.memo(
                   }
                 }}
                 onDoubleClick={onDoubleClick}
-                className={cn("w-full text-left h-full p-2",
-                  selectedMethod === method.type
-                    ? "bg-neutral-50 dark:bg-neutral-700"
-                    : "border-gray-200 hover:border-gray-300"
+                className={cn(
+                  "w-full text-left h-auto py-3.5 px-4 transition-all duration-200",
+                  isSelected
+                    ? "border-green-500 bg-green-50/50 ring-1 ring-green-500/20 dark:bg-green-950/30 dark:border-green-600 dark:ring-green-500/10"
+                    : "border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50 dark:border-neutral-700 dark:hover:border-neutral-600 dark:hover:bg-neutral-800/50"
                 )}
               >
-                <div className="flex items-center space-x-2 w-full">
+                <div className="flex items-center gap-3.5 w-full">
                   <div
                     className={cn(
-                      "p-2 rounded-sm",
-                      selectedMethod === method.type
-                        ? "dark:bg-green-700 bg-green-100  dark:text-white text-green-700"
-                        : "bg-gray-100 dark:bg-neutral-700 text-gray-600 dark:text-neutral-400"
+                      "p-2.5 rounded-lg shrink-0 transition-colors duration-200",
+                      isSelected
+                        ? "bg-green-100 text-green-700 dark:bg-green-800 dark:text-green-300"
+                        : "bg-neutral-100 text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400"
                     )}
                   >
                     {config.icon}
                   </div>
-                  <div className="flex-1">
-                    <p className=" text-neutral-900 dark:text-neutral-200">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-neutral-900 dark:text-neutral-200">
                       {config.title}{" "}
                       {config.isDisabled && (
-                        <span className="text-gray-400 text-sm">
+                        <span className="text-neutral-400 text-xs font-normal">
                           (Coming Soon)
                         </span>
                       )}
                     </p>
-                    <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                    <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-0.5">
                       {config.description}
                     </p>
                   </div>

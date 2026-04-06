@@ -17,13 +17,13 @@ export const ModalNavigation = React.memo(() => {
   const { currentStep, isFormValid, isCreating } = state;
 
   return (
-    <div >
+    <div className="border-t border-neutral-200 dark:border-neutral-700 pt-4 mt-2">
       <div className="flex justify-between items-center">
         <Button
-          variant="outline"
+          variant="ghost"
           onClick={handlePrevious}
           disabled={currentStep === 1}
-          className="flex items-center space-x-2"
+          className="flex items-center gap-1.5 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200 disabled:opacity-40"
         >
           <ChevronLeft size={16} />
           <span>{t("common.previous")}</span>
@@ -31,9 +31,9 @@ export const ModalNavigation = React.memo(() => {
 
         {currentStep < totalSteps ? (
           <Button
-            variant="outline"
             onClick={handleNext}
             disabled={!canGoNext}
+            className="flex items-center gap-1.5 bg-green-600 hover:bg-green-700 text-white dark:bg-green-600 dark:hover:bg-green-700 disabled:opacity-40"
           >
             <span>{t("common.next")}</span>
             <ChevronRight size={16} />
@@ -42,7 +42,7 @@ export const ModalNavigation = React.memo(() => {
           <Button
             onClick={handleCreateProject}
             disabled={!isFormValid || isCreating}
-            className="flex items-center space-x-2 bg-green-600 dark:bg-green-700 dark:text-green-100 hover:bg-green-700 disabled:bg-gray-400"
+            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white dark:bg-green-600 dark:hover:bg-green-700 disabled:opacity-40"
           >
             {isCreating ? (
               <>
