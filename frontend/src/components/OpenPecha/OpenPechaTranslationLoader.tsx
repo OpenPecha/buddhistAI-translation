@@ -4,8 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { createDocumentFromOpenPecha } from "@/api/document";
 import { ErrorDisplay } from "@/components/shared/modals";
 import { Button } from "@/components/ui/button";
-import { useBdrcSearch, BdrcSearchResult } from "@/hooks/uesBDRC";
-import { Search, AlertCircle, ExternalLink, Loader2 } from "lucide-react";
+import { Search, AlertCircle, Loader2 } from "lucide-react";
 import { fetchText } from "@/api/openpecha";
 import { useFetchTexts } from "@/api/queries/openpecha_api";
 
@@ -132,18 +131,10 @@ export function OpenPechaTranslationLoader({
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [showResults, setShowResults] = useState(false);
-  const [selectedBdrcResult, setSelectedBdrcResult] =
-    useState<BdrcSearchResult | null>(null);
   const [isCheckingText, setIsCheckingText] = useState(false);
   const [textNotFound, setTextNotFound] = useState(false);
   const [selectedTextId, setSelectedTextId] = useState("");
   const [selectedText, setSelectedText] = useState<SelectedText | null>(null);
-
-  const {
-    results: bdrcResults,
-    isLoading: isLoadingBdrc,
-    error: bdrcError,
-  } = useBdrcSearch(searchQuery, "Instance", 1000);
 
   const {
     data: titleSearchResults,
@@ -152,8 +143,7 @@ export function OpenPechaTranslationLoader({
   } = useFetchTexts({ title: searchQuery, limit: 100 });
 
   const resolveTextById = React.useCallback(
-    async (textId: string, bdrcResult?: BdrcSearchResult) => {
-      if (bdrcResult) setSelectedBdrcResult(bdrcResult);
+    async (textId: string) => {
       setShowResults(false);
       setTextNotFound(false);
       setIsCheckingText(true);
@@ -178,18 +168,6 @@ export function OpenPechaTranslationLoader({
 
   const handleTitleResultSelect = React.useCallback(
     (item: SearchResultItem) => resolveTextById(item.id),
-    [resolveTextById]
-  );
-
-  const handleBdrcResultSelect = React.useCallback(
-    (result: BdrcSearchResult) => {
-      if (!result.workId) {
-        setSelectedBdrcResult(result);
-        setTextNotFound(true);
-        return;
-      }
-      resolveTextById(result.workId, result);
-    },
     [resolveTextById]
   );
 
@@ -220,15 +198,6 @@ export function OpenPechaTranslationLoader({
     createTranslationMutation.mutate();
   };
 
-  const CATALOGER_URL =
-    import.meta.env.VITE_CATALOGER_FRONTEND_URL || "http://localhost:8000";
-  const catalogerUrl = React.useMemo(() => {
-    const workIdParam = selectedBdrcResult?.workId
-      ? `create?w_id=${selectedBdrcResult.workId}&i_id=${selectedBdrcResult.instanceId}`
-      : "";
-    return `${CATALOGER_URL}/${workIdParam}`;
-  }, [CATALOGER_URL, selectedBdrcResult?.workId, selectedBdrcResult?.instanceId]);
-
   const titleItems: SearchResultItem[] = React.useMemo(() => {
     if (!Array.isArray(titleSearchResults)) return [];
     return titleSearchResults.map(
@@ -239,21 +208,6 @@ export function OpenPechaTranslationLoader({
       })
     );
   }, [titleSearchResults]);
-
-  const bdrcItems: SearchResultItem[] = React.useMemo(
-    () =>
-      bdrcResults.map((r) => ({
-        id: r.workId || r.instanceId || `bdrc-${r.title}`,
-        title: r.title || r.workId || "Untitled",
-        subtitle: [
-          r.workId && `BDRC ID: ${r.workId}`,
-          r.language && `Language: ${r.language}`,
-        ]
-          .filter(Boolean)
-          .join(" · "),
-      })),
-    [bdrcResults]
-  );
 
   const hasQuery = !!searchQuery.trim();
 
@@ -266,7 +220,7 @@ export function OpenPechaTranslationLoader({
           htmlFor="bdrc-search"
           className="block text-sm font-medium text-gray-700 dark:text-zinc-300"
         >
-          Search BDRC by Title or ID
+          Search by Title or ID
         </label>
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -280,7 +234,7 @@ export function OpenPechaTranslationLoader({
               setSearchQuery(e.target.value);
               setShowResults(true);
             }}
-            placeholder="Search BDRC texts..."
+            placeholder="Search texts..."
             className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-zinc-600 rounded-md text-sm bg-white dark:bg-zinc-800 dark:text-zinc-200 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
@@ -306,22 +260,6 @@ export function OpenPechaTranslationLoader({
                 })
               }
             />
-            <SearchResultsPanel
-              heading="BDRC Results"
-              isLoading={isLoadingBdrc}
-              loadingMessage="Searching BDRC..."
-              error={bdrcError ? `Error searching BDRC: ${bdrcError}` : null}
-              items={bdrcItems}
-              emptyMessage="No BDRC texts found"
-              hasQuery={hasQuery}
-              onSelect={(item) => {
-                const match = bdrcResults.find(
-                  (r) =>
-                    (r.workId || r.instanceId || `bdrc-${r.title}`) === item.id
-                );
-                if (match) handleBdrcResultSelect(match);
-              }}
-            />
           </div>
         )}
 
@@ -334,7 +272,7 @@ export function OpenPechaTranslationLoader({
           </div>
         )}
 
-        {textNotFound && selectedBdrcResult && !isCheckingText && (
+        {textNotFound && !isCheckingText && (
           <div className="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 rounded-md">
             <div className="flex items-start">
               <AlertCircle className="h-5 w-5 text-yellow-600 dark:text-yellow-500 mt-0.5 mr-3 shrink-0" />
@@ -342,20 +280,6 @@ export function OpenPechaTranslationLoader({
                 <p className="text-sm font-medium text-yellow-800 dark:text-yellow-300 mb-2">
                   Text not found in catalog
                 </p>
-                <p className="text-sm text-yellow-700 dark:text-yellow-400 mb-3">
-                  The text "
-                  {selectedBdrcResult.title || selectedBdrcResult.workId}" (ID:{" "}
-                  {selectedBdrcResult.workId}) is not present in the catalog.
-                </p>
-                <a
-                  href={catalogerUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center px-4 py-2 bg-yellow-600 text-white text-sm font-medium rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 transition-colors"
-                >
-                  Create text on cataloger
-                  <ExternalLink className="ml-2 h-4 w-4" />
-                </a>
               </div>
             </div>
           </div>
