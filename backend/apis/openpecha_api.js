@@ -94,28 +94,6 @@ async function getEditionContent(editionId) {
   return data;
 }
 
-const uploadTranslationToOpenpecha = async (instanceId, translationData) => {
-  const response = await fetch(
-    `${API_ENDPOINT}/instances/${instanceId}/translation`,
-    {
-      method: "POST",
-      headers: {
-        accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(translationData),
-    },
-  );
-
-  if (!response.ok) {
-    throw new Error(
-      `Failed to upload translation to openpecha: ${response.statusText}`,
-    );
-  }
-
-  const data = await response.json();
-  return data;
-};
 
 async function getSegmentRelated(
   instanceId,
@@ -195,7 +173,6 @@ module.exports = {
   getTextInstances,
   getEditionContent,
   getSegmentation,
-  uploadTranslationToOpenpecha,
   getSegmentRelated,
   getSegmentsContent,
   getRelatedInstances,
