@@ -93,8 +93,8 @@ function Resources() {
                 {/* Text Title Header Skeleton */}
                 <div className="flex items-center gap-2 mb-3">
                   <div className="flex-1">
-                    <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2 animate-pulse" />
-                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2 animate-pulse" />
+                    <div className="h-5 bg-gray-200 dark:bg-zinc-700 rounded w-3/4 mb-2 animate-pulse" />
+                    <div className="h-3 bg-gray-200 dark:bg-zinc-700 rounded w-1/2 animate-pulse" />
                   </div>
                 </div>
 
@@ -103,15 +103,15 @@ function Resources() {
                   {Array.from({ length: 2 }, (_, segIndex) => (
                     <div
                       key={`skeleton-segment-${index}-${segIndex}`}
-                      className="p-3 bg-gray-50 dark:bg-card rounded-lg border border-gray-200 dark:border-gray-700"
+                      className="p-3 bg-gray-50 dark:bg-card rounded-lg border border-gray-200 dark:border-zinc-700"
                     >
                       <div className="mb-2">
-                        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/4 animate-pulse" />
+                        <div className="h-3 bg-gray-200 dark:bg-zinc-700 rounded w-1/4 animate-pulse" />
                       </div>
                       <div className="space-y-2">
-                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full animate-pulse" />
-                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-5/6 animate-pulse" />
-                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-4/6 animate-pulse" />
+                        <div className="h-4 bg-gray-200 dark:bg-zinc-700 rounded w-full animate-pulse" />
+                        <div className="h-4 bg-gray-200 dark:bg-zinc-700 rounded w-5/6 animate-pulse" />
+                        <div className="h-4 bg-gray-200 dark:bg-zinc-700 rounded w-4/6 animate-pulse" />
                       </div>
                     </div>
                   ))}
