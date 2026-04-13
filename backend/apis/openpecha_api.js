@@ -55,9 +55,27 @@ async function getTextInstances(text_id, instance_type) {
   return data;
 }
 
-async function getInstanceContent(instanceId) {
+async function getSegmentation(instanceId) {
   const response = await fetch(
-    `${API_ENDPOINT}/instances/${instanceId}?annotation=true&content=true`,
+    `${NEW_API_ENDPOINT}/editions/${instanceId}/segmentations`,
+    {
+      headers: {
+        accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    },
+  );
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch segmentation from openpecha: ${response.statusText}`,
+    );
+  }
+  const data = await response.json();
+  return data;
+}
+async function getEditionContent(editionId) {
+  const response = await fetch(
+    `${NEW_API_ENDPOINT}/editions/${editionId}/content`,
     {
       headers: {
         accept: "application/json",
@@ -68,29 +86,11 @@ async function getInstanceContent(instanceId) {
 
   if (!response.ok) {
     throw new Error(
-      `Failed to fetch instance content from openpecha: ${response.statusText}`,
+      `Failed to fetch edition content from openpecha: ${response.statusText}`,
     );
   }
 
-  const data = await response.json();
-  return data;
-}
-
-async function getAnnotations(annotation_id) {
-  const response = await fetch(`${API_ENDPOINT}/annotations/${annotation_id}`, {
-    header: {
-      accept: "application/json",
-      "Content-Type": "applicaton/json",
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(
-      `Failed to fetch annotations from openpecha: ${response.statusText}`,
-    );
-  }
-
-  const data = await response.json();
+  const data = await response.text();
   return data;
 }
 
@@ -193,8 +193,8 @@ module.exports = {
   getTexts,
   getText,
   getTextInstances,
-  getInstanceContent,
-  getAnnotations,
+  getEditionContent,
+  getSegmentation,
   uploadTranslationToOpenpecha,
   getSegmentRelated,
   getSegmentsContent,

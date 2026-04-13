@@ -26,8 +26,8 @@ const {
 const {
   getText,
   getTextInstances,
-  getAnnotations,
-  getInstanceContent,
+  getSegmentation,
+  getEditionContent,
 } = require("../apis/openpecha_api");
 const router = express.Router();
 const { docxToText } = require("../utils/docxToText");
@@ -397,16 +397,11 @@ router.post("/openpecha", authenticate, async (req, res, next) => {
         "Failed to get critical instance from openpecha",
       );
     }
-    const instanceWithContent = await getInstanceContent(criticalInstance.id);
-    const segmentationAnnotation = instanceWithContent.annotations.find(
-      (annotation) => annotation.type === "segmentation",
-    );
-    const segmentationAnnotationContent = await getAnnotations(
-      segmentationAnnotation.annotation_id,
-    );
+    const editionContent = await getEditionContent(criticalInstance.id);
+    const segmentation = await getSegmentation(criticalInstance.id);
     const segmentedContent = applySegmentation(
-      instanceWithContent.content,
-      segmentationAnnotationContent.data,
+      editionContent,
+      segmentation[0].segments,
     );
     const title =
       text.title.bo ??

@@ -3,7 +3,6 @@ const express = require("express");
 const {
   getTexts,
   getTextInstances,
-  getAnnotations,
   uploadTranslationToOpenpecha,
   getSegmentRelated,
   getText,
@@ -44,37 +43,6 @@ router.get("/texts/:id", async (req, res) => {
   const id = encodeURIComponent(req.params.id);
   const text = await getText(id);
   res.json(text);
-});
-
-/**
- * GET /openpecha/annotations/{id}
- * @summary Get annotations by annotation ID
- * @tags Pecha - OpenPecha integration
- * @param {string} id.path.required - Annotation ID
- * @return {object} 200 - Annotation content
- * @return {object} 400 - Bad request - Annotation ID is required
- * @return {object} 404 - Annotation not found
- * @return {object} 500 - Server error
- *
- */
-router.get("/annotations/:id", async (req, res) => {
-  const annotationId = req.params.id;
-  if (!annotationId) {
-    return res.status(400).json({
-      error: "Annotation ID is required",
-    });
-  }
-  try {
-    const annotations = await getAnnotations(annotationId);
-    res.json(annotations);
-  } catch (error) {
-    console.error("Error fetching annotations:", error);
-    res.status(500).json({
-      error: "Failed to fetch annotations",
-      id: annotationId,
-      details: error.message,
-    });
-  }
 });
 
 /**

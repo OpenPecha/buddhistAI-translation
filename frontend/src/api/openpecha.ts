@@ -47,25 +47,6 @@ export const fetchText = async (textId: string) => {
   return response.json();
 };
 
-/**
- * Fetch annotations by annotation ID
- * @param annotationId - Annotation ID
- * @returns Annotation content
- */
-export const fetchAnnotations = async (annotationId: string) => {
-  const response = await fetch(
-    `${server_url}/openpecha/annotations/${annotationId}`,
-    {
-      headers: getHeaders(),
-    }
-  );
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || "Failed to fetch annotations");
-  }
-  return response.json();
-};
-
 export interface LinkedResource {
   instance_id: string;
   metadata: {
