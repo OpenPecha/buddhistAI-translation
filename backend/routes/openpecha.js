@@ -159,7 +159,50 @@ router.get("/texts/:text_id/linked-resources", async (req, res) => {
     const criticalInstance = instances[0];
     const relatedInstances = await getRelatedInstances(criticalInstance.id);
 
-    res.json(relatedInstances);
+    const enriched = await Promise.all(
+      relatedInstances.map(async (instance) => {
+        try {
+          const textData = await getText(instance.text_id);
+          const relationship = textData.commentary_of
+            ? "commentary"
+            : textData.translation_of
+              ? "translation"
+              : "related";
+
+          return {
+            instance_id: instance.id,
+            metadata: {
+              instance_type: instance.type,
+              source: instance.source,
+              text_id: instance.text_id,
+              title: textData.title ?? {},
+              alt_titles: textData.alt_titles ?? [],
+              language: textData.language ?? "",
+              contributions: textData.contributions ?? [],
+            },
+            annotation: null,
+            relationship,
+          };
+        } catch {
+          return {
+            instance_id: instance.id,
+            metadata: {
+              instance_type: instance.type,
+              source: instance.source,
+              text_id: instance.text_id,
+              title: {},
+              alt_titles: [],
+              language: "",
+              contributions: [],
+            },
+            annotation: null,
+            relationship: "related",
+          };
+        }
+      }),
+    );
+
+    res.json(enriched);
   } catch (error) {
     console.error("Error fetching linked resources:", error);
     res.status(500).json({

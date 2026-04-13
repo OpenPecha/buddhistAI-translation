@@ -94,7 +94,6 @@ async function getEditionContent(editionId) {
   return data;
 }
 
-
 async function getSegmentRelated(
   instanceId,
   spanStart,
@@ -148,7 +147,7 @@ async function getSegmentsContent(instanceId, seg_ids) {
 
 async function getRelatedInstances(instanceId) {
   const response = await fetch(
-    `${API_ENDPOINT}/instances/${instanceId}/related`,
+    `${NEW_API_ENDPOINT}/editions/${instanceId}/related`,
     {
       headers: {
         accept: "application/json",
