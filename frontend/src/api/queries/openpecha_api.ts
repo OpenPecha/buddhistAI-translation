@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import {
   fetchLinkedResources,
-  fetchTextContent,
   fetchTexts,
 } from "../openpecha";
 
@@ -23,15 +22,6 @@ export const useFetchTexts = ({
     queryFn: () => fetchTexts({ limit, offset, language, title }),
     staleTime: 5 * 60 * 1000,
     enabled: title !== "" || title !== undefined,
-  });
-};
-
-export const useFetchTextContent = (instanceId: string) => {
-  return useQuery({
-    queryKey: ["textContent", instanceId],
-    queryFn: () => fetchTextContent(instanceId),
-    enabled: !!instanceId,
-    staleTime: 1000 * 60 * 5,
   });
 };
 

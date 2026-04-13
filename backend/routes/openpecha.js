@@ -2,7 +2,6 @@ const PERSON_ID = process.env.PERSON_ID;
 const express = require("express");
 const {
   getTexts,
-  getInstanceContent,
   getTextInstances,
   getAnnotations,
   uploadTranslationToOpenpecha,
@@ -45,56 +44,6 @@ router.get("/texts/:id", async (req, res) => {
   const id = encodeURIComponent(req.params.id);
   const text = await getText(id);
   res.json(text);
-});
-
-/**
- * GET /openpecha/instances/{id}
- * @summary Get text content by text ID
- * @tags Pecha - OpenPecha integration
- * @param {string} id.path.required - Text ID
- * @return {object} 200 - Text content
- * @return {object} 400 - Bad request - Text ID is required
- * @return {object} 404 - Text not found
- * @return {object} 500 - Server error
- */
-router.get("/instances/:id", async (req, res) => {
-  const textId = req.params.id;
-
-  if (!textId) {
-    return res.status(400).json({
-      error: "Text ID is required",
-    });
-  }
-
-  try {
-    const textContent = await getInstanceContent(textId);
-
-    if (!textContent) {
-      return res.status(404).json({
-        error: "Text not found",
-        id: textId,
-      });
-    }
-
-    res.json(textContent);
-  } catch (error) {
-    console.error("Error fetching text:", error);
-
-    // Handle specific error cases
-    if (error.message.includes("404") || error.message.includes("not found")) {
-      return res.status(404).json({
-        error: "Text not found",
-        id: textId,
-        details: error.message,
-      });
-    }
-
-    res.status(500).json({
-      error: "Failed to fetch text content",
-      id: textId,
-      details: error.message,
-    });
-  }
 });
 
 /**

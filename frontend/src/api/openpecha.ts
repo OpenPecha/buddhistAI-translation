@@ -48,22 +48,6 @@ export const fetchText = async (textId: string) => {
 };
 
 /**
- * Fetch text content by instance ID
- * @param textId - Instance ID
- * @returns Text content
- */
-export const fetchTextContent = async (textId: string) => {
-  const response = await fetch(`${server_url}/openpecha/instances/${textId}`, {
-    headers: getHeaders(),
-  });
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || "Failed to fetch text content");
-  }
-  return response.json();
-};
-
-/**
  * Fetch annotations by annotation ID
  * @param annotationId - Annotation ID
  * @returns Annotation content
