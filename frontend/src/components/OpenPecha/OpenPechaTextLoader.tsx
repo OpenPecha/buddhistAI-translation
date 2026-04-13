@@ -38,7 +38,6 @@ export function OpenPechaTextLoader({
     isLoading: isLoadingTitleSearch,
     error: titleSearchError,
   } = useFetchTexts({ title: searchQuery, limit: 100 });
-
   // Validation state
   const isValid = !!(selectedTextId && projectName.trim());
 

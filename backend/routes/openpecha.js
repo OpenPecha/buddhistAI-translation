@@ -19,27 +19,23 @@ const router = express.Router();
  * GET /openpecha/texts
  * @summary Get list of texts from OpenPecha
  * @tags Pecha - OpenPecha integration
- * @param {string} type.query - Filter by type (root, commentary, translations)
  * @param {number} limit.query - Limit number of texts returned
  * @param {number} offset.query - Offset for pagination
  * @param {string} language.query - Filter by language
- * @param {string} author.query - Filter by author
  * @param {string} title.query - Filter by title
  * @return {array<object>} 200 - List of texts
- * @return {object} 400 - Bad request - Invalid type parameter
  * @return {object} 500 - Server error
  */
 router.get("/texts", async (req, res) => {
-  const { type, limit, offset, language, author, title } = req.query;
+  const { limit, offset, language, title } = req.query;
 
   try {
-    const texts = await getTexts(type, limit, offset, language, author, title);
+    const texts = await getTexts(limit, offset, language, title);
     res.json(texts);
   } catch (error) {
     console.error("Error fetching texts:", error);
     res.status(500).json({
       error: "Failed to fetch texts",
-      type: type,
       details: error.message,
     });
   }

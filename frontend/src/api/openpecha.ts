@@ -8,27 +8,21 @@ const server_url = import.meta.env.VITE_SERVER_URL;
  * @returns List of texts
  */
 export const fetchTexts = async ({
-  type,
   limit,
   offset,
   language,
-  author,
   title,
 }: {
-  type?: string;
   limit?: number;
   offset?: number;
   language?: string;
-  author?: string;
   title?: string;
 }) => {
   const getUrl = () => {
     const params = new URLSearchParams();
-    if (type) params.append("type", type);
     if (limit) params.append("limit", limit.toString());
     if (offset) params.append("offset", offset.toString());
     if (language) params.append("language", language);
-    if (author) params.append("author", author);
     if (title) params.append("title", title);
     return `${server_url}/openpecha/texts?${params.toString()}`;
   };

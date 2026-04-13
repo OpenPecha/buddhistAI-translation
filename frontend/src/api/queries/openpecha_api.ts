@@ -7,25 +7,21 @@ import {
 } from "../openpecha";
 
 interface useFetchTextsParams {
-  type?: string;
   limit?: number;
   offset?: number;
   language?: string;
-  author?: string;
   title?: string;
 }
 
 export const useFetchTexts = ({
-  type,
   limit,
   offset,
   language,
-  author,
   title,
 }: useFetchTextsParams) => {
   return useQuery({
-    queryKey: ["texts", type, limit, offset, language, author, title],
-    queryFn: () => fetchTexts({ type, limit, offset, language, author, title }),
+    queryKey: ["texts", limit, offset, language, title],
+    queryFn: () => fetchTexts({ limit, offset, language, title }),
     staleTime: 5 * 60 * 1000,
     enabled: title !== "" || title !== undefined,
   });
