@@ -25,7 +25,7 @@ async function getTexts(limit, offset, language, title) {
 
 async function getText(text_id) {
   const id = encodeURIComponent(text_id);
-  const response = await fetch(`${API_ENDPOINT}/texts/${id}`, {
+  const response = await fetch(`${NEW_API_ENDPOINT}/texts/${id}`, {
     headers: {
       accept: "application/json",
       "Content-Type": "application/json",
