@@ -35,9 +35,9 @@ async function getText(text_id) {
 }
 
 async function getTextInstances(text_id, instance_type) {
-  const url = new URL(`${API_ENDPOINT}/texts/${text_id}/instances`);
+  const url = new URL(`${NEW_API_ENDPOINT}/texts/${text_id}/editions`);
   if (instance_type) {
-    url.searchParams.append("instance_type", instance_type);
+    url.searchParams.append("edition_type", instance_type);
   }
   const response = await fetch(url.toString(), {
     headers: {
@@ -51,7 +51,6 @@ async function getTextInstances(text_id, instance_type) {
       `Failed to fetch text instances from openpecha: ${response.statusText}`,
     );
   }
-
   const data = await response.json();
   return data;
 }

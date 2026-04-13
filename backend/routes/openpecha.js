@@ -48,55 +48,6 @@ router.get("/texts/:id", async (req, res) => {
 });
 
 /**
- * GET /openpecha/{id}/instances
- * @summary Get text instances for a specific text ID
- * @tags Pecha - OpenPecha integration
- * @param {string} id.path.required - Text ID
- * @return {array<object>} 200 - List of text instances
- * @return {object} 400 - Bad request - Text ID is required
- * @return {object} 404 - Text instance not found
- * @return {object} 500 - Server error
- */
-router.get("/:id/instances", async (req, res) => {
-  const text_id = req.params.id;
-  const { instance_type } = req.query;
-  if (!text_id) {
-    return res.status(400).json({
-      error: "Text ID is required",
-    });
-  }
-
-  try {
-    const instances = await getTextInstances(text_id, instance_type);
-
-    if (!instances) {
-      return res.status(404).json({
-        error: "Text instance not found",
-        text_id: text_id,
-      });
-    }
-    res.json(instances);
-  } catch (error) {
-    console.error("Error fetching instances:", error);
-
-    // Handle specific error cases
-    if (error.message.includes("404") || error.message.includes("not found")) {
-      return res.status(404).json({
-        error: "Text instance not found",
-        text_id: text_id,
-        details: error.message,
-      });
-    }
-
-    res.status(500).json({
-      error: "Failed to fetch manifestations",
-      text_id: text_id,
-      details: error.message,
-    });
-  }
-});
-
-/**
  * GET /openpecha/instances/{id}
  * @summary Get text content by text ID
  * @tags Pecha - OpenPecha integration
@@ -380,7 +331,7 @@ router.get("/texts/:text_id/linked-resources", async (req, res) => {
 
     if (!instances || instances.length === 0) {
       return res.status(404).json({
-        error: "No critical instances found for this text",
+        error: "No critical editions found for this text",
         text_id,
       });
     }

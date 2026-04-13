@@ -48,27 +48,6 @@ export const fetchText = async (textId: string) => {
 };
 
 /**
- * Fetch text instances for a specific text ID
- * @param textId - Text ID
- * @returns List of text instances
- */
-export const fetchInstances = async (textId: string, type?: string) => {
-  const response = await fetch(
-    `${server_url}/openpecha/${textId}/instances?${
-      type ? `instance_type=${type}` : ""
-    }`,
-    {
-      headers: getHeaders(),
-    }
-  );
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || "Failed to fetch instances");
-  }
-  return response.json();
-};
-
-/**
  * Fetch text content by instance ID
  * @param textId - Instance ID
  * @returns Text content

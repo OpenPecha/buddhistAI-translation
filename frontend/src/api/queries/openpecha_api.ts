@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import {
-  fetchInstances,
   fetchLinkedResources,
   fetchTextContent,
   fetchTexts,
@@ -24,15 +23,6 @@ export const useFetchTexts = ({
     queryFn: () => fetchTexts({ limit, offset, language, title }),
     staleTime: 5 * 60 * 1000,
     enabled: title !== "" || title !== undefined,
-  });
-};
-
-export const useFetchInstances = (textId: string) => {
-  return useQuery({
-    queryKey: ["instances", textId],
-    queryFn: () => fetchInstances(textId),
-    enabled: !!textId,
-    staleTime: 5 * 60 * 1000,
   });
 };
 
