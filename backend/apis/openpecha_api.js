@@ -18,7 +18,6 @@ async function getTexts(limit, offset, language, title) {
       `Failed to fetch texts from openpecha: ${response.statusText}`,
     );
   }
-
   const data = await response.json();
   return data;
 }

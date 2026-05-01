@@ -33,7 +33,10 @@ export const fetchTexts = async ({
     const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData.error || "Failed to fetch texts");
   }
-  return response.json();
+  const data = await response.json();
+  if (Array.isArray(data)) return data;
+  if (data && Array.isArray(data.items)) return data.items;
+  return [];
 };
 
 export const fetchText = async (textId: string) => {

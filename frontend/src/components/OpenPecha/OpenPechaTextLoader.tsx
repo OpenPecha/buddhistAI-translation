@@ -201,7 +201,7 @@ export function OpenPechaTextLoader({
                   {result.title?.bo || Object.values(result.title || {})[0]}
                 </div>
                 <div className="text-xs text-gray-500 dark:text-neutral-400 mt-1">
-                  Text ID: {result.id}fd
+                  Text ID: {result.id}
                 </div>
               </button>
             )

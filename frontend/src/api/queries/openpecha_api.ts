@@ -21,7 +21,7 @@ export const useFetchTexts = ({
     queryKey: ["texts", limit, offset, language, title],
     queryFn: () => fetchTexts({ limit, offset, language, title }),
     staleTime: 5 * 60 * 1000,
-    enabled: title !== "" || title !== undefined,
+    enabled: title !== "" && title !== undefined,
   });
 };
 
