@@ -8,27 +8,21 @@ const server_url = import.meta.env.VITE_SERVER_URL;
  * @returns List of texts
  */
 export const fetchTexts = async ({
-  type,
   limit,
   offset,
   language,
-  author,
   title,
 }: {
-  type?: string;
   limit?: number;
   offset?: number;
   language?: string;
-  author?: string;
   title?: string;
 }) => {
   const getUrl = () => {
     const params = new URLSearchParams();
-    if (type) params.append("type", type);
     if (limit) params.append("limit", limit.toString());
     if (offset) params.append("offset", offset.toString());
     if (language) params.append("language", language);
-    if (author) params.append("author", author);
     if (title) params.append("title", title);
     return `${server_url}/openpecha/texts?${params.toString()}`;
   };
@@ -39,7 +33,10 @@ export const fetchTexts = async ({
     const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData.error || "Failed to fetch texts");
   }
-  return response.json();
+  const data = await response.json();
+  if (Array.isArray(data)) return data;
+  if (data && Array.isArray(data.items)) return data.items;
+  return [];
 };
 
 export const fetchText = async (textId: string) => {
@@ -49,62 +46,6 @@ export const fetchText = async (textId: string) => {
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData.error || "Failed to fetch text");
-  }
-  return response.json();
-};
-
-/**
- * Fetch text instances for a specific text ID
- * @param textId - Text ID
- * @returns List of text instances
- */
-export const fetchInstances = async (textId: string, type?: string) => {
-  const response = await fetch(
-    `${server_url}/openpecha/${textId}/instances?${
-      type ? `instance_type=${type}` : ""
-    }`,
-    {
-      headers: getHeaders(),
-    }
-  );
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || "Failed to fetch instances");
-  }
-  return response.json();
-};
-
-/**
- * Fetch text content by instance ID
- * @param textId - Instance ID
- * @returns Text content
- */
-export const fetchTextContent = async (textId: string) => {
-  const response = await fetch(`${server_url}/openpecha/instances/${textId}`, {
-    headers: getHeaders(),
-  });
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || "Failed to fetch text content");
-  }
-  return response.json();
-};
-
-/**
- * Fetch annotations by annotation ID
- * @param annotationId - Annotation ID
- * @returns Annotation content
- */
-export const fetchAnnotations = async (annotationId: string) => {
-  const response = await fetch(
-    `${server_url}/openpecha/annotations/${annotationId}`,
-    {
-      headers: getHeaders(),
-    }
-  );
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || "Failed to fetch annotations");
   }
   return response.json();
 };
@@ -134,35 +75,6 @@ export const fetchLinkedResources = async (
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData.error || "Failed to fetch linked resources");
-  }
-  return response.json();
-};
-
-export interface TranslationPayload {
-  language: string;
-  content: string;
-  title: string;
-  segmentation: any;
-  target_annotation: any;
-  alignment_annotation: any;
-}
-
-export const uploadTranslationToOpenpecha = async (
-  instance_id: string,
-  payload: TranslationPayload,
-  translation_doc_id: string
-) => {
-  const response = await fetch(
-    `${server_url}/openpecha/instances/${instance_id}/translation/${translation_doc_id}`,
-    {
-      method: "POST",
-      headers: getHeaders(),
-      body: JSON.stringify(payload),
-    }
-  );
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || "Failed to upload translation");
   }
   return response.json();
 };

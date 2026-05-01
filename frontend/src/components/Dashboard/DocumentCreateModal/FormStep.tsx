@@ -9,7 +9,9 @@ interface FormStepProps {
   projectName: string;
   closeOnSuccess: () => void;
   onValidationChange: (isValid: boolean) => void;
-  onCreateProject: React.MutableRefObject<(() => void) | null>;
+  onCreateProject: React.MutableRefObject<
+    (() => void | Promise<void>) | null
+  >;
   setNewDocumentId: (id: string | null) => void;
 }
 

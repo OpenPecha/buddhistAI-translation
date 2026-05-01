@@ -12,7 +12,9 @@ interface FileUploadFormProps {
   readonly projectName: string;
   readonly closeOnSuccess: () => void;
   readonly onValidationChange?: (isValid: boolean) => void;
-  readonly onCreateProject?: React.MutableRefObject<(() => void) | null>;
+  readonly onCreateProject?: React.MutableRefObject<
+    (() => void | Promise<void>) | null
+  >;
   readonly setNewDocumentId: (id: string | null) => void;
 }
 
@@ -76,21 +78,26 @@ export function FileUploadForm({
     },
   });
 
-  const handleCreateProject = React.useCallback(() => {
+  const handleCreateProject = React.useCallback(async () => {
     if (!projectName) {
       setError("Project name is required");
       return;
     }
-    setError(""); // Clear any previous errors
-    createProjectMutation.mutate();
+    setError("");
+    try {
+      await createProjectMutation.mutateAsync();
+    } catch {
+      // Error already surfaced via onError; swallow to avoid unhandled rejection
+    }
   }, [projectName, createProjectMutation]);
 
-  // Expose the create function to parent
   React.useEffect(() => {
     if (onCreateProject) {
-      // Replace the onCreateProject prop with our handleCreateProject
-      (onCreateProject as React.MutableRefObject<(() => void) | null>).current =
-        handleCreateProject;
+      (
+        onCreateProject as React.MutableRefObject<
+          (() => void | Promise<void>) | null
+        >
+      ).current = handleCreateProject;
     }
   }, [handleCreateProject, onCreateProject]);
 

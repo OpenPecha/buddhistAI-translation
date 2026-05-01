@@ -1,12 +1,10 @@
 const API_ENDPOINT = process.env.OPENPECHA_ENDPOINT;
-
-async function getTexts(type, limit, offset, language, author, title) {
-  const url = new URL(`${API_ENDPOINT}/texts`);
-  if (type) url.searchParams.append("type", type);
+const NEW_API_ENDPOINT = process.env.PECHA_API_URL;
+async function getTexts(limit, offset, language, title) {
+  const url = new URL(`${NEW_API_ENDPOINT}/texts`);
   if (limit) url.searchParams.append("limit", limit);
   if (offset) url.searchParams.append("offset", offset);
   if (language) url.searchParams.append("language", language);
-  if (author) url.searchParams.append("author", author);
   if (title) url.searchParams.append("title", title);
   const response = await fetch(url.toString(), {
     headers: {
@@ -17,17 +15,16 @@ async function getTexts(type, limit, offset, language, author, title) {
 
   if (!response.ok) {
     throw new Error(
-      `Failed to fetch texts from openpecha: ${response.statusText}`
+      `Failed to fetch texts from openpecha: ${response.statusText}`,
     );
   }
-
   const data = await response.json();
   return data;
 }
 
 async function getText(text_id) {
   const id = encodeURIComponent(text_id);
-  const response = await fetch(`${API_ENDPOINT}/texts/${id}`, {
+  const response = await fetch(`${NEW_API_ENDPOINT}/texts/${id}`, {
     headers: {
       accept: "application/json",
       "Content-Type": "application/json",
@@ -37,9 +34,9 @@ async function getText(text_id) {
 }
 
 async function getTextInstances(text_id, instance_type) {
-  const url = new URL(`${API_ENDPOINT}/texts/${text_id}/instances`);
+  const url = new URL(`${NEW_API_ENDPOINT}/texts/${text_id}/editions`);
   if (instance_type) {
-    url.searchParams.append("instance_type", instance_type);
+    url.searchParams.append("edition_type", instance_type);
   }
   const response = await fetch(url.toString(), {
     headers: {
@@ -50,84 +47,60 @@ async function getTextInstances(text_id, instance_type) {
 
   if (!response.ok) {
     throw new Error(
-      `Failed to fetch text instances from openpecha: ${response.statusText}`
+      `Failed to fetch text instances from openpecha: ${response.statusText}`,
     );
   }
-
   const data = await response.json();
   return data;
 }
 
-async function getInstanceContent(instanceId) {
+async function getSegmentation(instanceId) {
   const response = await fetch(
-    `${API_ENDPOINT}/instances/${instanceId}?annotation=true&content=true`,
+    `${NEW_API_ENDPOINT}/editions/${instanceId}/segmentations`,
     {
       headers: {
         accept: "application/json",
         "Content-Type": "application/json",
       },
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error(
-      `Failed to fetch instance content from openpecha: ${response.statusText}`
-    );
-  }
-
-  const data = await response.json();
-  return data;
-}
-
-async function getAnnotations(annotation_id) {
-  const response = await fetch(`${API_ENDPOINT}/annotations/${annotation_id}`, {
-    header: {
-      accept: "application/json",
-      "Content-Type": "applicaton/json",
     },
-  });
-
+  );
   if (!response.ok) {
     throw new Error(
-      `Failed to fetch annotations from openpecha: ${response.statusText}`
+      `Failed to fetch segmentation from openpecha: ${response.statusText}`,
     );
   }
-
   const data = await response.json();
   return data;
 }
-
-const uploadTranslationToOpenpecha = async (instanceId, translationData) => {
+async function getEditionContent(editionId) {
   const response = await fetch(
-    `${API_ENDPOINT}/instances/${instanceId}/translation`,
+    `${NEW_API_ENDPOINT}/editions/${editionId}/content`,
     {
-      method: "POST",
       headers: {
         accept: "application/json",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(translationData),
-    }
+    },
   );
 
   if (!response.ok) {
     throw new Error(
-      `Failed to upload translation to openpecha: ${response.statusText}`
+      `Failed to fetch edition content from openpecha: ${response.statusText}`,
     );
   }
 
-  const data = await response.json();
+  const data = await response.text();
   return data;
-};
+}
 
 async function getSegmentRelated(
   instanceId,
   spanStart,
   spanEnd,
-  transform = false
+  transform = false,
 ) {
   const url = new URL(
-    `${API_ENDPOINT}/instances/${instanceId}/segment-related`
+    `${API_ENDPOINT}/instances/${instanceId}/segment-related`,
   );
   url.searchParams.append("span_start", spanStart);
   url.searchParams.append("span_end", spanEnd);
@@ -140,7 +113,7 @@ async function getSegmentRelated(
 
   if (!response.ok) {
     throw new Error(
-      `Failed to fetch segment related from openpecha: ${response.statusText}`
+      `Failed to fetch segment related from openpecha: ${response.statusText}`,
     );
   }
 
@@ -163,7 +136,7 @@ async function getSegmentsContent(instanceId, seg_ids) {
 
   if (!response.ok) {
     throw new Error(
-      `Failed to fetch segment content from openpecha: ${response.statusText}`
+      `Failed to fetch segment content from openpecha: ${response.statusText}`,
     );
   }
 
@@ -173,18 +146,18 @@ async function getSegmentsContent(instanceId, seg_ids) {
 
 async function getRelatedInstances(instanceId) {
   const response = await fetch(
-    `${API_ENDPOINT}/instances/${instanceId}/related`,
+    `${NEW_API_ENDPOINT}/editions/${instanceId}/related`,
     {
       headers: {
         accept: "application/json",
         "Content-Type": "application/json",
       },
-    }
+    },
   );
 
   if (!response.ok) {
     throw new Error(
-      `Failed to fetch related instances from openpecha: ${response.statusText}`
+      `Failed to fetch related instances from openpecha: ${response.statusText}`,
     );
   }
 
@@ -196,9 +169,8 @@ module.exports = {
   getTexts,
   getText,
   getTextInstances,
-  getInstanceContent,
-  getAnnotations,
-  uploadTranslationToOpenpecha,
+  getEditionContent,
+  getSegmentation,
   getSegmentRelated,
   getSegmentsContent,
   getRelatedInstances,

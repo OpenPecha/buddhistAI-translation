@@ -6,6 +6,7 @@ import useRelatedSegments from "@/hooks/useRelatedSegments";
 import { useEditor } from "@/hooks/useEditor";
 import { useSelectionStore } from "@/stores/selectionStore";
 import { RelatedSegmentResult } from "@/api/resources";
+import { Badge } from "../ui/badge";
 
 function Resources() {
   const { t } = useTranslation();
@@ -91,10 +92,9 @@ function Resources() {
               <div key={`skeleton-result-${index}`} className="mb-6">
                 {/* Text Title Header Skeleton */}
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="h-4 w-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
                   <div className="flex-1">
-                    <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2 animate-pulse" />
-                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2 animate-pulse" />
+                    <div className="h-5 bg-gray-200 dark:bg-zinc-700 rounded w-3/4 mb-2 animate-pulse" />
+                    <div className="h-3 bg-gray-200 dark:bg-zinc-700 rounded w-1/2 animate-pulse" />
                   </div>
                 </div>
 
@@ -103,15 +103,15 @@ function Resources() {
                   {Array.from({ length: 2 }, (_, segIndex) => (
                     <div
                       key={`skeleton-segment-${index}-${segIndex}`}
-                      className="p-3 bg-gray-50 dark:bg-card rounded-lg border border-gray-200 dark:border-gray-700"
+                      className="p-3 bg-gray-50 dark:bg-card rounded-lg border border-gray-200 dark:border-zinc-700"
                     >
                       <div className="mb-2">
-                        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/4 animate-pulse" />
+                        <div className="h-3 bg-gray-200 dark:bg-zinc-700 rounded w-1/4 animate-pulse" />
                       </div>
                       <div className="space-y-2">
-                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full animate-pulse" />
-                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-5/6 animate-pulse" />
-                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-4/6 animate-pulse" />
+                        <div className="h-4 bg-gray-200 dark:bg-zinc-700 rounded w-full animate-pulse" />
+                        <div className="h-4 bg-gray-200 dark:bg-zinc-700 rounded w-5/6 animate-pulse" />
+                        <div className="h-4 bg-gray-200 dark:bg-zinc-700 rounded w-4/6 animate-pulse" />
                       </div>
                     </div>
                   ))}
@@ -130,10 +130,8 @@ function Resources() {
                   ? `${result.instance_source}-${index}`
                   : `result-${index}`;
                 return (
-                  <div key={resultKey} className="mb-6">
-                    {/* Text Title Header */}
+                  <div key={resultKey} className="pb-6">
                     <div className="flex items-center gap-2 mb-3">
-                      <BookOpen className="h-4 w-4 text-blue-500" />
                       <div className="flex-1">
                         {result.text_title && result.text_title.length > 0 && (
                           <p className="font-medium text-gray-900 dark:text-white font-monlam-2">
@@ -142,8 +140,8 @@ function Resources() {
                         )}
                         {result.instance_source && (
                           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                            {t("resources.source", "Source")}:{" "}
-                            {result.instance_source}
+                            <Badge variant="outline"> {result.instance_source}
+                            </Badge>
                           </p>
                         )}
                       </div>
@@ -155,7 +153,7 @@ function Resources() {
                         {result.segments.map((segment) => (
                           <div
                             key={segment.segment_id}
-                            className="p-3 bg-gray-50 dark:bg-card rounded-lg border border-gray-200 dark:border-gray-700"
+                            className="p-3  border-l-2 border-gray-200 dark:border-gray-700"
                           >
                             <CollapsableDiv>
                               <span className="text-sm font-monlam-2 text-gray-800 dark:text-gray-200 leading-relaxed">

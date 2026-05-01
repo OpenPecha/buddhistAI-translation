@@ -11,7 +11,9 @@ interface EmptyTextFormProps {
   readonly projectName: string;
   readonly closeOnSuccess: () => void;
   readonly onValidationChange?: (isValid: boolean) => void;
-  readonly onCreateProject?: React.MutableRefObject<(() => void) | null>;
+  readonly onCreateProject?: React.MutableRefObject<
+    (() => void | Promise<void>) | null
+  >;
 }
 
 export function EmptyTextForm({
@@ -80,7 +82,7 @@ export function EmptyTextForm({
     },
   });
 
-  const handleCreateProject = React.useCallback(() => {
+  const handleCreateProject = React.useCallback(async () => {
     if (!projectName) {
       setError("Project name is required");
       return;
@@ -90,13 +92,20 @@ export function EmptyTextForm({
       return;
     }
     setError("");
-    createProjectMutation.mutate();
+    try {
+      await createProjectMutation.mutateAsync();
+    } catch {
+      // Error already surfaced via onError; swallow to avoid unhandled rejection
+    }
   }, [projectName, selectedLanguage, createProjectMutation]);
 
   React.useEffect(() => {
     if (onCreateProject) {
-      (onCreateProject as React.MutableRefObject<(() => void) | null>).current =
-        handleCreateProject;
+      (
+        onCreateProject as React.MutableRefObject<
+          (() => void | Promise<void>) | null
+        >
+      ).current = handleCreateProject;
     }
   }, [handleCreateProject, onCreateProject]);
 

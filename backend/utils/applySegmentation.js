@@ -5,13 +5,19 @@ const applySegmentation = (text, segments) => {
     );
   }
   return segments.map((segment) => {
-    const { start, end } = segment.span;
-
-    if (start < 0 || end > text.length || start >= end) {
-      throw new Error(`Invalid span range: start=${start}, end=${end}`);
+    const lines = segment.lines;
+    if (!Array.isArray(lines) || lines.length === 0) {
+      throw new Error(`Segment ${segment.id} has no valid lines array.`);
     }
 
-    return text.slice(start, end);
+    return lines
+      .map(({ start, end }) => {
+        if (start < 0 || end > text.length || start >= end) {
+          throw new Error(`Invalid line range: start=${start}, end=${end}`);
+        }
+        return text.slice(start, end);
+      })
+      .join("");
   });
 };
 

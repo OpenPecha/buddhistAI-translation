@@ -26,8 +26,8 @@ const {
 const {
   getText,
   getTextInstances,
-  getAnnotations,
-  getInstanceContent,
+  getSegmentation,
+  getEditionContent,
 } = require("../apis/openpecha_api");
 const router = express.Router();
 const { docxToText } = require("../utils/docxToText");
@@ -168,7 +168,7 @@ router.post(
         } else {
           return sendBadRequest(
             res,
-            "Unsupported file type: " + req.file.mimetype
+            "Unsupported file type: " + req.file.mimetype,
           );
         }
       }
@@ -239,7 +239,7 @@ router.post(
       logger.error("Error creating document", error);
       next(error);
     }
-  }
+  },
 );
 
 router.post("/content", authenticate, async (req, res, next) => {
@@ -385,28 +385,30 @@ router.post("/openpecha", authenticate, async (req, res, next) => {
     if (!text || !instances) {
       return sendBadRequest(
         res,
-        "Failed to get text or instances from openpecha"
+        "Failed to get text or editions from openpecha",
       );
     }
     const criticalInstance = instances.find(
-      (instance) => instance.type === "critical"
+      (instance) => instance.type === "critical",
     );
     if (!criticalInstance) {
       return sendBadRequest(
         res,
-        "Failed to get critical instance from openpecha"
+        "Failed to get critical instance from openpecha",
       );
     }
-    const instanceWithContent = await getInstanceContent(criticalInstance.id);
-    const segmentationAnnotation = instanceWithContent.annotations.find(
-      (annotation) => annotation.type === "segmentation"
-    );
-    const segmentationAnnotationContent = await getAnnotations(
-      segmentationAnnotation.annotation_id
-    );
+    const editionContent = await getEditionContent(criticalInstance.id);
+    const segmentation = await getSegmentation(criticalInstance.id);
+    if (
+      !Array.isArray(segmentation) ||
+      segmentation.length === 0 ||
+      !segmentation[0]?.segments
+    ) {
+      return sendBadRequest(res, "No segmentation available for this text");
+    }
     const segmentedContent = applySegmentation(
-      instanceWithContent.content,
-      segmentationAnnotationContent.data
+      editionContent,
+      segmentation[0].segments,
     );
     const title =
       text.title.bo ??
@@ -508,7 +510,7 @@ router.post("/openpecha", authenticate, async (req, res, next) => {
           instance_id: criticalInstance.id,
         },
         document.id, // Use the newly created document as root
-        req.user.id
+        req.user.id,
       );
       return sendSuccess(res, project);
     }
@@ -676,7 +678,7 @@ router.get("/:id", authenticate, async (req, res, next) => {
     if (!hasPermission) {
       return sendForbidden(
         res,
-        "You do not have permission to access this document"
+        "You do not have permission to access this document",
       );
     }
 
@@ -737,7 +739,7 @@ router.get("/:id/content", optionalAuthenticate, async (req, res, next) => {
     if (!hasPermission) {
       return sendForbidden(
         res,
-        "You do not have permission to access this document"
+        "You do not have permission to access this document",
       );
     }
 
@@ -785,12 +787,12 @@ router.get(
       // Check if user has permission to access this document
       const hasPermission = await checkDocumentPermission(
         document,
-        req.user?.id
+        req.user?.id,
       );
       if (!hasPermission) {
         return sendForbidden(
           res,
-          "You do not have permission to access this document"
+          "You do not have permission to access this document",
         );
       }
 
@@ -821,7 +823,7 @@ router.get(
       logger.error("Error fetching translations", error);
       next(error);
     }
-  }
+  },
 );
 
 /**
@@ -865,7 +867,7 @@ router.delete("/:id", authenticate, async (req, res, next) => {
     if (!isOwner && !isRootOwner && !hasPermission) {
       return sendForbidden(
         res,
-        "You do not have permission to delete this document"
+        "You do not have permission to delete this document",
       );
     }
 
@@ -925,7 +927,7 @@ router.post("/:id/permissions", authenticate, async (req, res, next) => {
     if (!hasPermission) {
       return sendForbidden(
         res,
-        "You do not have permission to modify this document"
+        "You do not have permission to modify this document",
       );
     }
 
@@ -1039,7 +1041,7 @@ router.patch("/:id", authenticate, async (req, res) => {
     const simpleUpdateFields = ["name", "language", "content"];
     const requestKeys = Object.keys(req.body);
     const isSimpleUpdate = requestKeys.every((key) =>
-      simpleUpdateFields.includes(key)
+      simpleUpdateFields.includes(key),
     );
 
     if (isSimpleUpdate && (name || language)) {
@@ -1099,7 +1101,7 @@ router.patch("/:id", authenticate, async (req, res) => {
 
       // Check if any of these documents are roots or already translations
       const invalidDocs = translationDocs.filter(
-        (doc) => doc.isRoot || doc.rootId !== null
+        (doc) => doc.isRoot || doc.rootId !== null,
       );
 
       if (invalidDocs.length > 0) {
@@ -1292,7 +1294,7 @@ router.patch("/:id/content", authenticate, async (req, res, next) => {
       {
         currentVersionId: currentVersionId,
       },
-      "Version content updated successfully"
+      "Version content updated successfully",
     );
   } catch (error) {
     logger.error("Error updating version content", error);
@@ -1460,7 +1462,7 @@ router.get(
       logger.error("Error fetching translation context", error);
       next(error);
     }
-  }
+  },
 );
 
 /**
@@ -1503,13 +1505,13 @@ router.delete(
       // Check if user has permission
       const hasPermission = await checkDocumentPermission(
         contextFile.document,
-        req.user.id
+        req.user.id,
       );
 
       if (!hasPermission) {
         return sendForbidden(
           res,
-          "You do not have permission to delete this file"
+          "You do not have permission to delete this file",
         );
       }
 
@@ -1521,13 +1523,13 @@ router.delete(
       return sendSuccess(
         res,
         null,
-        "Translation context file deleted successfully"
+        "Translation context file deleted successfully",
       );
     } catch (error) {
       logger.error("Error deleting translation context file", error);
       next(error);
     }
-  }
+  },
 );
 
 module.exports = router;

@@ -31,16 +31,22 @@ const useFetchProjects = ({
         owner: getOwnerType(selectedOwner),
       }),
     refetchOnWindowFocus: false,
-    keepPreviousData: true,
     select: (data) => data.data,
   });
 };
 
-const useFetchProjectShareInfo = (projectId: string) => {
+const useFetchProjectShareInfo = (
+  projectId: string,
+  options: { enabled?: boolean } = {}
+) => {
+  const { enabled = true } = options;
   return useQuery({
     queryKey: ["projectShare", projectId],
     queryFn: () => getProjectShareInfo(projectId),
+    enabled: enabled && !!projectId,
     retry: 1,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 };
 
