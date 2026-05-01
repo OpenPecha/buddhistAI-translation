@@ -4,7 +4,9 @@ interface OpenPechaFormProps {
   readonly projectName: string;
   readonly closeOnSuccess: () => void;
   readonly onValidationChange?: (isValid: boolean) => void;
-  readonly onCreateProject?: React.MutableRefObject<(() => void) | null>;
+  readonly onCreateProject?: React.MutableRefObject<
+    (() => void | Promise<void>) | null
+  >;
 }
 
 export function OpenPechaForm({

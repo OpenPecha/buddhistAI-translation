@@ -399,6 +399,13 @@ router.post("/openpecha", authenticate, async (req, res, next) => {
     }
     const editionContent = await getEditionContent(criticalInstance.id);
     const segmentation = await getSegmentation(criticalInstance.id);
+    if (
+      !Array.isArray(segmentation) ||
+      segmentation.length === 0 ||
+      !segmentation[0]?.segments
+    ) {
+      return sendBadRequest(res, "No segmentation available for this text");
+    }
     const segmentedContent = applySegmentation(
       editionContent,
       segmentation[0].segments,

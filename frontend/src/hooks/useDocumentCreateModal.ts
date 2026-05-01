@@ -72,7 +72,7 @@ function reducer(state: State, action: Action): State {
 
 export function useDocumentCreateModal() {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const createProjectRef = useRef<(() => void) | null>(null);
+  const createProjectRef = useRef<(() => void | Promise<void>) | null>(null);
 
   const setProjectName = useCallback((name: string) => {
     dispatch({ type: "SET_PROJECT_NAME", payload: name });
@@ -105,6 +105,10 @@ export function useDocumentCreateModal() {
 
   const setNewDocumentId = useCallback((id: string | null) => {
     dispatch({ type: "SET_NEW_DOCUMENT_ID", payload: id });
+  }, []);
+
+  const setIsCreating = useCallback((isCreating: boolean) => {
+    dispatch({ type: "SET_IS_CREATING", payload: isCreating });
   }, []);
 
   const resetModalState = useCallback(() => {
@@ -144,10 +148,13 @@ export function useDocumentCreateModal() {
     dispatch({ type: "SET_OPEN", payload: true });
   }, []);
 
-  const handleCreateProject = useCallback(() => {
-    if (createProjectRef.current) {
-      dispatch({ type: "SET_IS_CREATING", payload: true });
-      createProjectRef.current();
+  const handleCreateProject = useCallback(async () => {
+    if (!createProjectRef.current) return;
+    dispatch({ type: "SET_IS_CREATING", payload: true });
+    try {
+      await createProjectRef.current();
+    } finally {
+      dispatch({ type: "SET_IS_CREATING", payload: false });
     }
   }, []);
 
@@ -172,6 +179,7 @@ export function useDocumentCreateModal() {
     handlePrevious,
     setFormValid,
     setNewDocumentId,
+    setIsCreating,
     closeOnSuccess,
     handleModalOpenChange,
     handleCreateButtonClick,
