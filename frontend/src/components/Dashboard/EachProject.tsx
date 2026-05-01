@@ -130,12 +130,14 @@ export default function EachProject({
         onOpenChange={setShowEditModal}
         onUpdate={handleUpdate}
       />
-      <ShareModal
-        open={showShareModal}
-        projectId={project.id}
-        projectName={project.name}
-        onOpenChange={setShowShareModal}
-      />
+      {showShareModal && (
+        <ShareModal
+          open={showShareModal}
+          projectId={project.id}
+          projectName={project.name}
+          onOpenChange={setShowShareModal}
+        />
+      )}
 
       <ConfirmationModal
         open={showDeleteModal}

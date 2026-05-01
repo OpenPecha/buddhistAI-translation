@@ -79,7 +79,9 @@ const ShareModal: React.FC<ShareModalProps> = ({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
-  const { data: shareInfo, isLoading } = useFetchProjectShareInfo(projectId);
+  const { data: shareInfo, isLoading } = useFetchProjectShareInfo(projectId, {
+    enabled: open,
+  });
 
   const shareData = shareInfo?.data;
 
